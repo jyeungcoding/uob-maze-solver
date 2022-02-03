@@ -47,7 +47,7 @@ while SimulationRunning == 1:
 
     Clock.tick()
     #Enable below to print T or fps.
-    print("{:.0f}ms".format(Clock.get_time()))
+    #print("{:.0f}ms".format(Clock.get_time()))
     #print("{:.0f}fps".format(1/Clock.get_time()*1000))
 
 pygame.quit()

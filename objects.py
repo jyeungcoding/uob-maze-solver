@@ -16,8 +16,8 @@ class Ball(pygame.sprite.Sprite):
         # Position, velocity and acceleration should be provided in a numpy vector, size 2.
         super().__init__()
         # Sets sprite image as a circle.
-        self.shape = pygame.Surface(((2 * Radius * PixelScale), (2 * Radius * PixelScale)), pygame.SRCALPHA) # Radius given in pixels.
-        pygame.draw.circle(self.shape, Black, ((Radius * PixelScale), (Radius * PixelScale)), Radius * PixelScale)
+        self.shape = pygame.Surface((2 * Radius * PixelScale, 2 * Radius * PixelScale), pygame.SRCALPHA) # Convert radius to pixels. 
+        pygame.draw.circle(self.shape, Black, (Radius * PixelScale, Radius * PixelScale), Radius * PixelScale)
         self.image = self.shape
         # Creates sprite mask for collision detection.
         self.mask = pygame.mask.from_surface(self.image)
