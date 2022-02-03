@@ -9,3 +9,4 @@ To do:
 -Add written information onto the display. 
 -Optimise graphics. 
 -Add object collision. 
+-Research licensing
