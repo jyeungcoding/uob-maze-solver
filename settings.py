@@ -9,17 +9,17 @@ from math import pi
 
 ''' PHYSICAL DIMENSIONS '''
 # Board dimensions.
-FrameSize = np.array([333, 285]) # [mm]
-MazeSize = np.array([270, 230]) # [mm]
+FrameSize = np.array([332, 286]) # [mm]
+MazeSize = np.array([274.5, 229.5]) # [mm]
 FrameHorizontal = (FrameSize[1] - MazeSize[1]) / 2 # [mm]
 FrameVertical = (FrameSize[0] - MazeSize[0]) / 2 # [mm]
 
 # Ball dimensions.
-BallRadius = 6 # [mm]
-BallMass = 0.1 # [kg]
+BallRadius = 6.335 # [mm]
+BallMass = 0.009 # [kg]
 
 # Hole dimensions.
-HoleRadius = 9 # [mm]
+HoleRadius = 7.37 # [mm]
 
 ''' SIMULATION SETTINGS '''
 # Default ball settings.
@@ -28,7 +28,7 @@ Velocity = np.array([0, 0]) # [mm/s]
 Acceleration = np.array([0, 0]) # [mm/s^2]
 
 # Tilt angle for manual maze tilt.
-ThetaStep = 0.1 * pi
+ThetaStep = 0.05 * pi
 
 # Artificial drag on ball: approximates air resistance and friction.
 Drag = 0.6

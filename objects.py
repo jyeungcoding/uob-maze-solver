@@ -84,7 +84,7 @@ class Ball():
 
     def hole_collision(self, Holes):
         for hole in Holes:
-            if hole.R + 2 > ((hole.S[0] - self.S[0]) ** 2 + (hole.S[1] - self.S[1]) ** 2 ) ** 0.5:
+            if hole.R + 1 > ((hole.S[0] - self.S[0]) ** 2 + (hole.S[1] - self.S[1]) ** 2 ) ** 0.5:
                 self.Active = False
 
     def update(self, TimeStep, Theta, Walls, Holes):
@@ -104,7 +104,7 @@ class Wall():
     # Class for walls.
     def __init__(self, Position, Size):
         # Position and Size should be provided in numpy vectors, Size 2.
-        self.S = Position # [mm] Postiion taken from top left corner. 
+        self.S = Position # [mm] Postiion taken from top left corner.
         self.Size = Size # [mm]
 
     def __repr__(self):

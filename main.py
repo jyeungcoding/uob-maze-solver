@@ -156,7 +156,7 @@ def main_control(Mode, Graphics):
     ''' PYGAME GRAPHICS END '''
 
 def main():
-    main_control(1, 1)
+    main_control(0, 1)
 
 if __name__ == "__main__":
     main()
