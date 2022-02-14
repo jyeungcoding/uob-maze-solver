@@ -12,6 +12,8 @@ To do:
 -Research licensing
 -Contact JJ about camera
 -Email Shuangyi
+-Software compensate for theta
+-Ball overlap with walls?
 
 Notes for Pranay:
 
