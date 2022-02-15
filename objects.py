@@ -78,7 +78,7 @@ class Ball():
         # Handles corner reflections. Velocity reflection is reliable, position reflection is inaccurate but acceptable.
         ReflectMatrix = (1 / (1 + m ** 2)) * np.array([[m ** 2 - 1, - 2 * m], [- 2 * m, 1 - m ** 2]]) # Matrix for reflection in y = mx, followed by an inverse.
 
-        # Position reflection based on tangent to impact.
+        # Position reflection based on tangent to impact. IMPROVEMENT: USE RADIAL TO CATESIAN CONVERSION (sin(theta), cos(theta))
         dS = self.S - self.LastS
         dS[1] = - dS[1] # Required as our y axis goes from up to down.
         np.transpose(dS) # Required as we use size (2, 1) arrays instead of (1, 2) arrays for simplicity.

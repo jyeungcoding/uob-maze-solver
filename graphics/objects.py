@@ -8,7 +8,7 @@ import pygame
 import numpy as np
 
 # Import values.
-from settings import PixelScale, Black, Grey, DimGrey, Red, Blue
+from settings import PixelScale, Black, Grey, DimGrey, Red, Blue, Purple
 
 class SpriteBall(pygame.sprite.Sprite):
     # Sprite class for the metal ball.
@@ -104,6 +104,26 @@ class SpriteSetPoint(pygame.sprite.Sprite):
         self.shape = pygame.Surface((8 * PixelScale, 8 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
         pygame.draw.line(self.shape, Red, (0, 0), (8, 8), 3)
         pygame.draw.line(self.shape, Red, (0, 8), (8, 0), 3)
+        self.image = self.shape
+        # Creates sprite rect object for positioning.
+        self.rect = self.image.get_rect()
+        self.rect.centerx = Position[0] * PixelScale # Set point position in pixels, based on center of set point.
+        self.rect.centery = Position[1] * PixelScale # Set point position in pixels, based on center of set point.
+
+class SpriteEndPoint(pygame.sprite.Sprite):
+    # Sprite class for the last checkpoint.
+    def __init__(self, Position):
+        # Position should be provided in a numpy vector, size 2. Units in mm.
+        if type(Position) != np.ndarray:
+            raise TypeError("Position should be given in a size 2 numpy array.")
+        elif Position.shape != (2,):
+            raise ValueError("Position should be given in a size 2 numpy array.")
+
+        super().__init__()
+        # Sets sprite image as a cross.
+        self.shape = pygame.Surface((8 * PixelScale, 8 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
+        pygame.draw.line(self.shape, Purple, (0, 0), (8, 8), 3)
+        pygame.draw.line(self.shape, Purple, (0, 8), (8, 0), 3)
         self.image = self.shape
         # Creates sprite rect object for positioning.
         self.rect = self.image.get_rect()

@@ -25,16 +25,16 @@ HoleRadius = 7.37 # [mm]
 # Default ball settings.
 Position = np.array([50, 50]) # [mm]
 Velocity = np.array([0, 0]) # [mm/s]
-Acceleration = np.array([0, 0]) # [mm/s^2]
 
 # Tilt angle for manual maze tilt.
-ThetaStep = 0.05 * pi
+ThetaStep = 0.01 * pi
 
 # Artificial drag on ball: approximates air resistance and friction.
 Drag = 0.6
 
-# Coefficient of reflectivity off walls.
-Bounce = 0.05
+# Coefficient of reflectivity off walls. Positive floats.
+FrameBounce = 0.06
+WallBounce = 0.01
 
 ''' GRAPHICAL SETTINGS '''
 # Scaling factor from mm to pixels.
@@ -47,7 +47,7 @@ Blue    = (0  , 0  , 255)
 Grey    = (169, 169, 169)
 DimGrey = (105, 105, 105)
 Red     = (255, 0  , 0  )
-#Purple  = (75 , 0  , 130)
+Purple  = (75 , 0  , 130)
 
 if __name__ == "__main__":
     import doctest

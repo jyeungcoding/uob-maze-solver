@@ -6,22 +6,24 @@ import time
 from math import pi
 
 # Import classes, functions and values.
-from objects import Maze, Hole, Checkpoint
-from graphics.objects import SpriteBall, SpriteSetPoint
+from objects import Maze, Hole, Checkpoint, Wall
+from graphics.objects import SpriteBall, SpriteSetPoint, SpriteEndPoint
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
 from simulation.tilt_maze import tilt_maze
-from simulation.default_objects import Frame, DefaultMaze
+from simulation.default_objects import DefaultMaze, Circle
 from settings import PixelScale, White
 
 MazeModel = DefaultMaze
+MazeModel.Checkpoints.extend(Circle)
 
-# Add frame to MazeModel.
-MazeModel.Walls.extend(Frame)
-
+'''
+Wall1 = Wall(np.array([80, 80]), np.array([20, 20]))
+MazeModel.Walls.append(Wall1)
 Hole1 = Hole(np.array([200, 200]))
 MazeModel.Holes.append(Hole1)
 Checkpoint1 = Checkpoint(np.array([200, 160]))
 MazeModel.Checkpoints.append(Checkpoint1)
+'''
 
 def main_control(Mode, Graphics):
 
@@ -88,9 +90,20 @@ def main_control(Mode, Graphics):
 
         ''' PID CONTROL START'''
         if Mode == 1 and MazeModel.Ball.Active == True:
+
             ProcessVariable = MazeModel.Ball.S
 
             SetPoint = MazeModel.Checkpoints[0].S
+
+            if ((SetPoint[0] - ProcessVariable[0]) ** 2 + (SetPoint[1] - ProcessVariable[1]) ** 2) ** 0.5 < 3 and len(MazeModel.Checkpoints) != 1:
+
+                MazeModel.Checkpoints.pop(0)
+
+                SetPoint = MazeModel.Checkpoints[0].S
+
+                Integral = np.array([0.0, 0.0])
+
+                ErrorValue = np.array([0.0, 0.0])
 
             LastErrorValue = ErrorValue
 
@@ -156,7 +169,7 @@ def main_control(Mode, Graphics):
     ''' PYGAME GRAPHICS END '''
 
 def main():
-    main_control(0, 1)
+    main_control(1, 1)
 
 if __name__ == "__main__":
     main()

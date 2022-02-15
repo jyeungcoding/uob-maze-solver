@@ -35,6 +35,7 @@ def initialise_checkpoints(Checkpoints):
     # Generate checkpoints.
     CheckpointList = pygame.sprite.Group()
     for checkpoint in Checkpoints:
+
         Checkpoint1 = SpriteCheckpoint(
             checkpoint.S, # [mm], numpy vector, size 2.
         )
