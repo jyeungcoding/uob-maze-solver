@@ -8,7 +8,7 @@ import numpy as np
 from math import sin
 
 # Import values.
-from settings import FrameSize, WallBounce, BallRadius, BallMass, HoleRadius, Drag
+from settings import FrameSize, FrameHorizontal, FrameVertical, FrameBounce, WallBounce, BallRadius, BallMass, HoleRadius, Drag
 
 class Ball():
     # Class for the metal ball.
@@ -245,6 +245,32 @@ class Maze():
         self.Walls = walls # Should be given in list.
         self.Holes = holes # Should be given in list.
         self.Checkpoints = checkpoints # Should be given in list. Checkpoint order matters!
+
+        # Generate frame.
+        Frame = [
+            Wall(
+                np.array([0, 0]), # Standard units (see settings).
+                np.array([FrameVertical, FrameSize[1]]), # Standard units (see settings).
+                FrameBounce
+            ),
+            Wall(
+                np.array([FrameSize[0] - FrameVertical, 0]),
+                np.array([FrameVertical, FrameSize[1]]),
+                FrameBounce
+            ),
+            Wall(
+                np.array([0, 0]),
+                np.array([FrameSize[0], FrameHorizontal]),
+                FrameBounce
+            ),
+            Wall(
+                np.array([0, FrameSize[1] - FrameHorizontal]),
+                np.array([FrameSize[0], FrameHorizontal]),
+                FrameBounce
+            )
+        ]
+        # Add frame to maze.
+        self.Walls.extend(Frame)
 
     def __repr__(self):
         # Makes the class printable.

@@ -9,37 +9,16 @@ import pygame
 
 # Import classes, functions and values.
 from objects import Ball, Wall, Maze
-from settings import Position, Velocity, Acceleration, FrameSize, MazeSize, FrameHorizontal, FrameVertical
+from settings import Position, Velocity
 
 # Default ball settings.
 DefaultBall = Ball(
     Position, # [mm]
     Velocity, # [mm/s]
-    Acceleration # [mm/s^2]
 )
 
-# Frame settings.
-Frame = [
-    Wall(
-        np.array([0, 0]), # Standard units (see settings).
-        np.array([FrameVertical, FrameSize[1]]) # Standard units (see settings).
-    ),
-    Wall(
-        np.array([FrameSize[0] - FrameVertical, 0]),
-        np.array([FrameVertical, FrameSize[1]])
-    ),
-    Wall(
-        np.array([0, 0]),
-        np.array([FrameSize[0], FrameHorizontal])
-    ),
-    Wall(
-        np.array([0, FrameSize[1] - FrameHorizontal]),
-        np.array([FrameSize[0], FrameHorizontal])
-    )
-]
-
 # Default maze setting.
-DefaultMaze = Maze(FrameSize, DefaultBall, [], [], [])
+DefaultMaze = Maze(DefaultBall, [], [], [])
 
 if __name__ == "__main__":
     import doctest
