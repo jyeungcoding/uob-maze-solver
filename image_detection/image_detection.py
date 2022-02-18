@@ -15,7 +15,7 @@ def initialise_maze():
     opposite to a traditional coordinate system. Furthermore, the side frames of the maze are
     included in the coordiate system so the "true" area where maze objects can exists should
     be from (28.75, 28.25) to (303.25, 257.75). Do check this based on the frame and maze
-    sizes in the settings file though. 
+    sizes in the settings file though.
     '''
 
     return Maze
@@ -23,13 +23,13 @@ def initialise_maze():
 def update_ball():
     '''
     This function is run during every processing loop to update the position of the ball in
-    our maze objects. The output should be in the format of a list: [Active, Position].
+    our maze objects. The output should be in the format of a tuple: Active, Position.
     Active should be a boolean value and should be set to True as long as the ball is still
     on the maze, and False when the ball has fallen through a hole. The Position of the Ball
     should be provided as np.array([x, y]). See objects.py for more information.
     '''
 
-    return Output
+    return Active, Position
 
 if __name__ == "__main__":
     import doctest
