@@ -6,9 +6,10 @@ This file contains object classes required for maze control and simulation.
 # Import modules.
 import numpy as np
 from math import sin
+import random
 
-# Import values.
-from settings import FrameSize, FrameHorizontal, FrameVertical, FrameBounce, WallBounce, BallRadius, BallMass, HoleRadius, Drag
+# Import functions and values.
+from settings import FrameSize, FrameHorizontal, FrameVertical, FrameBounce, WallBounce, BallRadius, BallMass, HoleRadius, Drag, ImageNoise
 
 class Ball():
     # Class for the metal ball.
@@ -40,7 +41,7 @@ class Ball():
 
     def __repr__(self):
         # Makes the class printable.
-        return "Ball(Active: %s, Position: %s, Velocity: %s, Acceleration: %s)" % (self.Active, self.S, self.v, self.a)
+        return "Ball(Active: %s, Position: %s, Velocity: %s, Acceleration: %s)" % (self.Active, np.round(self.S, 1), np.round(self.v, 1), np.round(self.a, 1))
 
     def last_position(self):
         # Saves balls's last position, needed for collision detection.
@@ -146,7 +147,8 @@ class Ball():
             if hole.R + 1 > ((hole.S[0] - self.S[0]) ** 2 + (hole.S[1] - self.S[1]) ** 2 ) ** 0.5:
                 self.Active = False
 
-    def update(self, TimeStep, Theta, Walls, Holes):
+    def next_step(self, TimeStep, Theta, Walls, Holes):
+        # Calculate next ball position based on model.
         if self.Active == True:
             self.last_position() # Save last position of ball.
 
@@ -184,7 +186,7 @@ class Wall():
 
     def __repr__(self):
         # Makes the class printable.
-        return "Wall(Position: %s, Size: %s)" % (self.S, self.Size)
+        return "Wall(Position: %s, Size: %s)" % (np.round(self.S, 1), np.round(self.Size, 1))
 
 class Hole():
     # Class for holes.
@@ -200,7 +202,7 @@ class Hole():
 
     def __repr__(self):
         # Makes the class printable.
-        return "Hole(Position: %s)" % (self.S)
+        return "Hole(Position: %s)" % (np.round(self.S, 1))
 
 class Checkpoint():
     # Class for checkpoints.
@@ -215,7 +217,7 @@ class Checkpoint():
 
     def __repr__(self):
         # Printable.
-        return "Checkpoint(Position: %s)" % (self.S)
+        return "Checkpoint(Position: %s)" % (np.round(self.S, 1))
 
 class Maze():
     # Class for full model of maze.
@@ -274,11 +276,18 @@ class Maze():
 
     def __repr__(self):
         # Makes the class printable.
-        return "Maze(Size: %s, Ball: %s, Walls: %s, Holes: %s, Checkpoints: %s)" % (self.Size, self.Ball, self.Walls, self.Holes, self.Checkpoints)
+        return "Maze(Size: %s, Ball: %s, Walls: %s, Holes: %s, Checkpoints: %s)" % (np.round(self.Size, 1), self.Ball, self.Walls, self.Holes, self.Checkpoints)
 
-    def update(self, TimeStep, Theta):
-        self.Ball.update(TimeStep, Theta, self.Walls, self.Holes)
-        return [self.Ball.Active, self.Ball.S]
+    def image_noise(self):
+        # Simulate random noise from image detection.
+        BallPosition = self.Ball.S + np.array([random.randint(-ImageNoise, ImageNoise), random.randint(-ImageNoise, ImageNoise)])
+        return BallPosition
+
+    def next_step(self, TimeStep, Theta):
+        # Calculate next ball position based on model, output info.
+        self.Ball.next_step(TimeStep, Theta, self.Walls, self.Holes)
+        BallPosition = self.image_noise()
+        return self.Ball.Active, BallPosition
 
 if __name__ == "__main__":
     import doctest

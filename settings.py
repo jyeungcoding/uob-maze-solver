@@ -21,24 +21,30 @@ BallMass = 0.009 # [kg]
 # Hole dimensions.
 HoleRadius = 7.37 # [mm]
 
-''' SIMULATION SETTINGS '''
-# Default ball settings.
-Position = np.array([50, 50]) # [mm]
-Velocity = np.array([0, 0]) # [mm/s]
+''' CONTROL SETTINGS '''
+# Number of error values to buffer for derivative calculation.
+BufferSize = 10
 
+# Maximum tilt angle allowed.
+ThetaMax = 0.25 * pi
+
+''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
 ThetaStep = 0.01 * pi
 
 # Artificial drag on ball: approximates air resistance and friction.
 Drag = 0.6
 
-# Coefficient of reflectivity off walls. Positive floats.
+# Coefficient of reflectivity off walls. Positive floats0
 FrameBounce = 0.06
 WallBounce = 0.01
 
+# Simulated +- error value from image detection.
+ImageNoise = 2 # [mm]
+
 ''' GRAPHICAL SETTINGS '''
-# Scaling factor from mm to pixels.
-PixelScale = 2 # PyGame rounds pixels to the nearest ones digit, can cause slight graphical errors.
+# Scaling factor from mm to pixels. (Integers only please. )
+PixelScale = 3 # PyGame rounds pixels to the nearest ones digit, can cause slight graphical errors.
 
 # Colours
 Black   = (0  , 0  , 0  )
