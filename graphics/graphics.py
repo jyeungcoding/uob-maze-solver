@@ -7,7 +7,7 @@ This file contains functions used to generate certain graphical objects in Pygam
 import pygame
 
 # Import classes and settings.
-from graphics.objects import SpriteWall, SpriteHole, SpriteCheckpoint
+from graphics.objects import SpriteWall, SpriteHole, SpriteCheckpoint, SpriteEndPoint
 
 def initialise_walls(Walls):
     # Generate walls.
@@ -35,11 +35,16 @@ def initialise_checkpoints(Checkpoints):
     # Generate checkpoints.
     CheckpointList = pygame.sprite.Group()
     for checkpoint in Checkpoints:
-
-        Checkpoint1 = SpriteCheckpoint(
-            checkpoint.S, # [mm], numpy vector, size 2.
-        )
-        CheckpointList.add(Checkpoint1)
+        if Checkpoints.index(checkpoint) != len(Checkpoints) - 1:
+            Checkpoint1 = SpriteCheckpoint(
+                checkpoint.S, # [mm], numpy vector, size 2.
+            )
+            CheckpointList.add(Checkpoint1)
+        else: # Last checkpoint is coloured purple instead of blue.
+            EndPoint1 = SpriteEndPoint(
+                checkpoint.S, # [mm], numpy vector, size 2.
+            )
+            CheckpointList.add(EndPoint1)
     return CheckpointList
 
 if __name__ == "__main__":

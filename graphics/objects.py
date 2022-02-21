@@ -81,14 +81,16 @@ class SpriteCheckpoint(pygame.sprite.Sprite):
 
         super().__init__()
         # Sets sprite image as a cross.
-        self.shape = pygame.Surface((8 * PixelScale, 8 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
-        pygame.draw.line(self.shape, Blue, (0, 0), (8, 8), 3)
-        pygame.draw.line(self.shape, Blue, (0, 8), (8, 0), 3)
+        self.shape = pygame.Surface((5 * PixelScale, 5 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
+        pygame.draw.line(self.shape, Blue, (0, 0), (4 * PixelScale, 4 * PixelScale), PixelScale)
+        pygame.draw.line(self.shape, Blue, (0, 4 * PixelScale), (4 * PixelScale, 0), PixelScale)
         self.image = self.shape
         # Creates sprite rect object for positioning.
         self.rect = self.image.get_rect()
         self.rect.centerx = Position[0] * PixelScale # Checkpoint position in pixels, based on center of checkpoint.
         self.rect.centery = Position[1] * PixelScale # Checkpoint position in pixels, based on center of checkpoint.
+
+        self.S = Position # Purely for generating SpriteSetPoint in main code.
 
 class SpriteSetPoint(pygame.sprite.Sprite):
     # Sprite class for the current set point.
@@ -101,9 +103,9 @@ class SpriteSetPoint(pygame.sprite.Sprite):
 
         super().__init__()
         # Sets sprite image as a cross.
-        self.shape = pygame.Surface((8 * PixelScale, 8 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
-        pygame.draw.line(self.shape, Red, (0, 0), (8, 8), 3)
-        pygame.draw.line(self.shape, Red, (0, 8), (8, 0), 3)
+        self.shape = pygame.Surface((5 * PixelScale, 5 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
+        pygame.draw.line(self.shape, Red, (0, 0), (4 * PixelScale, 4 * PixelScale), PixelScale)
+        pygame.draw.line(self.shape, Red, (0, 4 * PixelScale), (4 * PixelScale, 0), PixelScale)
         self.image = self.shape
         # Creates sprite rect object for positioning.
         self.rect = self.image.get_rect()
@@ -121,14 +123,16 @@ class SpriteEndPoint(pygame.sprite.Sprite):
 
         super().__init__()
         # Sets sprite image as a cross.
-        self.shape = pygame.Surface((8 * PixelScale, 8 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
-        pygame.draw.line(self.shape, Purple, (0, 0), (8, 8), 3)
-        pygame.draw.line(self.shape, Purple, (0, 8), (8, 0), 3)
+        self.shape = pygame.Surface((5 * PixelScale, 5 * PixelScale), pygame.SRCALPHA) # Convert to pixels.
+        pygame.draw.line(self.shape, Purple, (0, 0), (4 * PixelScale, 4 * PixelScale), PixelScale)
+        pygame.draw.line(self.shape, Purple, (0, 4 * PixelScale), (4 * PixelScale, 0), PixelScale)
         self.image = self.shape
         # Creates sprite rect object for positioning.
         self.rect = self.image.get_rect()
         self.rect.centerx = Position[0] * PixelScale # Set point position in pixels, based on center of set point.
         self.rect.centery = Position[1] * PixelScale # Set point position in pixels, based on center of set point.
+
+        self.S = Position # Purely for generating SpriteSetPoint in main code.
 
 if __name__ == "__main__":
     import doctest
