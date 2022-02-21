@@ -22,7 +22,7 @@ class SpriteBall(pygame.sprite.Sprite):
         super().__init__()
         # Sets sprite image as a circle.
         self.shape = pygame.Surface((2 * Radius * PixelScale, 2 * Radius * PixelScale), pygame.SRCALPHA) # Convert to pixels.
-        pygame.draw.circle(self.shape, Black, (Radius * PixelScale, Radius * PixelScale), Radius * PixelScale)
+        pygame.draw.circle(self.shape, Black, (int(round(Radius * PixelScale)), int(round(Radius * PixelScale))), int(round(Radius * PixelScale))) # pygame.draw requires int inputs on Linux but not on Mac.
         self.image = self.shape
         # Creates sprite rect object for positioning.
         self.rect = self.image.get_rect()
@@ -63,7 +63,7 @@ class SpriteHole(pygame.sprite.Sprite):
         super().__init__()
         # Sets sprite image as a circle.
         self.shape = pygame.Surface((2 * Radius * PixelScale, 2 * Radius * PixelScale), pygame.SRCALPHA) # Convert to pixels.
-        pygame.draw.circle(self.shape, DimGrey, (Radius * PixelScale, Radius * PixelScale), Radius * PixelScale)
+        pygame.draw.circle(self.shape, DimGrey, (int(round(Radius * PixelScale)), int(round(Radius * PixelScale))), int(round(Radius * PixelScale))) # pygame.draw requires int inputs on Linux but not on Mac.
         self.image = self.shape
         # Creates sprite rect object for positioning.
         self.rect = self.image.get_rect()
