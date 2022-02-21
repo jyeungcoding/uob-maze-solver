@@ -12,7 +12,7 @@ motor_limit = [7.2,17,26.8] # Duty cycle for Hitec at: 0 90 180
 motor_steps = ((motor_limit[1] - motor_limit[0]) / (0.5 * math.pi)) # The factor of the on time
 
 
-def motor_reset():
+def motor_reset(): # Start the PWM
     # For pin12
     os.system('echo 0 > /sys/class/pwm/pwmchip0/unexport')
     os.system('echo 0 > /sys/class/pwm/pwmchip0/export') # Exported  the hardware pwm channel
@@ -27,7 +27,7 @@ def motor_reset():
     os.system('echo ' + str(int(100000 * motor_limit[1])) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/duty_cycle')
     os.system('echo 1 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/enable')
 
-def motor_angle(Theta):
+def motor_angle(Theta): # Enter the new angle
     # Theta (radians) should be a size 2 vector of floats. i.e. np.array([0.2 * pi, 0.2 * pi])
     On_time = 100000 * ((Theta / motor_steps) + motor_limit[0]) # New on times
 
