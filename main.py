@@ -13,6 +13,7 @@ from sys import argv
 from testing.image_detection_test import image_detection_test
 from simulation.manual_sim import manual_sim
 from simulation.PID_sim import PID_sim
+from testing.motor_test import test1, test2, test3
 
 def main():
     if len(argv) == 2 and argv[1].isdigit():
@@ -22,6 +23,12 @@ def main():
             manual_sim()
         elif int(argv[1]) == 2:
             PID_sim()
+        elif int(argv[1]) == 3:
+            test1()
+        elif int(argv[1]) == 4:
+            test2()
+        elif int(argv[1]) == 5:
+            test3()
 
 if __name__ == "__main__":
     main()
