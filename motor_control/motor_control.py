@@ -4,12 +4,12 @@
 # pin12 is now pwm0 and pin35 is now pwm0.
 
 import os
-import math
+from math import pi
 
 motor_limit = [7.2,17,26.8] # Duty cycle for Hitec at: 0 90 180
 # motor_limit = [4.2 8.5 11.3] # Duty cycle for Blue Bird at: 0 90 150
 
-motor_steps = ((motor_limit[1] - motor_limit[0]) / (0.5 * math.pi)) # The factor of the on time
+motor_steps = ((motor_limit[1] - motor_limit[0]) / (0.5 * pi)) # The factor of the on time
 
 
 def motor_reset(): # Start the PWM
