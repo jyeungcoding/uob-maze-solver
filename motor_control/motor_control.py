@@ -12,7 +12,7 @@ motor_limit = [7.2,17,26.8] # Duty cycle for Hitec at: 0 90 180
 motor_steps = (motor_limit[1] - motor_limit[0]) / (0.5 * math.pi) # The factor of the on time
 
 
-def reset():
+def motor_reset():
     # For pin12
     os.system('echo 0 > /sys/class/pwm/pwmchip0/unexport')
     os.system('echo 0 > /sys/class/pwm/pwmchip0/export') # Exported  the hardware pwm channel
