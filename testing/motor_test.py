@@ -38,3 +38,7 @@ def test3():
     motor_angle(np.array([0.02 * pi, 0.02 * pi]))
     sleep(0.5)
     motor_angle(np.array([0, 0]))
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
