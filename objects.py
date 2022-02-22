@@ -283,7 +283,7 @@ class Maze():
         BallPosition = self.Ball.S + np.array([random.randint(-ImageNoise, ImageNoise), random.randint(-ImageNoise, ImageNoise)])
         return BallPosition
 
-    def next_step(self, TimeStep, Theta):
+    def next_step(self, TimeStep, Theta = np.array([0.0, 0.0])):
         # Calculate next ball position based on model, output info.
         self.Ball.next_step(TimeStep, Theta, self.Walls, self.Holes)
         BallPosition = self.image_noise()

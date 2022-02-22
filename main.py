@@ -12,7 +12,7 @@ from sys import argv
 # Import functions.
 from testing.image_detection_test import image_detection_test
 from simulation.manual_sim import manual_sim
-from simulation.PID_sim import PID_sim
+from simulation.pid_sim import PID_sim
 from testing.motor_test import test1, test2, test3
 
 def main():
@@ -29,6 +29,8 @@ def main():
             test2()
         elif int(argv[1]) == 5:
             test3()
+    else:
+        pass
 
 if __name__ == "__main__":
     main()

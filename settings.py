@@ -22,11 +22,16 @@ BallMass = 0.009 # [kg]
 HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
-# Number of error values to buffer for derivative calculation.
-BufferSize = 10
+# PID Coefficients
+Kp = 2.99e-3
+Ki = 1e-4
+Kd = 1e-3
+
+# Number of error values to buffer for PID derivative calculation.
+BufferSize = 5
 
 # Maximum tilt angle allowed.
-ThetaMax = 0.25 * pi
+SaturationLimit = 0.25 * pi
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
