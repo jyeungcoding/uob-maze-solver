@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 This file contains PID_sim() which simulates PID control of the maze using the PID
-controller in control/pid_controller.py. 
+controller in control/pid_controller.py.
 '''
 
 # Import modules.
@@ -24,7 +24,7 @@ def PID_sim():
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
-        raise TypeError("MazeModel should be of class Maze. See 'objects.py'.")
+        raise TypeError("ActiveMaze should be of class Maze. See 'objects.py'.")
 
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.

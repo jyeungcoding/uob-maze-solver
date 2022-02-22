@@ -31,7 +31,7 @@ Kd = 1e-3
 BufferSize = 5
 
 # Maximum tilt angle allowed.
-SaturationLimit = 0.25 * pi
+SaturationLimit = 0.11 * pi
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
