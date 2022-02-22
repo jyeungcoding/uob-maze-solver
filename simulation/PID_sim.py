@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 '''
-
+This file contains PID_sim() which simulates PID control of the maze using the PID
+controller in control/pid_controller.py. 
 '''
 
 # Import modules.
