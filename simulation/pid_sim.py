@@ -18,9 +18,9 @@ from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
 from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit
 
-def PID_sim():
+def pid_sim():
     # Generate starting maze.
-    ActiveMaze = SimpleMaze
+    ActiveMaze = CircleMaze
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:

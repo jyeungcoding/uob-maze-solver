@@ -24,11 +24,11 @@ HoleRadius = 7.37 # [mm]
 ''' CONTROL SETTINGS '''
 # PID Coefficients
 Kp = 2.99e-3
-Ki = 1e-4
-Kd = 1e-3
+Ki = 2e-4
+Kd = 8e-4
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 5
+BufferSize = 8
 
 # Maximum tilt angle allowed.
 SaturationLimit = 0.11 * pi
