@@ -41,11 +41,11 @@ class PID_Controller():
 
     def conditional_integrator(self, ErrorValue, TimeStep):
         # Conditional integrator, clamps if ControlSignal is saturated and the error is the same sign as the integral.
-        if np.all(self.Saturation) and np.sign(ErrorValue)[0] == np.sign(self.ErrorIntegral)[0] and np.sign(ErrorValue)[1] == np.sign(self.ErrorIntegral)[1]:
+        if np.all(self.Saturation) and int(np.sign(ErrorValue)[0]) == int(np.sign(self.ErrorIntegral)[0]) and int(np.sign(ErrorValue)[1]) == int(np.sign(self.ErrorIntegral)[1]):
             pass # X and Y clamped.
-        elif self.Saturation[0] == False and self.Saturation[1] == True and np.sign(ErrorValue)[1] == np.sign(self.ErrorIntegral)[1]:
+        elif self.Saturation[0] == False and self.Saturation[1] == True and int(np.sign(ErrorValue[1])) == int(np.sign(self.ErrorIntegral[1])):
             self.ErrorIntegral[0] += ErrorValue[0] * TimeStep # Y clamped.
-        elif self.Saturation[1] == True and self.Saturation[0] == False and np.sign(ErrorValue)[0] == np.sign(self.ErrorIntegral)[0]:
+        elif self.Saturation[0] == True and self.Saturation[1] == False and int(np.sign(ErrorValue[0])) == int(np.sign(self.ErrorIntegral[0])):
             self.ErrorIntegral[1] += ErrorValue[1] * TimeStep # X clamped.
         else:
             self.ErrorIntegral += ErrorValue * TimeStep # Both unclamped.
