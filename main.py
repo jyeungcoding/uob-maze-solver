@@ -10,6 +10,7 @@ control function is run.
 from sys import argv
 
 # Import functions.
+from full_system import full_system
 from testing.image_detection_test import image_detection_test
 from simulation.manual_sim import manual_sim
 from simulation.pid_sim import PID_sim
@@ -30,7 +31,7 @@ def main():
         elif int(argv[1]) == 5:
             test3()
     else:
-        pass
+        full_system()
 
 if __name__ == "__main__":
     main()
