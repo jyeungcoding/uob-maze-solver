@@ -4,11 +4,13 @@ This file contains our fully integrated system. Image detection, feedback contro
 motor control, and the graphics are all implemented from modular functions.
 '''
 
+# Import modules.
 import pygame
 import numpy as np
 import time
 from math import pi
 
+# Import classes, functions and values.
 from objects import Maze
 from graphics.objects import SpriteBall, SpriteSetPoint
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
