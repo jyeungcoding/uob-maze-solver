@@ -53,11 +53,11 @@ def update_ball():
         # grab the raw array representation of the image
         frame = f.array
 
-        # convert imags to grayscale &  blur the result
+        # convert images to grayscale &  blur the result
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
-        # inittialize firstFrame which will be used as a reference
+        # initialize firstFrame which will be used as a reference
         if firstFrame is None:
             firstFrame = gray
             rawCapture.truncate(0)
