@@ -23,9 +23,9 @@ HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
 # PID Coefficients
-Kp = 2.99e-3
-Ki = 2e-4
-Kd = 8e-4
+Kp = 1e-4 #2.99e-3
+Ki = 1e-6 #2e-4
+Kd = 9e-5 #8e-3
 
 # Number of error values to buffer for PID derivative calculation.
 BufferSize = 8
