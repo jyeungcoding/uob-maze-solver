@@ -17,10 +17,6 @@ class PID_Controller():
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
         elif SetPoint.shape != (2,):
             raise ValueError("SetPoint should be given in a size 2 numpy array.")
-        if type(SaturationLimit) != np.ndarray:
-            raise TypeError("SaturationLimit should be given in a size 2 numpy array.")
-        elif SaturationLimit.shape != (2,):
-            raise ValueError("SaturationLimit should be given in a size 2 numpy array.")
 
         self.Kp = Kp # Proportional coefficient.
         self.Ki = Ki # Integral coefficient.
@@ -88,19 +84,19 @@ class PID_Controller():
 
     def saturation_clamp(self, ControlSignal):
         # Saturation clamp. Limits the ControlSignal to the SaturationLimit and records if saturation has occured.
-        if ControlSignal[0] > self.SaturationLimit[0]:
-            ControlSignal[0] = self.SaturationLimit[0]
+        if ControlSignal[0] > self.SaturationLimit:
+            ControlSignal[0] = self.SaturationLimit
             self.Saturation[0] = True
-        elif ControlSignal[0] < -self.SaturationLimit[0]:
-            ControlSignal[0] = -self.SaturationLimit[0]
+        elif ControlSignal[0] < -self.SaturationLimit:
+            ControlSignal[0] = -self.SaturationLimit
             self.Saturation[0] = True
         else:
             self.Saturation[0] = False
-        if ControlSignal[1] > self.SaturationLimit[1]:
-            ControlSignal[1] = self.SaturationLimit[1]
+        if ControlSignal[1] > self.SaturationLimit:
+            ControlSignal[1] = self.SaturationLimit
             self.Saturation[1] = True
-        elif ControlSignal[1] < -self.SaturationLimit[1]:
-            ControlSignal[1] = -self.SaturationLimit[1]
+        elif ControlSignal[1] < -self.SaturationLimit:
+            ControlSignal[1] = -self.SaturationLimit
             self.Saturation[1] = True
         else:
             self.Saturation[1] = False
