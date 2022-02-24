@@ -15,6 +15,7 @@ from testing.image_detection_test import image_detection_test
 from simulation.manual_sim import manual_sim
 from simulation.pid_sim import pid_sim
 from testing.motor_test import test1, test2, test3
+from testing.model_tuning import model_tuning
 
 def main():
     if len(argv) == 2 and argv[1].isdigit():
@@ -30,6 +31,8 @@ def main():
             test2()
         elif int(argv[1]) == 5:
             test3()
+        elif int(argv[1]) == 6:
+            model_tuning()
     else:
         full_system()
 
