@@ -9,7 +9,7 @@ screen using the pygame module.
 import pygame
 
 # Import classes, functions and values.
-from objects import Maze
+from objects import Maze, Ball
 from image_detection.image_detection import initialise_maze, update_ball
 from graphics.objects import SpriteBall
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
@@ -18,7 +18,7 @@ from settings import PixelScale, White, Black
 def image_detection_test():
 
     # Capture and initialise all elements in the maze.
-    ActiveMaze = initialise_maze()
+    ActiveMaze = Maze(Ball([40, 40]), [], [], [])
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
