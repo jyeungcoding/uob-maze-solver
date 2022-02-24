@@ -13,7 +13,7 @@ from objects import Ball, Wall, Hole, Checkpoint, Maze
 
 # Sandbox Maze
 SandboxBall = Ball(
-    np.array([40, 40]), # [mm]
+    np.array([35.8, 40]), # [mm]
     np.array([0, 0]) # [mm/s]
 )
 

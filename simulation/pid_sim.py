@@ -140,8 +140,9 @@ def pid_sim():
         TimeStep = CurrentTime - LastTime
 
         # Optional: introduce maximum run speed by specifying time period of loop.
-        if CurrentTime - LastTime < 0.05: # Time period in s.
-            time.sleep(0.05 - CurrentTime + LastTime)
+        TimePeriod = 0.01 # Time period in s.
+        if CurrentTime - LastTime < TimePeriod:
+            time.sleep(TimePeriod - CurrentTime + LastTime)
             CurrentTime = time.perf_counter()
             TimeStep = CurrentTime - LastTime
 
