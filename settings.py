@@ -38,7 +38,7 @@ SaturationLimit = 0.11 * pi
 ThetaStep = 0.01 * pi
 
 # Artificial drag on ball: approximates air resistance and friction.
-Drag = 0.6
+Drag = 10
 
 # Coefficient of reflectivity off walls. Positive floats0
 FrameBounce = 0.06

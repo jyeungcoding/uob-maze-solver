@@ -55,12 +55,17 @@ class Ball():
         # NewA[mm/s^2] = gsin(theta)*1000
         NewA = 9.81 * np.sin(Theta) * 1000
         # Artificial drag on ball: approximates air resistance and friction.
-        NewA -= self.Drag * self.v
+        NewA -= self.Drag * np.sign(self.v) * (4 / (abs(0.005 * self.v) + 0.5)) + 0.02 * self.v
         return NewA
 
     def next_v(self, TimeStep, NewA):
         # Calculate next v.
         NewV = self.v + (self.a + NewA) * TimeStep / 2
+        # Stop ball if v is too small.
+        if NewV[0] < 0.05 and NewV[0] > -0.05:
+            NewV[0] = 0.0
+        if NewV[1] < 0.05 and NewV[1] > -0.05:
+            NewV[1] = 0.0
         return NewV
 
     def next_S(self, TimeStep, NewV):
