@@ -12,6 +12,16 @@ import numpy as np
 class PID_Controller():
 
     def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit):
+        # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
+        if type(SetPoint) != np.ndarray:
+            raise TypeError("SetPoint should be given in a size 2 numpy array.")
+        elif SetPoint.shape != (2,):
+            raise ValueError("SetPoint should be given in a size 2 numpy array.")
+        if type(SaturationLimit) != np.ndarray:
+            raise TypeError("SaturationLimit should be given in a size 2 numpy array.")
+        elif SaturationLimit.shape != (2,):
+            raise ValueError("SaturationLimit should be given in a size 2 numpy array.")
+
         self.Kp = Kp # Proportional coefficient.
         self.Ki = Ki # Integral coefficient.
         self.Kd = Kd # Derivative coefficient.
@@ -52,7 +62,12 @@ class PID_Controller():
         return self.ErrorIntegral
 
     def linear_regression(self):
-        # Calculate derivative of error value using least squares linear regression method from a buffer of error value vs time.
+        '''
+        Calculate derivative of error value using least squares linear regression method from a buffer of error value vs time.
+        This is necessary as calculating instantaneous gradient from the noisy input signal from image detection would result
+        in greatly incorrect derivative terms. Instead, calculating the average gradient of a buffer of error values effectively
+        "filters" out the noise at the cost of a less accuracy and a slight lag.
+        '''
         if self.BufferIteration >= self.BufferSize: # Only begin when buffer is full.
             MeanT = np.mean(self.ErrorBuffer[0]) # Calculate mean of T.
             MeanX = np.mean(self.ErrorBuffer[1]) # Calculate mean of X.
@@ -73,19 +88,19 @@ class PID_Controller():
 
     def saturation_clamp(self, ControlSignal):
         # Saturation clamp. Limits the ControlSignal to the SaturationLimit and records if saturation has occured.
-        if ControlSignal[0] > self.SaturationLimit:
-            ControlSignal[0] = self.SaturationLimit
+        if ControlSignal[0] > self.SaturationLimit[0]:
+            ControlSignal[0] = self.SaturationLimit[0]
             self.Saturation[0] = True
-        elif ControlSignal[0] < -self.SaturationLimit:
-            ControlSignal[0] = -self.SaturationLimit
+        elif ControlSignal[0] < -self.SaturationLimit[0]:
+            ControlSignal[0] = -self.SaturationLimit[0]
             self.Saturation[0] = True
         else:
             self.Saturation[0] = False
-        if ControlSignal[1] > self.SaturationLimit:
-            ControlSignal[1] = self.SaturationLimit
+        if ControlSignal[1] > self.SaturationLimit[1]:
+            ControlSignal[1] = self.SaturationLimit[1]
             self.Saturation[1] = True
-        elif ControlSignal[1] < -self.SaturationLimit:
-            ControlSignal[1] = -self.SaturationLimit
+        elif ControlSignal[1] < -self.SaturationLimit[1]:
+            ControlSignal[1] = -self.SaturationLimit[1]
             self.Saturation[1] = True
         else:
             self.Saturation[1] = False
