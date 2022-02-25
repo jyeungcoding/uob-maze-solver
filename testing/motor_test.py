@@ -13,29 +13,23 @@ from motor_control.motor_control import motor_angle, motor_reset
 
 def test1():
     motor_reset()
-    motor_angle(np.array([-pi, -pi]))
+    motor_angle(np.array([-0.42 * pi, -0.42 * pi]))
     sleep(1)
     motor_angle(np.array([0, 0]))
     sleep(1)
-    motor_angle(np.array([pi, pi]))
+    motor_angle(np.array([0.42 * pi, 0.42 * pi]))
 
 def test2():
     motor_reset()
-    motor_angle(np.array([-pi, -pi]))
-    sleep(1)
-    motor_angle(np.array([-0.5 * pi, -0.5 * pi]))
-    sleep(1)
-    motor_angle(np.array([0, 0]))
-    sleep(1)
-    motor_angle(np.array([0.5 * pi, 0.5 * pi]))
-    sleep(1)
-    motor_angle(np.array([pi, pi]))
+    for x in range(-42, 42):
+        motor_angle(np.array([0.01 * x * pi, 0.01 * x * pi]))
+        sleep(0.2)
 
 def test3():
     motor_reset()
     motor_angle(np.array([0, 0]))
-    sleep(10)
-    motor_angle(np.array([0.02 * pi, 0.02 * pi]))
+    sleep(2)
+    motor_angle(np.array([0.01 * pi, 0.0]))
     sleep(0.5)
     motor_angle(np.array([0, 0]))
 
