@@ -23,15 +23,18 @@ HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
 # PID Coefficients
-Kp = 1e-4 #2.99e-3
-Ki = 1e-6 #2e-4
-Kd = 9e-5 #8e-3
+Kp = 3e-4 #2.99e-3
+Ki = 5e-5 #2e-4
+Kd = 2e-4 #8e-3
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 8
+BufferSize = 12
 
 # Maximum tilt angle allowed.
-SaturationLimit = 0.11 * pi
+SaturationLimit = np.array([pi / 20, pi / 30])
+
+# Minimum tilt angle allowed.
+MinSignal = np.array([pi / 90, pi / 90])
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.

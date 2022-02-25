@@ -11,7 +11,7 @@ import numpy as np
 
 class PID_Controller():
 
-    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit):
+    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit, MinSignal):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
         if type(SetPoint) != np.ndarray:
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
@@ -27,7 +27,8 @@ class PID_Controller():
         self.BufferIteration = 0 # Record buffer iteration number.
         self.ErrorIntegral = np.array([0.0, 0.0]) # Initialise integrator.
         self.Saturation = np.array([False, False]) # Initialise saturation check.
-        self.SaturationLimit = SaturationLimit # Control signal angle limit.
+        self.SaturationLimit = SaturationLimit # Control signal maximum angle limit.
+        self.MinSignal = MinSignal # Control signal minimum angle limit.
 
     def __repr__(self):
         # Makes the class printable.
@@ -82,24 +83,39 @@ class PID_Controller():
             ErrorDerivative = np.array([0.0, 0.0])
         return ErrorDerivative
 
-    def saturation_clamp(self, ControlSignal):
+    def saturation_clamp(self, ThetaSignal):
         # Saturation clamp. Limits the ControlSignal to the SaturationLimit and records if saturation has occured.
-        if ControlSignal[0] > self.SaturationLimit:
-            ControlSignal[0] = self.SaturationLimit
+        if ThetaSignal[0] > self.SaturationLimit[0]:
+            ThetaSignal[0] = self.SaturationLimit[0]
             self.Saturation[0] = True
-        elif ControlSignal[0] < -self.SaturationLimit:
-            ControlSignal[0] = -self.SaturationLimit
+        elif ThetaSignal[0] < -self.SaturationLimit[0]:
+            ThetaSignal[0] = -self.SaturationLimit[0]
             self.Saturation[0] = True
         else:
             self.Saturation[0] = False
-        if ControlSignal[1] > self.SaturationLimit:
-            ControlSignal[1] = self.SaturationLimit
+        if ThetaSignal[1] > self.SaturationLimit[1]:
+            ThetaSignal[1] = self.SaturationLimit[1]
             self.Saturation[1] = True
-        elif ControlSignal[1] < -self.SaturationLimit:
-            ControlSignal[1] = -self.SaturationLimit
+        elif ThetaSignal[1] < -self.SaturationLimit[1]:
+            ThetaSignal[1] = -self.SaturationLimit[1]
             self.Saturation[1] = True
         else:
             self.Saturation[1] = False
+        return ThetaSignal
+
+    def min_signal(self, ThetaSignal):
+        if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinSignal[0]:
+            ThetaSignal[0] = self.MinSignal[0]
+        elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinSignal[0]:
+            ThetaSignal[0] = -self.MinSignal[0]
+        if ThetaSignal[1] > 0 and ThetaSignal[1] < self.MinSignal[1]:
+            ThetaSignal[1] = self.MinSignal[1]
+        elif ThetaSignal[1] < 0 and ThetaSignal[1] > -self.MinSignal[1]:
+            ThetaSignal[1] = -self.MinSignal[1]
+        return ThetaSignal
+
+    def gearing(self, ThetaSignal):
+        ControlSignal = ThetaSignal * np.array([8.4, 12.6])
         return ControlSignal
 
     def update(self, ProcessVariable, TimeStep):
@@ -113,8 +129,10 @@ class PID_Controller():
         ProportionalTerm = self.Kp * ErrorValue
         IntegralTerm = self.Ki * ErrorIntegral
         DerivativeTerm = self.Kd * ErrorDerivative
-        ControlSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
-        ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
+        ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
+        ThetaSignal = self.saturation_clamp(ThetaSignal) # Apply saturation clamp if necessary.
+        ThetaSignal = self.min_signal(ThetaSignal) # Apply minimum signal if necessary.
+        ControlSignal = self.gearing(ThetaSignal) # Convert theta to motor angle.
 
         return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm
 

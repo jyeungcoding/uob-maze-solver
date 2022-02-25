@@ -16,7 +16,7 @@ from graphics.objects import SpriteBall, SpriteSetPoint
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
-from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit
+from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def pid_sim():
     # Generate starting maze.
@@ -58,7 +58,7 @@ def pid_sim():
 
     ''' INITIALISE PID CONTROL '''
     # Initialise PID controller object, see control/pid_controller.py for more information.
-    PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit)
+    PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
     ''' INITIALISE PID CONTROL '''
 
     # Theta (radians) should be a size 2 vector of floats.
@@ -87,12 +87,11 @@ def pid_sim():
 
             # Calculate control signal using the PID controller.
             PID_Output = PID_Controller1.update(ProcessVariable, TimeStep)
-            Theta = PID_Output[0]
-
-            # Theta sanity check: raise error if greater than 0.25pi.
-            if Theta[0] > SaturationLimit or Theta[0] < -SaturationLimit or Theta[1] > SaturationLimit or Theta[1] < -SaturationLimit:
-                raise Exception("Control signal exceeded SaturationLimit in one or both axes. PLease check PID settings.")
+            ControlSignal = PID_Output[0]
         ''' PID CONTROL END'''
+
+        # Convert control signal into actual Theta (based on measurements).
+        Theta = ControlSignal * np.array([5/42, 5/63])
 
         ''' PYGAME GRAPHICS START '''
         # Check for events.
@@ -117,7 +116,7 @@ def pid_sim():
         # Create surface with text describing the PID Terms.
         PIDTermsTxt = Font1.render("P: %s, I: %s, D: %s" % (np.round(PID_Output[1] * 360 / (2 * pi), 1), np.round(PID_Output[2] * 360 / (2 * pi), 1), np.round(PID_Output[3] * 360 / (2 * pi), 1)), False, Black)
         # Create surface with text displaying the control signal in degrees.
-        ControlSignalTxt = Font1.render("Saturation: %s, Control Signal: %s" % (PID_Controller1.Saturation, np.round(Theta * 360 / (2 * pi), 1)), False, Black)
+        ControlSignalTxt = Font1.render("Saturation: %s, Control Signal: %s, Theta: %s" % (PID_Controller1.Saturation, np.round(ControlSignal * 360 / (2 * pi), 1), np.round(Theta * 360 / (2 * pi), 1)), False, Black)
 
         # Update graphics. Could optimise.
         Screen.fill(White)
