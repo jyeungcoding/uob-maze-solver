@@ -7,6 +7,7 @@ screen using the pygame module.
 
 # Import modules.
 import pygame
+import cv2
 
 # Import classes, functions and values.
 from objects import Maze, Ball
@@ -17,8 +18,11 @@ from settings import PixelScale, White, Black
 
 def image_detection_test():
 
-    # Capture and initialise all elements in the maze.
-    ActiveMaze = Maze(Ball([40, 40]), [], [], [])
+    # Initialise video capture.
+    cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FPS, 10)
+    # Capture inital maze elements and ball position.
+    ActiveMaze = initialise_maze(cap)
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
@@ -52,14 +56,14 @@ def image_detection_test():
     HoleList = initialise_holes(ActiveMaze.Holes)
     # Generate checkpoints.
     CheckpointList = initialise_checkpoints(ActiveMaze.Checkpoints)
+    ''' PYGAME GRAPHICS END '''
 
     # Start main code.
     Running = 1
     while Running == 1:
-        ''' PYGAME GRAPHICS END '''
 
         # Update ball position.
-        BallUpdate = update_ball()
+        BallUpdate = update_ball(cap)
         ActiveMaze.Ball.Active = BallUpdate[0]
         ActiveMaze.Ball.S = BallUpdate[1]
 

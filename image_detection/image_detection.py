@@ -4,9 +4,14 @@ This file contains the main functions needed to capture all elements in the maze
 it as a single Maze object as defined in 'objects.py'.
 '''
 
+# Import modules.
+import cv2
+import numpy as np
+
+# Import classes.
 from objects import Ball, Wall, Hole, Checkpoint, Maze
 
-def initialise_maze():
+def initialise_maze(cap):
     '''
     This function is run once at the beginning of the program. It captures all elements in the
     maze (ball, walls, holes and checkpoints) and outputs a single Maze object as defined in
@@ -18,9 +23,15 @@ def initialise_maze():
     sizes in the settings file though.
     '''
 
-    return Maze
+    Ball1 = Ball(
+        np.array([0, 0]), # [mm]
+        np.array([0, 0]) # [mm/s]
+    )
+    Maze1 = Maze(Ball1, [], [], [])
 
-def update_ball():
+    return Maze1
+
+def update_ball(cap):
     '''
     This function is run during every processing loop to update the position of the ball in
     our maze objects. The output should be in the format of a tuple: Active, Position.
@@ -29,89 +40,59 @@ def update_ball():
     should be provided as np.array([x, y]). See objects.py for more information.
     '''
 
-    from picamera.array import PiRGBArray
-    from picamera import PiCamera
-    import time
-    import cv2
-    import numpy as np
+    _, frame1 = cap.read()
+    frame = frame1[20:480, 30: 570]
+    Gauss_frame = cv2.GaussianBlur(frame, (5, 5), 0)
+    hsv_frame = cv2.cvtColor(Gauss_frame, cv2.COLOR_BGR2HSV)
+    """
+    # Red color
+    low_red = np.array([161, 155, 84])
+    high_red = np.array([179, 255, 255])
+    red_mask = cv2.inRange(hsv_frame, low_red, high_red)
+    red = cv2.bitwise_and(frame, frame, mask=red_mask)
+    """
+    # Blue color
+    low_blue = np.array([94, 80, 2])
+    high_blue = np.array([126, 255, 255])
+    blue_mask = cv2.inRange(hsv_frame, low_blue, high_blue)
+    blue = cv2.bitwise_and(frame, frame, mask=blue_mask)
+    """
+    # Green color
+    low_green = np.array([25, 52, 72])
+    high_green = np.array([102, 255, 255])
+    green_mask = cv2.inRange(hsv_frame, low_green, high_green)
+    green = cv2.bitwise_and(frame, frame, mask=green_mask)
+    """
+    contours, _ = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    if len(contours) == 0:
+        np.array([])
 
-    Active = 1
+    # ((x, y), radius) = cv2.minEnclosingCircle(c)
+    #centers = np.zeros((len(contours), 2), dtype=np.int32)
+    for i, c in enumerate(contours):
+        area = cv2.contourArea(c)
+        M = cv2.moments(c)  # Moment calculation required to get centre
+        if M["m00"] != 0 and area > 100:
+            Active = True
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))   # Equation to get centre of contour
+            Position = np.array(((center[0] / 1.6265), (center[1] / 1.608)), dtype=np.int32)
+        else:
+            Position = (0, 0)
+            Active = False
+        #centers[i] = center
+        #print(Active)
+    cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
 
-    # initialize the camera and grab a reference to the raw camera capture
-    camera = PiCamera()
-    camera.resolution = (640, 480)
-    camera.framerate = 30
-    camera.rotation = 180
-    rawCapture = PiRGBArray(camera, size=(640, 480))
-    firstFrame = None
 
-    # allow the camera to adjust to lighting/white balance
-    time.sleep(2)
+    # print(contours)
 
-    # initiate video or frame capture sequence
-    for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        # grab the raw array representation of the image
-        frame = f.array
+    cv2.imshow("Frame", frame)
+    #cv2.imshow("Red", red)
+    cv2.imshow("Blue", blue)
+    #cv2.imshow("Green", green)
+    # cv2.imshow("Result", result)
 
-        # convert images to grayscale &  blur the result
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
-
-        # initialize firstFrame which will be used as a reference
-        if firstFrame is None:
-            firstFrame = gray
-            rawCapture.truncate(0)
-            continue
-
-        # obtain difference between frames
-        frameDelta = cv2.absdiff(gray, firstFrame)
-
-        # coonvert the difference into binary & dilate the result to fill in small holes
-        thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
-        thresh = cv2.dilate(thresh, None, iterations=2)
-
-        # show the result
-        cv2.imshow("Delta + Thresh", thresh)
-
-        # find contours or continuous white blobs in the image
-        contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_TREE,
-                                               cv2.CHAIN_APPROX_SIMPLE)  # Try CV_RETR_EXTERNAL to remove largest contour if statement
-
-        # find the index of the largest contour
-        if len(contours) > 0:
-            areas = [cv2.contourArea(c) for c in contours]
-            max_index = np.argmax(areas)
-            cnt = contours[max_index]
-
-            # draw a bounding box/rectangle around the largest contour
-            x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            # area = cv2.contourArea(cnt)
-
-            # Finding Centre of contour by using moments and centroid calculation
-            M = cv2.moments(thresh)
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
-            Position = np.array([cX, cY])
-
-            # print area to the terminal
-            # print(area)
-
-            # add text to the frame
-            cv2.putText(frame, "Largest Contour", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-        # show the frame
-        cv2.imshow("Video", frame)
-
-        # clear the stream in preparation for the next frame
-        rawCapture.truncate(0)
-
-        # if the 'q' key is pressed then break from the loop
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            break
-
-    cv2.destroyAllWindows()
+    key = cv2.waitKey(1)
 
     return Active, Position
 
