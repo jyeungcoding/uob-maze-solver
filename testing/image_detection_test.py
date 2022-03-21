@@ -100,3 +100,6 @@ def image_detection_test():
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()
+
+if __name__ == "__main__":
+    image_detection_test()
