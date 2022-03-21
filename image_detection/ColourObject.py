@@ -2,9 +2,11 @@ import cv2
 import numpy as np
 
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FPS, 10)
 
 while True:
-    _, frame = cap.read()
+    _, frame1 = cap.read()
+    frame = frame1[20:480, 30: 570]
     Gauss_frame = cv2.GaussianBlur(frame, (5, 5), 0)
     hsv_frame = cv2.cvtColor(Gauss_frame, cv2.COLOR_BGR2HSV)
     """
@@ -31,20 +33,20 @@ while True:
         np.array([])
 
     # ((x, y), radius) = cv2.minEnclosingCircle(c)
-    centers = np.zeros((len(contours), 2), dtype=np.int32)
+    #centers = np.zeros((len(contours), 2), dtype=np.int32)
     for i, c in enumerate(contours):
         area = cv2.contourArea(c)
         M = cv2.moments(c)  # Moment calculation required to get centre
         if M["m00"] != 0 and area > 100:
             Active = True
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))   # Equation to get centre of contour
-            NewCenter = np.array(((center[0] / 1.93), (center[1] / 1.678)), dtype=np.float_)
+            NewCenter = np.array(((center[0] / 1.6265), (center[1] / 1.608)), dtype=np.int32)
             print(NewCenter)
         else:
             center = (0, 0)
             Active = False
-        centers[i] = center
-        print(Active)
+        #centers[i] = center
+        #print(Active)
     cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
 
 
@@ -56,6 +58,6 @@ while True:
     #cv2.imshow("Green", green)
     # cv2.imshow("Result", result)
 
-    key = cv2.waitKey(5)
+    key = cv2.waitKey(1)
     if key == 27:
         break
