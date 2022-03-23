@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FPS, 10)
+#cap.set(cv2.CAP_PROP_FPS, 10)
 
 while True:
     _, frame1 = cap.read()
@@ -30,7 +30,8 @@ while True:
     """
     contours, _ = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if len(contours) == 0:
-        np.array([])
+        #np.array([])
+        Active = False
 
     # ((x, y), radius) = cv2.minEnclosingCircle(c)
     #centers = np.zeros((len(contours), 2), dtype=np.int32)
@@ -41,14 +42,14 @@ while True:
             Active = True
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))   # Equation to get centre of contour
             NewCenter = np.array(((center[0] / 1.6265), (center[1] / 1.608)), dtype=np.int32)
-            print(NewCenter)
+            #print(NewCenter)
         else:
             center = (0, 0)
             Active = False
         #centers[i] = center
-        #print(Active)
-    cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
 
+    cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
+    print(Active)
 
     # print(contours)
 
