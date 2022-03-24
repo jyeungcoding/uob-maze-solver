@@ -154,7 +154,7 @@ def full_system():
         ''' PYGAME GRAPHICS END '''
 
         # Optional: introduce maximum run speed by specifying time period of loop.
-        TimePeriod = 0.25 # Time period in s.
+        TimePeriod = 0.2 # Time period in s.
         if CurrentTime - LastTime < TimePeriod:
             time.sleep(TimePeriod - CurrentTime + LastTime)
             CurrentTime = time.perf_counter()

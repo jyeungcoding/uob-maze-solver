@@ -1,12 +1,13 @@
 Welcome to the Group B Year 3 Project repo.
 
-Notes for Justin: 
+Notes for Justin:
 
-Halfway through writing the maze simulation script. Decided to use PyGame because of its great built-in collision detection functions and relatively simple graphics. Can now simulate motion of the ball on a tilted surface. 
+Halfway through writing the maze simulation script. Decided to use PyGame because of its great built-in collision detection functions and relatively simple graphics. Can now simulate motion of the ball on a tilted surface.
 
 To do:
--Add written information onto the display. 
--Optimise graphics. 
+Note! 0.3pi is now max. 
+-Add written information onto the display.
+-Optimise graphics.
 -Research licensing
 -Email Shuangyi
 -Software compensate for theta
