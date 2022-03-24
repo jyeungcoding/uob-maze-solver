@@ -104,6 +104,7 @@ class PID_Controller():
         return ThetaSignal
 
     def min_signal(self, ThetaSignal):
+        # Apply minimum signal if necessary.
         if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinSignal[0]:
             ThetaSignal[0] = self.MinSignal[0]
         elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinSignal[0]:
@@ -115,6 +116,7 @@ class PID_Controller():
         return ThetaSignal
 
     def gearing(self, ThetaSignal):
+        # Convert theta to motor angle.
         ControlSignal = ThetaSignal * np.array([8.4, 12.6])
         return ControlSignal
 

@@ -41,7 +41,10 @@ class Image_Detector():
             np.array([0, 0]), # [mm]
             np.array([0, 0]) # [mm/s]
         )
-        Maze1 = Maze(Ball1, [], [], [])
+        Checkpoint1 = Checkpoint(
+            np.array([166, 143])
+        )
+        Maze1 = Maze(Ball1, [], [], [Checkpoint1])
 
         return Maze1
 
@@ -110,13 +113,11 @@ class Image_Detector():
 
         # print(contours)
 
-        cv2.imshow("Frame", frame)
+        #cv2.imshow("Frame", frame)
         #cv2.imshow("Red", red)
-        cv2.imshow("Blue", blue)
+        #cv2.imshow("Blue", blue)
         #cv2.imshow("Green", green)
         # cv2.imshow("Result", result)
-
-        key = cv2.waitKey(1)
 
         return Active, Position
 

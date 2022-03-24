@@ -18,7 +18,7 @@ from graphics.graphics import initialise_walls, initialise_holes, initialise_che
 from image_detection.image_detection import Image_Detector
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit
+from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def full_system():
 
@@ -36,6 +36,9 @@ def full_system():
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
         raise TypeError("ActiveMaze should be of class Maze. See 'objects.py'.")
+
+    if len(ActiveMaze.Checkpoints) == 0:
+        raise ValueError("No checkpoints detected.")
     ''' IMAGE DETECTION END '''
 
     ''' PYGAME GRAPHICS START '''
@@ -43,7 +46,7 @@ def full_system():
     pygame.init()
     # Initialise display surface.
     Screen = pygame.display.set_mode((ActiveMaze.Size[0] * PixelScale, (ActiveMaze.Size[1] + 42) * PixelScale))
-    pygame.display.set_caption("PID Simulation")
+    pygame.display.set_caption("System Display")
 
     # Initialise text module.
     pygame.font.init()
@@ -70,7 +73,7 @@ def full_system():
 
     ''' INITIALISE PID CONTROL '''
     # Initialise PID controller object, see control/pid_controller.py for more information.
-    PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit)
+    PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
     ''' INITIALISE PID CONTROL '''
 
     ''' INITIALISE MOTOR CONTROL '''
@@ -149,6 +152,13 @@ def full_system():
 
         pygame.display.flip() # Update display.
         ''' PYGAME GRAPHICS END '''
+
+        # Optional: introduce maximum run speed by specifying time period of loop.
+        TimePeriod = 0.25 # Time period in s.
+        if CurrentTime - LastTime < TimePeriod:
+            time.sleep(TimePeriod - CurrentTime + LastTime)
+            CurrentTime = time.perf_counter()
+            TimeStep = CurrentTime - LastTime
 
     pygame.quit()
 
