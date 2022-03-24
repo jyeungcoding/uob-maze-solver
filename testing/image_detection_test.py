@@ -7,22 +7,26 @@ screen using the pygame module.
 
 # Import modules.
 import pygame
+import time
 import cv2
 
 # Import classes, functions and values.
 from objects import Maze, Ball
-from image_detection.image_detection import initialise_maze, update_ball
+from image_detection.image_detection import Image_Detector
 from graphics.objects import SpriteBall
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
 from settings import PixelScale, White, Black
 
 def image_detection_test():
 
-    # Initialise video capture.
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FPS, 10)
+    # Start clock for time-steps.
+    CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
+    StartTime = CurrentTime # Record start time, currently unused.
+
+    # Initialise image detector.
+    ImageDetector = Image_Detector(CurrentTime)
     # Capture inital maze elements and ball position.
-    ActiveMaze = initialise_maze(cap)
+    ActiveMaze = ImageDetector.initialise_maze()
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
@@ -62,10 +66,11 @@ def image_detection_test():
     Running = 1
     while Running == 1:
 
+        # Update clock.
+        CurrentTime = time.perf_counter()
+
         # Update ball position.
-        BallUpdate = update_ball(cap)
-        ActiveMaze.Ball.Active = BallUpdate[0]
-        ActiveMaze.Ball.S = BallUpdate[1]
+        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(CurrentTime)
 
         ''' PYGAME GRAPHICS START '''
         # Check for events.

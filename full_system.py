@@ -6,6 +6,7 @@ motor control, and the graphics are all implemented from modular functions.
 
 # Import modules.
 import pygame
+import cv2
 import numpy as np
 import time
 from math import pi
@@ -14,15 +15,23 @@ from math import pi
 from objects import Maze
 from graphics.objects import SpriteBall, SpriteSetPoint
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
-from image_detection.image_detection import initialise_maze, update_ball
+from image_detection.image_detection import Image_Detector
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
 from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit
 
 def full_system():
+
+    # Start clock.
+    CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
+    StartTime = CurrentTime # Record start time, currently unused.
+    TimeStep = 0
+
     ''' IMAGE DETECTION START '''
+    # Initialise image detector.
+    ImageDetector = Image_Detector(CurrentTime)
     # Capture inital maze elements and ball position.
-    ActiveMaze = initialise_maze()
+    ActiveMaze = ImageDetector.initialise_maze()
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
@@ -64,21 +73,17 @@ def full_system():
     PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit)
     ''' INITIALISE PID CONTROL '''
 
-    ''' INITIALISE CONTROL START '''
+    ''' INITIALISE MOTOR CONTROL '''
     motor_reset()
-    ''' INITIALISE CONTROL START '''
+    ''' INITIALISE MOTOR CONTROL '''
 
     # Start control program.
     Running = 1
-    # Start clock for time-steps.
-    CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
-    StartTime = CurrentTime # Record start time, currently unused.
-    TimeStep = 0
     while Running == 1:
 
         ''' IMAGE DETECTION START '''
         # Capture and update position of ball.
-        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = update_ball()
+        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(CurrentTime)
         ''' IMAGE DETECTION END '''
 
         # Calculate time since last frame.
@@ -98,10 +103,6 @@ def full_system():
             # Calculate control signal using the PID controller.
             PID_Output = PID_Controller1.update(ActiveMaze.Ball.S, TimeStep)
             ControlSignal = PID_Output[0]
-
-            # Theta sanity check: raise error if greater than 0.25pi.
-            if ControlSignal[0] > SaturationLimit or ControlSignal[0] < -SaturationLimit or ControlSignal[1] > SaturationLimit or ControlSignal[1] < -SaturationLimit:
-                raise Exception("Control signal exceeded SaturationLimit in one or both axes. PLease check PID settings.")
         ''' PID CONTROL END'''
 
         ''' MOTOR CONTROL START'''
