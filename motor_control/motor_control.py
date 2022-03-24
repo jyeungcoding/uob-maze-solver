@@ -7,21 +7,21 @@ import os
 from math import pi
 
 #motor_limit = [7.2,17,26.8] # Duty cycle for Hitec at: 0 90 180
-motor_limit = [8.3,16.1,22.7] # Duty cycle for Blue Bird at: 0 90 160
+motor_limit = [9,15.2,21] # Duty cycle for Blue Bird at: 0 90 160
 
-motor_steps = ((motor_limit[1] - motor_limit[0]) / (0.5 * pi)) # The factor of the on time
+motor_steps = ((motor_limit[1] - motor_limit[0]) / (pi / 3)) # The factor of the on time
 default_OnTime = 100000 * motor_limit[1]
 
 def motor_reset(): # Start the PWM
     # For pin12
     os.system('sudo echo 0 > /sys/class/pwm/pwmchip0/export') # Exported  the hardware pwm channel
-    os.system('sudo echo 12500000 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/period') # Set up the period, which is 0.0125s.
+    os.system('sudo echo 8000000 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/period') # Set up the period, which is 0.0125s.
     os.system('sudo echo ' + str(int(default_OnTime)) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/duty_cycle') # Set up the on time, which makes the motor reset to 90 degree.
     os.system('sudo echo 1 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/enable') # Enable the pwm output
 
     # For pin35
     os.system('sudo echo 1 > /sys/class/pwm/pwmchip0/export')
-    os.system('sudo echo 12500000 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/period')
+    os.system('sudo echo 8000000 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/period')
     os.system('sudo echo ' + str(int(default_OnTime)) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/duty_cycle')
     os.system('sudo echo 1 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/enable')
 
