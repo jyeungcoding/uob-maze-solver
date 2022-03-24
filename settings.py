@@ -26,15 +26,15 @@ HoleRadius = 7.37 # [mm]
 TimePeriod = 0.2 # [s]
 
 # PID Coefficients
-Kp = 3e-4 #2.99e-3
-Ki = 5e-5 #2e-4
-Kd = 2e-4 #8e-3
+Kp = 5e-4
+Ki = 3e-4
+Kd = 3e-4
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 12
+BufferSize = 3
 
 # Minimum tilt angle allowed.
-MinSignal = np.array([0, 0])
+MinSignal = np.array([pi/360, pi/360])
 
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 3, pi / 3])

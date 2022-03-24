@@ -100,25 +100,25 @@ class PID_Controller():
         ControlSignal = ThetaSignal * np.array([20 / 3, 10])
         return ControlSignal
 
-    def saturation_clamp(self, ThetaSignal):
+    def saturation_clamp(self, ControlSignal):
         # Saturation clamp. Limits the ControlSignal to the SaturationLimit and records if saturation has occured.
-        if ThetaSignal[0] > self.SaturationLimit[0]:
-            ThetaSignal[0] = self.SaturationLimit[0]
+        if ControlSignal[0] > self.SaturationLimit[0]:
+            ControlSignal[0] = self.SaturationLimit[0]
             self.Saturation[0] = True
-        elif ThetaSignal[0] < -self.SaturationLimit[0]:
-            ThetaSignal[0] = -self.SaturationLimit[0]
+        elif ControlSignal[0] < -self.SaturationLimit[0]:
+            ControlSignal[0] = -self.SaturationLimit[0]
             self.Saturation[0] = True
         else:
             self.Saturation[0] = False
-        if ThetaSignal[1] > self.SaturationLimit[1]:
-            ThetaSignal[1] = self.SaturationLimit[1]
+        if ControlSignal[1] > self.SaturationLimit[1]:
+            ControlSignal[1] = self.SaturationLimit[1]
             self.Saturation[1] = True
-        elif ThetaSignal[1] < -self.SaturationLimit[1]:
-            ThetaSignal[1] = -self.SaturationLimit[1]
+        elif ControlSignal[1] < -self.SaturationLimit[1]:
+            ControlSignal[1] = -self.SaturationLimit[1]
             self.Saturation[1] = True
         else:
             self.Saturation[1] = False
-        return ThetaSignal
+        return ControlSignal
 
     def update(self, ProcessVariable, TimeStep):
         ErrorValue = self.SetPoint - ProcessVariable # Calculate error value.
@@ -132,7 +132,7 @@ class PID_Controller():
         IntegralTerm = self.Ki * ErrorIntegral
         DerivativeTerm = self.Kd * ErrorDerivative
         ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
-        #ThetaSignal = self.min_signal(ThetaSignal) # Apply minimum signal if necessary.
+        ThetaSignal = self.min_signal(ThetaSignal) # Apply minimum signal if necessary.
         ControlSignal = self.gearing(ThetaSignal) # Convert theta to motor angle.
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
 
