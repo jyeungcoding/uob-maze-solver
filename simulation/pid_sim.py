@@ -16,11 +16,12 @@ from graphics.objects import SpriteBall, SpriteSetPoint
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
+from motor_control.motor_control import motor_reset, motor_angle
 from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def pid_sim():
     # Generate starting maze.
-    ActiveMaze = CircleMaze
+    ActiveMaze = SandboxMaze
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
@@ -61,6 +62,10 @@ def pid_sim():
     PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
     ''' INITIALISE PID CONTROL '''
 
+    ''' INITIALISE MOTOR CONTROL '''
+    motor_reset()
+    ''' INITIALISE MOTOR CONTROL '''
+
     # Theta (radians) should be a size 2 vector of floats.
     Theta = np.array([0.0, 0.0])
 
@@ -89,6 +94,11 @@ def pid_sim():
             PID_Output = PID_Controller1.update(ProcessVariable, TimeStep)
             ControlSignal = PID_Output[0]
         ''' PID CONTROL END'''
+
+        ''' MOTOR CONTROL START'''
+        # Change the servo motors' angles.
+        motor_angle(ControlSignal)
+        ''' MOTOR CONTROL END '''
 
         # Convert control signal into actual Theta (based on measurements).
         Theta = ControlSignal * np.array([5/42, 5/63])
@@ -138,8 +148,8 @@ def pid_sim():
         CurrentTime = time.perf_counter()
         TimeStep = CurrentTime - LastTime
 
-        # Optional: introduce maximum run speed by specifying time period of loop.
-        TimePeriod = 0.01 # Time period in s.
+        # Optional: introduce maximum run speed by specifying time period of control loop.
+        TimePeriod = 0.2 # Time period in s.
         if CurrentTime - LastTime < TimePeriod:
             time.sleep(TimePeriod - CurrentTime + LastTime)
             CurrentTime = time.perf_counter()
