@@ -18,14 +18,13 @@ from graphics.graphics import initialise_walls, initialise_holes, initialise_che
 from image_detection.image_detection import Image_Detector
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import TimePeriod, PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def full_system():
 
     # Start clock.
     CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
-    StartTime = CurrentTime # Record start time, currently unused.
-    TimeStep = 0
+    LastTime = CurrentTime
 
     ''' IMAGE DETECTION START '''
     # Initialise image detector.
@@ -84,17 +83,21 @@ def full_system():
     Running = 1
     while Running == 1:
 
+        # Optional: introduce maximum run speed by specifying time period of loop.
+        CurrentTime = time.perf_counter()
+        if CurrentTime - LastTime < TimePeriod:
+            time.sleep(TimePeriod - CurrentTime + LastTime)
+            CurrentTime = time.perf_counter()
+
         ''' IMAGE DETECTION START '''
         # Capture and update position of ball.
         ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(CurrentTime)
         ''' IMAGE DETECTION END '''
 
         # Calculate time since last frame.
-        LastTime = CurrentTime
         CurrentTime = time.perf_counter()
         TimeStep = CurrentTime - LastTime
-        # Enable below to print the timestep of a full loop.
-        #print("{:.0f}ms".format(TimeStep * 1000))
+        LastTime = CurrentTime
 
         ''' PID CONTROL START '''
         if ActiveMaze.Ball.Active == True:
@@ -107,7 +110,7 @@ def full_system():
             PID_Output = PID_Controller1.update(ActiveMaze.Ball.S, TimeStep)
             ControlSignal = PID_Output[0]
         ''' PID CONTROL END'''
-
+        # Make sure you deal with the cases where no control signal is generated when Active == False. 
         ''' MOTOR CONTROL START'''
         # Change the servo motors' angles.
         motor_angle(ControlSignal)
@@ -153,12 +156,8 @@ def full_system():
         pygame.display.flip() # Update display.
         ''' PYGAME GRAPHICS END '''
 
-        # Optional: introduce maximum run speed by specifying time period of loop.
-        TimePeriod = 0.2 # Time period in s.
-        if CurrentTime - LastTime < TimePeriod:
-            time.sleep(TimePeriod - CurrentTime + LastTime)
-            CurrentTime = time.perf_counter()
-            TimeStep = CurrentTime - LastTime
+        # Enable below to print the timestep of a full loop.
+        print("{:.0f}ms".format(TimeStep * 1000))
 
     pygame.quit()
 

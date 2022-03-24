@@ -22,6 +22,9 @@ BallMass = 0.009 # [kg]
 HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
+# Minimum time period of each image and control loop. 
+TimePeriod = 0.2 # [s]
+
 # PID Coefficients
 Kp = 3e-4 #2.99e-3
 Ki = 5e-5 #2e-4
@@ -34,7 +37,7 @@ BufferSize = 12
 SaturationLimit = np.array([pi / 20, pi / 30])
 
 # Minimum tilt angle allowed.
-MinSignal = np.array([pi / 90, pi / 90])
+MinSignal = np.array([pi / 360, pi / 360])
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.

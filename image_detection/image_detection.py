@@ -37,6 +37,10 @@ class Image_Detector():
         sizes in the settings file though.
         '''
 
+        '''
+        Include redundancy for ball not found.
+        '''
+
         Ball1 = Ball(
             np.array([0, 0]), # [mm]
             np.array([0, 0]) # [mm/s]
@@ -99,7 +103,6 @@ class Image_Detector():
                 Active = True
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))   # Equation to get centre of contour
                 Position = np.array(((center[0] / 1.6265), (center[1] / 1.608)), dtype=np.int32)
-                #print(NewCenter)
             else:
                 if CurrentTime - self.LastTime > 1:
                     Active = False
@@ -110,8 +113,6 @@ class Image_Detector():
             #centers[i] = center
 
         cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
-
-        # print(contours)
 
         #cv2.imshow("Frame", frame)
         #cv2.imshow("Red", red)
