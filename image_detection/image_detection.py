@@ -18,9 +18,6 @@ class Image_Detector():
         self.LastPosition = np.array([0, 0])
         self.LastTime = CurrentTime
 
-        self.cap = cv2.VideoCapture(0)
-        #self.cap.set(cv2.CAP_PROP_FPS, 10)
-
     def __repr__(self):
         # Makes the class printable.
         return "Image Detector(Last Ball Position: %s, Time Taken: %s)" % (self.LastPosition, self.LastTime)
@@ -52,7 +49,7 @@ class Image_Detector():
 
         return Maze1
 
-    def update_ball(self, CurrentTime):
+    def update_ball(self, Cap, CurrentTime):
         '''
         This function is run during every processing loop to update the position of the ball in
         our maze objects. The output should be in the format of a tuple: Active, Position.
@@ -61,8 +58,8 @@ class Image_Detector():
         should be provided as np.array([x, y]). See objects.py for more information.
         '''
 
-        _, frame1 = self.cap.read()
-        frame = frame1[20:480, 30: 570]
+        _, frame1 = Cap.read()
+        frame = frame1[6:480, 62: 606]
         Gauss_frame = cv2.GaussianBlur(frame, (5, 5), 0)
         hsv_frame = cv2.cvtColor(Gauss_frame, cv2.COLOR_BGR2HSV)
         """
@@ -87,11 +84,12 @@ class Image_Detector():
         contours, _ = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         if len(contours) == 0:
             #np.array([])
-            if CurrentTime - self.LastTime > 1:
+            if CurrentTime - self.LastTime > 2:
                 Active = False
+                Position = np.array([0, 0])
             else:
                 Active = True
-            Position = np.array([0, 0])
+                Position = self.LastPosition
 
         # ((x, y), radius) = cv2.minEnclosingCircle(c)
         #centers = np.zeros((len(contours), 2), dtype=np.int32)
@@ -102,19 +100,20 @@ class Image_Detector():
                 self.LastTime = CurrentTime
                 Active = True
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))   # Equation to get centre of contour
-                Position = np.array(((center[0] / 1.6265), (center[1] / 1.608)), dtype=np.int32)
+                Position = np.array(((center[0] / 1.176), (center[1] / 1.012658)), dtype=np.int32)
+                self.LastPosition = Position
             else:
-                if CurrentTime - self.LastTime > 1:
+                if CurrentTime - self.LastTime > 2:
                     Active = False
+                    Position = np.array([0, 0])
                 else:
                     Active = True
-                center = (0, 0)
-                Position = np.array([0, 0])
+                    Position = self.LastPosition
             #centers[i] = center
 
         cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
 
-        #cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame)
         #cv2.imshow("Red", red)
         #cv2.imshow("Blue", blue)
         #cv2.imshow("Green", green)

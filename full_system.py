@@ -30,6 +30,8 @@ def full_system():
 
     ''' IMAGE DETECTION START '''
     # Initialise image detector.
+    Cap = cv2.VideoCapture(0)
+    #self.cap.set(cv2.CAP_PROP_FPS, 10)
     ImageDetector = Image_Detector(CurrentTime)
     # Capture inital maze elements and ball position.
     ActiveMaze = ImageDetector.initialise_maze()
@@ -106,7 +108,7 @@ def full_system():
         if ControlOn == True:
             ''' IMAGE DETECTION START '''
             # Capture and update position of ball.
-            ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(CurrentTime)
+            ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, CurrentTime)
             ''' IMAGE DETECTION END '''
 
             # Calculate time since last frame.

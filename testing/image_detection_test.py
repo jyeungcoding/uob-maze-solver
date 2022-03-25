@@ -23,6 +23,8 @@ def image_detection_test():
     CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
 
     # Initialise image detector.
+    Cap = cv2.VideoCapture(0)
+    #self.cap.set(cv2.CAP_PROP_FPS, 10)
     ImageDetector = Image_Detector(CurrentTime)
     # Capture inital maze elements and ball position.
     ActiveMaze = ImageDetector.initialise_maze()
@@ -73,7 +75,7 @@ def image_detection_test():
             CurrentTime = time.perf_counter()
 
         # Update ball position.
-        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(CurrentTime)
+        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, CurrentTime)
 
         ''' PYGAME GRAPHICS START '''
         # Check for events.
