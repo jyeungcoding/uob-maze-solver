@@ -70,9 +70,14 @@ def image_detection_test():
         # Update clock, limit
         LastTime = CurrentTime
         CurrentTime = time.perf_counter()
+        TimeStep = CurrentTime - LastTime # For measuring loop time.
         if CurrentTime - LastTime < ControlPeriod:
             time.sleep(ControlPeriod - CurrentTime + LastTime)
             CurrentTime = time.perf_counter()
+            TimeStep = CurrentTime - LastTime # For measuring loop time.
+
+        # Enable below to print the timestep of a full loop.
+        #print("{:.0f}ms".format(TimeStep * 1000))
 
         # Update ball position.
         ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, CurrentTime)
@@ -102,11 +107,6 @@ def image_detection_test():
         # Blit text to screen.
         Screen.blit(BallPositionTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 6) * PixelScale))
         pygame.display.flip() # Update display.
-
-        Clock.tick()
-        # Enable below to print T or fps of full graphics loop.
-        #print("{:.0f}ms".format(Clock.get_time()))
-        #print("{:.0f}fps".format(1/Clock.get_time()*1000))
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()

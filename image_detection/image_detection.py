@@ -113,7 +113,7 @@ class Image_Detector():
 
         cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
 
-        cv2.imshow("Frame", frame)
+        #cv2.imshow("Frame", frame)
         #cv2.imshow("Red", red)
         #cv2.imshow("Blue", blue)
         #cv2.imshow("Green", green)

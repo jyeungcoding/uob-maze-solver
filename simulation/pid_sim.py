@@ -86,6 +86,9 @@ def pid_sim():
         CurrentTime = time.perf_counter()
         TimeStep = CurrentTime - LastTime
 
+        # Enable below to print the timestep of a full loop.
+        #print("{:.0f}ms".format(TimeStep * 1000))
+
         # Limit minimum time period between each control loop.
         if CurrentTime - ControlLastTime > ControlPeriod: # Time period in settings.
             ControlTimeStep = CurrentTime - ControlLastTime
@@ -161,9 +164,6 @@ def pid_sim():
 
         pygame.display.flip() # Update display.
         ''' PYGAME GRAPHICS END '''
-
-        # Enable below to print the timestep of a full loop.
-        #print("{:.0f}ms".format(TimeStep * 1000))
 
     pygame.quit()
 
