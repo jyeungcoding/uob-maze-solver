@@ -31,7 +31,7 @@ def full_system():
     ''' IMAGE DETECTION START '''
     # Initialise image detector.
     Cap = cv2.VideoCapture(0)
-    #self.cap.set(cv2.CAP_PROP_FPS, 10)
+    #Cap.set(cv2.CAP_PROP_FPS, 10)
     ImageDetector = Image_Detector(CurrentTime)
     # Capture inital maze elements and ball position.
     ActiveMaze = ImageDetector.initialise_maze()
@@ -80,7 +80,7 @@ def full_system():
     ''' INITIALISE PID CONTROL '''
 
     ''' INITIALISE MOTOR CONTROL '''
-    #motor_reset()
+    motor_reset()
     ''' INITIALISE MOTOR CONTROL '''
 
     # Start control program.
@@ -130,6 +130,7 @@ def full_system():
             # Make sure you deal with the cases where no control signal is generated when Active == False.
             ''' MOTOR CONTROL START'''
             # Change the servo motors' angles.
+            ControlSignal[0] = -ControlSignal[0]
             motor_angle(ControlSignal)
             ''' MOTOR CONTROL END '''
 

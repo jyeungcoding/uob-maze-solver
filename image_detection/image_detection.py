@@ -84,7 +84,7 @@ class Image_Detector():
         contours, _ = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         if len(contours) == 0:
             #np.array([])
-            if CurrentTime - self.LastTime > 2:
+            if CurrentTime - self.LastTime > 5:
                 Active = False
                 Position = np.array([0, 0])
             else:
@@ -103,7 +103,7 @@ class Image_Detector():
                 Position = np.array(((center[0] / 1.176), (center[1] / 1.012658)), dtype=np.int32)
                 self.LastPosition = Position
             else:
-                if CurrentTime - self.LastTime > 2:
+                if CurrentTime - self.LastTime > 5:
                     Active = False
                     Position = np.array([0, 0])
                 else:

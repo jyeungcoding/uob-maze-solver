@@ -24,7 +24,7 @@ def image_detection_test():
 
     # Initialise image detector.
     Cap = cv2.VideoCapture(0)
-    #self.cap.set(cv2.CAP_PROP_FPS, 10)
+    #Cap.set(cv2.CAP_PROP_FPS, 10)
     ImageDetector = Image_Detector(CurrentTime)
     # Capture inital maze elements and ball position.
     ActiveMaze = ImageDetector.initialise_maze()

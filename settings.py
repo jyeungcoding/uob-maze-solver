@@ -26,21 +26,21 @@ HoleRadius = 7.37 # [mm]
 ControlPeriod = 0.2 # [s]
 
 # Minimum time period of each graphics loop.
-GraphicsPeriod = 0.2 # [s]
+GraphicsPeriod = 5 # [s]
 
 # PID Coefficients
-Kp = 5e-4
-Ki = 3e-4
-Kd = 3e-4
+Kp = 30e-5
+Ki = 0e-5
+Kd = 28e-5
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 3
+BufferSize = 2
 
 # Minimum tilt angle allowed.
-MinSignal = np.array([pi/360, pi/360])
+MinSignal = np.array([0, 0])
 
 # Maximum motor angle.
-SaturationLimit = np.array([pi / 3, pi / 3])
+SaturationLimit = np.array([pi / 4, pi / 4])
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
