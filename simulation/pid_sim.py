@@ -17,7 +17,7 @@ from graphics.graphics import initialise_walls, initialise_holes, initialise_che
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import TimePeriod, PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import ControlPeriod, PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def pid_sim():
     # Generate starting maze.
@@ -87,7 +87,7 @@ def pid_sim():
         TimeStep = CurrentTime - LastTime
 
         # Limit minimum time period between each control loop.
-        if CurrentTime - ControlLastTime > TimePeriod: # Time period in settings.
+        if CurrentTime - ControlLastTime > ControlPeriod: # Time period in settings.
             ControlTimeStep = CurrentTime - ControlLastTime
             ControlOn = True
             ControlLastTime = CurrentTime

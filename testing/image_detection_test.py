@@ -15,7 +15,7 @@ from objects import Maze, Ball
 from image_detection.image_detection import Image_Detector
 from graphics.objects import SpriteBall
 from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
-from settings import TimePeriod, PixelScale, White, Black
+from settings import ControlPeriod, PixelScale, White, Black
 
 def image_detection_test():
 
@@ -68,8 +68,8 @@ def image_detection_test():
         # Update clock, limit
         LastTime = CurrentTime
         CurrentTime = time.perf_counter()
-        if CurrentTime - LastTime < TimePeriod:
-            time.sleep(TimePeriod - CurrentTime + LastTime)
+        if CurrentTime - LastTime < ControlPeriod:
+            time.sleep(ControlPeriod - CurrentTime + LastTime)
             CurrentTime = time.perf_counter()
 
         # Update ball position.

@@ -23,7 +23,10 @@ HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
 # Minimum time period of each control loop.
-TimePeriod = 0.2 # [s]
+ControlPeriod = 0.2 # [s]
+
+# Minimum time period of each graphics loop.
+GraphicsPeriod = 0.2 # [s]
 
 # PID Coefficients
 Kp = 5e-4
