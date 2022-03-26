@@ -13,14 +13,14 @@ import cv2
 # Import classes, functions and values.
 from objects import Maze, Ball
 from image_detection.image_detection import Image_Detector
-from graphics.objects import SpriteBall
-from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
-from settings import ControlPeriod, PixelScale, White, Black
+from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_values
+from settings import ControlPeriod, DisplayScale, White, Black
 
 def image_detection_test():
 
     # Start clock for time-steps.
     CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
+    StartTime = CurrentTime # Record start time. 
 
     # Initialise image detector.
     Cap = cv2.VideoCapture(0)
@@ -36,31 +36,26 @@ def image_detection_test():
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
     pygame.init()
-    # Initialise clock.
-    Clock = pygame.time.Clock()
     # Initialise display surface.
-    Screen = pygame.display.set_mode((ActiveMaze.Size[0] * PixelScale, (ActiveMaze.Size[1] + 22) * PixelScale))
-    pygame.display.set_caption("Maze Display")
+    Screen = pygame.display.set_mode((800 * DisplayScale, 480 * DisplayScale))
+    #Screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) # Fullscreen mode: only use on pi touchscreen.
+    pygame.display.set_caption("PID Simulation")
 
-    # Initialise text module.
-    pygame.font.init()
-    # Create fonts.
-    Font1 = pygame.font.SysFont("Times New Roman", 7 * PixelScale)
+    # Generate background.
+    Background = pygame.Surface((800 * DisplayScale, 480 * DisplayScale)).convert()
+    Background.fill(White)
+    BackgroundSprites = initialise_background(ActiveMaze.Holes, ActiveMaze.Walls)
+    BackgroundSprites.draw(Background)
 
-    # Generate graphic objects.
-    # Generate ball.
-    BallList = pygame.sprite.Group()
-    SpriteBall1 = SpriteBall(
-        ActiveMaze.Ball.S, # [mm], numpy vector, size 2.
-        ActiveMaze.Ball.R, # [mm], numpy vector, size 2.
-    )
-    BallList.add(SpriteBall1)
-    # Generate walls.
-    WallList = initialise_walls(ActiveMaze.Walls)
-    # Generate holes.
-    HoleList = initialise_holes(ActiveMaze.Holes)
-    # Generate checkpoints.
-    CheckpointList = initialise_checkpoints(ActiveMaze.Checkpoints)
+    # Generate checkpoints, outputs LayeredDirty group.
+    ActiveSprites = initialise_checkpoints(ActiveMaze.Checkpoints)
+
+    # Generate ball, add to ActiveSprites.
+    SpriteBall_ = initialise_ball(ActiveMaze.Ball)
+    ActiveSprites.add(SpriteBall_, layer = 1)
+
+    # Initialise output values, add to ActiveSprites.
+    ActiveSprites.add(initialise_values(), layer = 2)
     ''' PYGAME GRAPHICS END '''
 
     # Start main code.
@@ -82,31 +77,39 @@ def image_detection_test():
         # Update ball position.
         ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, CurrentTime)
 
-        ''' PYGAME GRAPHICS START '''
+        ''' PYGAME EVENT HANDLER START '''
         # Check for events.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Running = 0
+        ''' PYGAME EVENT HANDLER END '''
 
+        ''' PYGAME GRAPHICS START '''
+        # Update Sprite Ball position.
         if ActiveMaze.Ball.Active == True:
-            # Update Sprite Ball position.
-            SpriteBall1.rect.centerx = ActiveMaze.Ball.S[0] * PixelScale # Ball position in pixels based on center of ball.
-            SpriteBall1.rect.centery = ActiveMaze.Ball.S[1] * PixelScale # Ball position in pixels based on center of ball.
+            SpriteBall_.update(ActiveMaze.Ball.S)
         else:
-            SpriteBall1.kill()
+            SpriteBall_.kill()
 
-        # Create surface with text describing the ball's position.
-        BallPositionTxt = Font1.render(str(ActiveMaze.Ball), False, Black)
+        # Check/update SpriteSetPoint.
+        while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(0)):
+            if len(ActiveSprites.get_sprites_from_layer(0)) != 1:
+                ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
+            ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
 
-        # Update graphics. Could optimise.
-        Screen.fill(White)
-        WallList.draw(Screen) # Draw walls.
-        HoleList.draw(Screen) # Draw holes.
-        CheckpointList.draw(Screen) # Draw checkpoints.
-        BallList.draw(Screen) # Draw ball.
-        # Blit text to screen.
-        Screen.blit(BallPositionTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 6) * PixelScale))
-        pygame.display.flip() # Update display.
+        # Generate strings for output values to be displayed.
+        OutputValues = {
+        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+        1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+        }
+        # Update text sprites with new values.
+        Values = ActiveSprites.get_sprites_from_layer(2) # List of value text sprites.
+        for Key in OutputValues:
+            Values[Key].update(OutputValues[Key])
+
+        # Update changed areas.
+        Rects = ActiveSprites.draw(Screen, Background)
+        pygame.display.update(Rects)
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()

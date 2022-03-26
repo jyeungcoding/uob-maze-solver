@@ -27,7 +27,7 @@ ControlPeriod = 0.2 # [s]
 
 # Minimum time period of each graphics loop.
 GraphicsPeriod = 0.2 # [s]
-
+"""
 # PID Coefficients
 Kp = 30e-5
 Ki = 0e-5
@@ -41,6 +41,22 @@ MinSignal = np.array([0, 0])
 
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 4, pi / 4])
+"""
+
+# PID Coefficients
+Kp = 30e-5
+Ki = 10e-5
+Kd = 28e-5
+
+# Number of error values to buffer for PID derivative calculation.
+BufferSize = 4
+
+# Minimum tilt angle allowed.
+MinSignal = np.array([pi/360, pi/360])
+
+# Maximum motor angle.
+SaturationLimit = np.array([pi / 4, pi / 4])
+
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
@@ -57,8 +73,14 @@ WallBounce = 0.01
 ImageNoise = 2 # [mm]
 
 ''' GRAPHICAL SETTINGS '''
-# Scaling factor from mm to pixels. (Integers only please. )
-PixelScale = 3 # PyGame rounds pixels to the nearest ones digit, can cause slight graphical errors.
+# GUI display scaling factor. Use 1 for pi touchscreen.
+DisplayScale = 1
+
+# Maze to GUI scaling factor. Don't change.
+GUIScale = 1.5 * DisplayScale
+
+# Maze shift for GUI display.
+HeaderShift = np.array([0, 51]) * DisplayScale
 
 # Colours
 Black   = (0  , 0  , 0  )
@@ -68,6 +90,13 @@ Grey    = (169, 169, 169)
 DimGrey = (105, 105, 105)
 Red     = (255, 0  , 0  )
 Purple  = (75 , 0  , 130)
+
+# Checkpoint Colours
+CheckpointColours = {
+"SetPoint" : Red,
+"Checkpoint" : Blue,
+"EndPoint" : Purple
+}
 
 if __name__ == "__main__":
     import doctest

@@ -8,16 +8,15 @@ controller in control/pid_controller.py.
 import pygame
 import numpy as np
 import time
-from math import pi
+from math import degrees
 
 # Import classes, functions and values.
 from objects import Maze
-from graphics.objects import SpriteBall, SpriteSetPoint
-from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
+from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_values
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import ControlPeriod, PixelScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import ControlPeriod, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def pid_sim():
     # Generate starting maze.
@@ -27,34 +26,32 @@ def pid_sim():
     if type(ActiveMaze) != Maze:
         raise TypeError("ActiveMaze should be of class Maze. See 'objects.py'.")
 
+    if len(ActiveMaze.Checkpoints) == 0:
+        raise ValueError("No checkpoints found.")
+
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
     pygame.init()
     # Initialise display surface.
-    Screen = pygame.display.set_mode((ActiveMaze.Size[0] * PixelScale, (ActiveMaze.Size[1] + 42) * PixelScale))
+    Screen = pygame.display.set_mode((800 * DisplayScale, 480 * DisplayScale))
+    #Screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) # Fullscreen mode: only use on pi touchscreen.
     pygame.display.set_caption("PID Simulation")
 
-    # Initialise text module.
-    pygame.font.init()
-    # Create fonts.
-    Font1 = pygame.font.SysFont("Times New Roman", 7 * PixelScale)
+    # Generate background.
+    Background = pygame.Surface((800 * DisplayScale, 480 * DisplayScale)).convert()
+    Background.fill(White)
+    BackgroundSprites = initialise_background(ActiveMaze.Holes, ActiveMaze.Walls)
+    BackgroundSprites.draw(Background)
 
-    # Generate graphic objects.
-    BallList = pygame.sprite.Group() # Generate ball.
-    SpriteBall1 = SpriteBall(
-        ActiveMaze.Ball.S, # [mm], numpy vector, size 2.
-        ActiveMaze.Ball.R, # [mm], numpy vector, size 2.
-    )
-    BallList.add(SpriteBall1)
-    WallList = initialise_walls(ActiveMaze.Walls) # Generate walls.
-    HoleList = initialise_holes(ActiveMaze.Holes) # Generate holes.
-    CheckpointList = initialise_checkpoints(ActiveMaze.Checkpoints) # Generate checkpoints.
+    # Generate checkpoints, outputs LayeredDirty group.
+    ActiveSprites = initialise_checkpoints(ActiveMaze.Checkpoints)
 
-    # Set the first SpriteCheckpoint as the SpriteSetPoint and remove it from CheckpointList so it isn't drawn twice.
-    CheckpointIter1 = iter(CheckpointList) # Sprite groups aren't indexed, so it is necessary to create an iterable.
-    CheckpointIter2 = iter(CheckpointList)
-    SpriteSetPoint1 = SpriteSetPoint(next(CheckpointIter1).S) # Set point is drawn red instead of blue.
-    next(CheckpointIter2).kill()
+    # Generate ball, add to ActiveSprites.
+    SpriteBall_ = initialise_ball(ActiveMaze.Ball)
+    ActiveSprites.add(SpriteBall_, layer = 1)
+
+    # Initialise output values, add to ActiveSprites.
+    ActiveSprites.add(initialise_values(), layer = 2)
     ''' PYGAME GRAPHICS END '''
 
     ''' INITIALISE PID CONTROL '''
@@ -63,23 +60,30 @@ def pid_sim():
     ''' INITIALISE PID CONTROL '''
 
     ''' INITIALISE MOTOR CONTROL '''
-    motor_reset()
+    #motor_reset()
     ''' INITIALISE MOTOR CONTROL '''
 
     # Starting values.
     ControlSignal = np.array([0.0, 0.0])
     Theta = np.array([0.0, 0.0]) # Theta (radians) should be a size 2 vector of floats.
     Saturation = np.array([False, False])
-    PID_Output = [np.array([0.0, 0.0]), 0, 0, 0]
+    PID_Output = [np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0])]
 
     # Start control program.
     Running = 1
     # Start clock for time-steps.
     CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
-    StartTime = CurrentTime # Record start time, currently unused.
+    StartTime = CurrentTime # Record start time.
     ControlOn = True # Turns control loop on and off.
     ControlLastTime = CurrentTime # Last time control signal was updated.
     while Running == 1:
+
+        ''' PYGAME EVENT HANDLER START '''
+        # Check for events.
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                Running = 0
+        ''' PYGAME EVENT HANDLER END '''
 
         # Calculate simulation loop time-step.
         LastTime = CurrentTime
@@ -113,56 +117,50 @@ def pid_sim():
 
                 # Calculate control signal using the PID controller.
                 PID_Output = PID_Controller1.update(ProcessVariable, ControlTimeStep)
-                Saturation = PID_Controller1.Saturation
+                Saturation = PID_Controller1.Saturation # For display.
                 ControlSignal = PID_Output[0]
             ''' PID CONTROL END'''
 
             ''' MOTOR CONTROL START'''
             # Change the servo motors' angles.
-            motor_angle(ControlSignal)
+            #motor_angle(ControlSignal)
             ''' MOTOR CONTROL END '''
 
             # Convert control signal into actual Theta (based on measurements).
             Theta = ControlSignal * np.array([3 / 20, 0.1])
 
         ''' PYGAME GRAPHICS START '''
-        # Check for events.
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                Running = 0
-
         # Update Sprite Ball position.
         if ActiveMaze.Ball.Active == True:
-            SpriteBall1.rect.centerx = ActiveMaze.Ball.S[0] * PixelScale # Ball position in pixels based on center of ball.
-            SpriteBall1.rect.centery = ActiveMaze.Ball.S[1] * PixelScale # Ball position in pixels based on center of ball.
+            SpriteBall_.update(ActiveMaze.Ball.S)
         else:
-            SpriteBall1.kill()
+            SpriteBall_.kill()
 
-        # Check/update SpriteSetPoint, remove last SpriteCheckpoint if necessary.
-        while (len(ActiveMaze.Checkpoints) < len(CheckpointList) + 1) and len(ActiveMaze.Checkpoints) > 0:
-            SpriteSetPoint1 = SpriteSetPoint(next(CheckpointIter1).S)
-            next(CheckpointIter2).kill()
+        # Check/update SpriteSetPoint.
+        while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(0)):
+            if len(ActiveSprites.get_sprites_from_layer(0)) != 1:
+                ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
+            ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
 
-        # Create surface with text describing the ball's position.
-        BallPositionTxt = Font1.render(str(ActiveMaze.Ball), False, Black)
-        # Create surface with text describing the PID Terms.
-        PIDTermsTxt = Font1.render("P: %s, I: %s, D: %s" % (np.round(PID_Output[1] * 360 / (2 * pi), 1), np.round(PID_Output[2] * 360 / (2 * pi), 1), np.round(PID_Output[3] * 360 / (2 * pi), 1)), False, Black)
-        # Create surface with text displaying the control signal in degrees.
-        ControlSignalTxt = Font1.render("Saturation: %s, Control Signal: %s, Theta: %s" % (PID_Controller1.Saturation, np.round(ControlSignal * 360 / (2 * pi), 1), np.round(Theta * 360 / (2 * pi), 1)), False, Black)
+        # Generate strings for output values to be displayed.
+        OutputValues = {
+        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+        1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+        2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
+        3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
+        4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # D.
+        5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
+        6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
+        7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
+        }
+        # Update text sprites with new values.
+        Values = ActiveSprites.get_sprites_from_layer(2) # List of value text sprites.
+        for Key in OutputValues:
+            Values[Key].update(OutputValues[Key])
 
-        # Update graphics. Could optimise.
-        Screen.fill(White)
-        WallList.draw(Screen) # Draw walls.
-        HoleList.draw(Screen) # Draw holes.
-        CheckpointList.draw(Screen) # Draw checkpoints.
-        Screen.blit(SpriteSetPoint1.image, SpriteSetPoint1.rect) # Draw set point.
-        BallList.draw(Screen) # Draw ball.
-        # Blit text to screen.
-        Screen.blit(BallPositionTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 6) * PixelScale))
-        Screen.blit(PIDTermsTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 17) * PixelScale))
-        Screen.blit(ControlSignalTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 28) * PixelScale))
-
-        pygame.display.flip() # Update display.
+        # Update changed areas.
+        Rects = ActiveSprites.draw(Screen, Background)
+        pygame.display.update(Rects)
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()
