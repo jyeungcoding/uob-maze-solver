@@ -261,7 +261,7 @@ class Maze():
                 FrameBounce
             ),
             Wall(
-                np.array([FrameSize[0] - FrameVertical, 0]),
+                np.array([FrameSize[0] - FrameVertical + 1, 0]),
                 np.array([FrameVertical, FrameSize[1]]),
                 FrameBounce
             ),
@@ -271,7 +271,7 @@ class Maze():
                 FrameBounce
             ),
             Wall(
-                np.array([0, FrameSize[1] - FrameHorizontal]),
+                np.array([0, FrameSize[1] - FrameHorizontal + 1]),
                 np.array([FrameSize[0], FrameHorizontal]),
                 FrameBounce
             )
