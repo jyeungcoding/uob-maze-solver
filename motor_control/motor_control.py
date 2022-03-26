@@ -4,6 +4,7 @@
 # pin12 is now pwm0 and pin35 is now pwm1.
 
 import os
+import numpy as np
 from math import pi
 
 #motor_limit = [7.2,17,26.8] # Duty cycle for Hitec at: 0 90 180
@@ -27,7 +28,7 @@ def motor_reset(): # Start the PWM
 
 def motor_angle(Theta): # Enter the new angle
     # Theta (radians) should be a size 2 vector of floats. i.e. np.array([0.2 * pi, 0.2 * pi])
-    OnTime = 100000 * (Theta * motor_steps + motor_limit[1]) # New on times
+    OnTime = 100000 * (Theta * np.array([-1, 1]) * motor_steps + motor_limit[1]) # New on times, use numpy array to change motor direction.
 
     # For pin12
     os.system('sudo echo ' + str(int(OnTime[0])) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/duty_cycle') # Set up the new on time for the new angle.
