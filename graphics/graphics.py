@@ -9,10 +9,64 @@ import numpy as np
 
 # Import classes and settings.
 from graphics.objects import SpriteBall, SpriteWall, SpriteHole, SpriteCheckpoint, SpriteHeader, SpriteText, SpriteButton, SpriteVariableButton
+from settings import White
+
+def initialise_background(Size):
+    # Generate background surface.
+    Background = pygame.Surface((Size[0], Size[1]))
+    Background.fill(White)
+    Background.convert()
+    return Background
+
+def initialise_holes(Holes):
+    # Generate holes.
+    SpriteHoles = []
+    for hole in Holes:
+        SpriteHole_ = SpriteHole(
+            hole.S, # [mm], numpy vector, size 2.
+            hole.R # [mm], numpy vector, size 2.
+        )
+        SpriteHoles.append(SpriteHole_)
+    return iter(SpriteHoles)
+
+def initialise_walls(Walls):
+    # Generate walls.
+    SpriteWalls = []
+    for wall in Walls:
+        SpriteWall_ = SpriteWall(
+            wall.S, # [mm], numpy vector, size 2.
+            wall.Size # [mm], numpy vector, size 2.
+        )
+        SpriteWalls.append(SpriteWall_)
+    return iter(SpriteWalls)
+
+def initialise_checkpoints(Checkpoints):
+    # Generate checkpoints.
+    SpriteCheckPoints = []
+    for checkpoint in Checkpoints:
+        if Checkpoints.index(checkpoint) == 0: # First checkpoint is the set point.
+            SpriteSetPoint_ = SpriteCheckpoint(
+                checkpoint.S, # [mm], numpy vector, size 2.
+                "SetPoint" # Checkpoint type.
+            )
+            SpriteCheckPoints.append(SpriteSetPoint_)
+        elif Checkpoints.index(checkpoint) < len(Checkpoints) - 1:
+            SpriteCheckpoint_ = SpriteCheckpoint(
+                checkpoint.S, # [mm], numpy vector, size 2.
+                "Checkpoint" # Checkpoint type.
+            )
+            SpriteCheckPoints.append(SpriteCheckpoint_)
+        else: # Last checkpoint is coloured purple instead of blue.
+            SpriteEndPoint_ = SpriteCheckpoint(
+                checkpoint.S, # [mm], numpy vector, size 2.
+                "EndPoint" # Checkpoint type.
+            )
+            SpriteCheckPoints.append(SpriteEndPoint_)
+    return iter(SpriteCheckPoints)
 
 def initialise_keys():
     # Generate ouput text keys.
-    Sprites = (
+    SpriteKeys = (
     SpriteText("Time Elapsed [s]: ", np.array([515, 65])),
     SpriteText("Position [mm]: ", np.array([515, 100])),
     SpriteText("P [°]: ", np.array([515, 135])),
@@ -22,63 +76,7 @@ def initialise_keys():
     SpriteText("Control Signal [°]: ", np.array([515, 275])),
     SpriteText("Theta [°]: ", np.array([515, 310]))
     )
-    return Sprites
-
-def initialise_background(Holes, Walls):
-    BackgroundSprites = pygame.sprite.LayeredUpdates() # Create LayeredUpdates Sprite Group.
-    for hole in Holes:
-        # Generate holes.
-        SpriteHole_ = SpriteHole(
-            hole.S, # [mm], numpy vector, size 2.
-            hole.R # [mm], numpy vector, size 2.
-        )
-        BackgroundSprites.add(SpriteHole_, layer = 0)
-    for wall in Walls:
-        # Generate walls.
-        SpriteWall_ = SpriteWall(
-            wall.S, # [mm], numpy vector, size 2.
-            wall.Size # [mm], numpy vector, size 2.
-        )
-        BackgroundSprites.add(SpriteWall_, layer = 1)
-    #Generate display keys.
-    BackgroundSprites.add(initialise_keys(), layer = 2)
-    return BackgroundSprites
-
-def initialise_checkpoints(Checkpoints):
-    # Generate checkpoints.
-    ActiveSprites = pygame.sprite.LayeredDirty() # Create Dirty Sprite Group.
-    for checkpoint in Checkpoints:
-        if Checkpoints.index(checkpoint) == 0: # First checkpoint is the set point.
-            SpriteSetPoint_ = SpriteCheckpoint(
-                checkpoint.S, # [mm], numpy vector, size 2.
-                "SetPoint" # Checkpoint type.
-            )
-            ActiveSprites.add(SpriteSetPoint_, layer = 0)
-        elif Checkpoints.index(checkpoint) < len(Checkpoints) - 1:
-            SpriteCheckpoint_ = SpriteCheckpoint(
-                checkpoint.S, # [mm], numpy vector, size 2.
-                "Checkpoint" # Checkpoint type.
-            )
-            ActiveSprites.add(SpriteCheckpoint_, layer = 0)
-        else: # Last checkpoint is coloured purple instead of blue.
-            SpriteEndPoint_ = SpriteCheckpoint(
-                checkpoint.S, # [mm], numpy vector, size 2.
-                "EndPoint" # Checkpoint type.
-            )
-            ActiveSprites.add(SpriteEndPoint_, layer = 0)
-    return ActiveSprites
-
-def initialise_ball(Ball):
-    SpriteBall_ = SpriteBall(
-        Ball.S, # [mm], numpy vector, size 2.
-        Ball.R # [mm], numpy vector, size 2.
-    )
-    return SpriteBall_
-
-def initialise_header():
-    # Initialise header. 
-    SpriteHeader_ = SpriteHeader()
-    return SpriteHeader_
+    return SpriteKeys
 
 def initialise_values():
     # Initialise ouput text values.
@@ -94,6 +92,19 @@ def initialise_values():
     )
     return Sprites
 
+def initialise_dirty_group(Maze):
+    # Create dirty sprite group.
+    ActiveSprites = pygame.sprite.LayeredDirty()
+    # Generate holes, add to ActiveSprites.
+    ActiveSprites.add(initialise_holes(Maze.Holes), layer = 0)
+    # Generate walls, add to ActiveSprites.
+    ActiveSprites.add(initialise_walls(Maze.Walls), layer = 1)
+    # Generate checkpoints, add to ActiveSprites.
+    ActiveSprites.add(initialise_checkpoints(Maze.Checkpoints), layer = 2)
+    # Generate keys, add to ActiveSprites.
+    ActiveSprites.add(initialise_keys(), layer = 3)
+    return ActiveSprites
+
 def initialise_buttons():
     # Initialise buttons.
     Buttons = pygame.sprite.LayeredDirty() # Create Dirty Sprite Group.
@@ -102,6 +113,27 @@ def initialise_buttons():
     Buttons.add(SpriteButton(np.array([515, 415]), "Reset"), layer = 0)
     Buttons.add(SpriteButton(np.array([658, 415]), "Quit"), layer = 0)
     return Buttons
+
+def initialise_header():
+    # Initialise header.
+    SpriteHeader_ = SpriteHeader()
+    return SpriteHeader_
+
+def initialise_ball(Ball):
+    SpriteBall_ = SpriteBall(
+        Ball.S, # Initialise ball outside maze.
+        Ball.R # [mm], numpy vector, size 2.
+    )
+    return SpriteBall_
+
+def change_maze(Group, Maze):
+    Group.remove_sprites_of_layer(0)
+    Group.add(initialise_holes(Maze.Holes), layer = 0)
+    Group.remove_sprites_of_layer(1)
+    Group.add(initialise_walls(Maze.Walls), layer = 1)
+    Group.remove_sprites_of_layer(2)
+    Group.add(initialise_checkpoints(Maze.Checkpoints), layer = 2)
+    return Group
 
 if __name__ == "__main__":
     import doctest

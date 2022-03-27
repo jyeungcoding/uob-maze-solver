@@ -43,7 +43,7 @@ class SpriteBall(pygame.sprite.DirtySprite):
             self.dirty = 1 # Set for redraw.
             self.LastPosition = Position
 
-class SpriteHole(pygame.sprite.Sprite):
+class SpriteHole(pygame.sprite.DirtySprite):
     # Sprite class for holes.
     def __init__(self, Position, Radius):
         # Position should be provided in a numpy vector, size 2. Units in mm. Radius should be provided in mm.
@@ -66,7 +66,7 @@ class SpriteHole(pygame.sprite.Sprite):
         self.rect.centerx = Position[0] # Hole position in pixels, based on center of hole.
         self.rect.centery = Position[1] # Hole position in pixels, based on center of hole.
 
-class SpriteWall(pygame.sprite.Sprite):
+class SpriteWall(pygame.sprite.DirtySprite):
     # Sprite class for walls.
     def __init__(self, Position, Size):
         # Position and size should be provided in numpy vectors, size 2. Units in mm.
@@ -158,7 +158,7 @@ class SpriteHeader(pygame.sprite.DirtySprite):
         super().__init__()
         # Defined statuses.
         Statuses_Green = ("Ready", "Calibrating", "Running", "Completed")
-        Statuses_Red = ("Stopped", "Ball Not Found", "Ball Lost")
+        Statuses_Red = ("Paused", "Ball Lost")
 
         # Generate surfaces for each status.
         self.Surfaces = {}
@@ -177,7 +177,7 @@ class SpriteHeader(pygame.sprite.DirtySprite):
         self.rect.y = 0 # Text position in pixels.
 
     def update(self, Status):
-        # Only update if status has changed. 
+        # Only update if status has changed.
         if Status != self.CurrentStatus:
             # Update surface.
             self.image = self.Surfaces[Status]
@@ -287,7 +287,7 @@ class SpriteButton(pygame.sprite.DirtySprite):
 
     def update(self, Time):
         # Update button animation.
-        if self.Clicked == True and Time > self.ClickTime + 0.5:
+        if self.Clicked == True and Time > self.ClickTime + 0.4:
             self.Clicked = False
             # Change to up surface.
             self.image = self.Surfaces[0]
@@ -318,6 +318,7 @@ class SpriteVariableButton(SpriteButton):
         # Button is clicked.
         self.Clicked = True
         self.ClickTime = Time # Record click time.
+        self.CurrentState = next(self.StateIterator) # Next state.
         # Change to down surface.
         self.image = self.Surfaces[self.CurrentState][1]
         # Creates sprite rect object for positioning.
@@ -328,9 +329,8 @@ class SpriteVariableButton(SpriteButton):
 
     def update(self, Time):
         # Update button animation.
-        if self.Clicked == True and Time > self.ClickTime + 0.5:
+        if self.Clicked == True and Time > self.ClickTime + 0.4:
             self.Clicked = False
-            self.CurrentState = next(self.StateIterator) # Next state.
             # Change to up surface of next state.
             self.image = self.Surfaces[self.CurrentState][0]
             # Creates sprite rect object for positioning.
