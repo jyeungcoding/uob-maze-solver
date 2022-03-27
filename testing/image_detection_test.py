@@ -55,8 +55,9 @@ def image_detection_test():
     # Initialise output values, add to ActiveSprites.
     ActiveSprites.add(initialise_values(), layer = 2)
 
-    # Initialise buttons.
+    # Initialise buttons, add to Buttons and ActiveSprites groups.
     Buttons = initialise_buttons()
+    ActiveSprites.add(Buttons.sprites(), layer = 3)
     ''' PYGAME GRAPHICS END '''
 
     # Start main code.
@@ -134,9 +135,8 @@ def image_detection_test():
             Buttons.update(time.perf_counter())
 
         # Update changed areas.
-        Rects1 = ActiveSprites.draw(Screen, Background)
-        Rects2 = Buttons.draw(Screen, Background)
-        pygame.display.update(Rects1 + Rects2) # Rects are empty if GraphicsOn == False.
+        Rects = ActiveSprites.draw(Screen, Background)
+        pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()

@@ -8,7 +8,7 @@ and functions needed to fetch the position of the checkpoitns and the ball.
 import cv2
 import numpy as np
 
-# Import classes.
+# Import objects.
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 
 class Image_Detector():

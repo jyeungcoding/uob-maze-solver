@@ -11,9 +11,9 @@ import time
 from math import degrees
 
 # Import classes, functions and values.
+from mazes import Maze1, Maze2, Maze3
 from objects import Maze
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
-from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
 from control.timing_controller import TimingController
 from motor_control.motor_control import motor_reset, motor_angle
@@ -21,12 +21,11 @@ from settings import ControlPeriod, DisplayScale, White, Black, Kp, Ki, Kd, Buff
 
 def pid_sim():
     # Generate starting maze.
-    ActiveMaze = CircleMaze
+    ActiveMaze = Maze1
 
-    # Check MazeModel is correct type.
+    # Check ActiveMaze is correct type.
     if type(ActiveMaze) != Maze:
         raise TypeError("ActiveMaze should be of class Maze. See 'objects.py'.")
-
     if len(ActiveMaze.Checkpoints) == 0:
         raise ValueError("No checkpoints found.")
 
@@ -59,8 +58,9 @@ def pid_sim():
     # Initialise output values, add to ActiveSprites.
     ActiveSprites.add(initialise_values(), layer = 2)
 
-    # Initialise buttons.
+    # Initialise buttons, add to Buttons and ActiveSprites groups.
     Buttons = initialise_buttons()
+    ActiveSprites.add(Buttons.sprites(), layer = 3)
     ''' PYGAME GRAPHICS END '''
 
     ''' INITIALISE PID CONTROL '''
@@ -179,9 +179,8 @@ def pid_sim():
             Buttons.update(time.perf_counter())
 
         # Update changed areas.
-        Rects1 = ActiveSprites.draw(Screen, Background)
-        Rects2 = Buttons.draw(Screen, Background)
-        pygame.display.update(Rects1 + Rects2) # Rects are empty if GraphicsOn == False.
+        Rects = ActiveSprites.draw(Screen, Background)
+        pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()
