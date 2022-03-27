@@ -151,7 +151,10 @@ def pid_sim():
 
                 ''' PYGAME GRAPHICS START '''
                 # Update header.
-                SpriteHeader.update("Running")
+                if Completed == 0:
+                    SpriteHeader.update("Running")
+                else:
+                    SpriteHeader.update("Completed")
                 ''' PYGAME GRAPHICS END '''
 
                 ''' PYGAME EVENT HANDLER START '''
@@ -175,6 +178,7 @@ def pid_sim():
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning = 0
+                                    Completed = 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
                                     Button.click(time.perf_counter()) # Animate button click.
                                     ProgramOn = 0
@@ -189,6 +193,9 @@ def pid_sim():
 
                 # Simulate next step of maze using theta and a given timestep.
                 Output = ActiveMaze.next_step(TimeStep, Theta) # Time step given in s.
+
+                if Output[0] == False:
+                    BallLost = 1 # If ball is lost.
                 ''' MAZE SIMULATION END '''
 
                 ''' TIMING CONTROL START '''
@@ -203,9 +210,12 @@ def pid_sim():
                         ProcessVariable = Output[1]
 
                         # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
-                        while ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2 and len(ActiveMaze.Checkpoints) > 1:
-                            ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
-                            PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
+                        if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
+                            if len(ActiveMaze.Checkpoints) > 1:
+                                ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
+                                PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
+                            elif len(ActiveMaze.Checkpoints) == 1:
+                                Completed = 1
 
                         # Calculate control signal using the PID controller.
                         PID_Output = PID_Controller1.update(ProcessVariable, ControlTimeStep)
@@ -214,8 +224,6 @@ def pid_sim():
 
                         # Convert control signal into actual Theta (based on measurements).
                         Theta = ControlSignal * np.array([3 / 20, 0.1])
-                    else:
-                        BallLost = 1 # If ball is lost.
                     ''' PID CONTROL END'''
 
                     ''' MOTOR CONTROL START'''
@@ -301,6 +309,7 @@ def pid_sim():
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
                                         Paused = 0
+                                        Completed = 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ProgramOn = 0
@@ -377,6 +386,7 @@ def pid_sim():
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
                                         BallLost = 0
+                                        Completed = 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ProgramOn = 0

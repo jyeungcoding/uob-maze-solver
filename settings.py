@@ -45,12 +45,12 @@ SaturationLimit = np.array([pi / 4, pi / 4])
 """
 
 # PID Coefficients
-Kp = 30e-5
-Ki = 10e-5
-Kd = 28e-5
+Kp = 4e-4
+Ki = 1e-4
+Kd = 4e-4
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 4
+BufferSize = 3
 
 # Minimum tilt angle allowed.
 MinSignal = np.array([pi/360, pi/360])

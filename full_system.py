@@ -156,7 +156,10 @@ def full_system():
 
                 ''' PYGAME GRAPHICS START '''
                 # Update header.
-                SpriteHeader.update("Running")
+                if Completed == 0:
+                    SpriteHeader.update("Running")
+                else:
+                    SpriteHeader.update("Completed")
                 ''' PYGAME GRAPHICS END '''
 
                 ''' PYGAME EVENT HANDLER START '''
@@ -180,6 +183,7 @@ def full_system():
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning = 0
+                                    Completed = 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
                                     Button.click(time.perf_counter()) # Animate button click.
                                     ProgramOn = 0
@@ -205,16 +209,18 @@ def full_system():
                     LastFrameTime = CurrentTime
 
                     ''' PID CONTROL START '''
-                    if ActiveMaze.Ball.Active == True:
-                        # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
-                        while ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2 and len(ActiveMaze.Checkpoints) > 1:
+                    # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
+                    if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
+                        if len(ActiveMaze.Checkpoints) > 1:
                             ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
                             PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
+                        elif len(ActiveMaze.Checkpoints) == 1:
+                            Completed = 1
 
-                        # Calculate control signal using the PID controller.
-                        PID_Output = PID_Controller1.update(ActiveMaze.Ball.S, FrameTimeStep)
-                        Saturation = PID_Controller1.Saturation # For display.
-                        ControlSignal = PID_Output[0]
+                    # Calculate control signal using the PID controller.
+                    PID_Output = PID_Controller1.update(ActiveMaze.Ball.S, FrameTimeStep)
+                    Saturation = PID_Controller1.Saturation # For display.
+                    ControlSignal = PID_Output[0]
                     ''' PID CONTROL END'''
                     # Make sure you deal with the cases where no control signal is generated when Active == False.
                     ''' MOTOR CONTROL START'''
@@ -303,6 +309,7 @@ def full_system():
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
                                         Paused = 0
+                                        Completed = 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ProgramOn = 0
@@ -377,6 +384,7 @@ def full_system():
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
                                         BallLost = 0
+                                        Completed = 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ProgramOn = 0
