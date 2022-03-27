@@ -13,27 +13,17 @@ from math import degrees
 
 # Import classes, functions and values.
 from objects import Maze
+from simulation.objects import SandboxMaze
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from image_detection.image_detection import Image_Detector
 from control.pid_controller import PID_Controller
+from control.timing_controller import TimingController
 from motor_control.motor_control import motor_reset, motor_angle
 from settings import ControlPeriod, GraphicsPeriod, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def full_system():
-
-    # Start clock.
-    CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
-    StartTime = CurrentTime # Record start time.
-    LastTime = CurrentTime # For timing each full loop.
-    LastFrameTime = CurrentTime # For timing each image frame loop.
-
-    ''' IMAGE DETECTION START '''
-    # Initialise image detector.
-    Cap = cv2.VideoCapture(0)
-    #Cap.set(cv2.CAP_PROP_FPS, 10)
-    ImageDetector = Image_Detector(CurrentTime)
-    # Capture inital maze elements and ball position.
-    ActiveMaze = ImageDetector.initialise_maze()
+    # Generate starting maze.
+    ActiveMaze = SandboxMaze
 
     # Check MazeModel is correct type.
     if type(ActiveMaze) != Maze:
@@ -41,7 +31,6 @@ def full_system():
 
     if len(ActiveMaze.Checkpoints) == 0:
         raise ValueError("No checkpoints detected.")
-    ''' IMAGE DETECTION END '''
 
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
@@ -87,11 +76,19 @@ def full_system():
 
     # Start control program.
     Running = 1
-    # Start clock for time-steps.
-    ControlOn = True # Turns control on and off.
-    LastControl = CurrentTime # Last time control signal was updated.
-    GraphicsOn = True # Turns graphics on and off.
-    LastGraphics = CurrentTime # Last time graphics were updated.
+    # Start clock.
+    StartTime = time.perf_counter() # Record start time.
+    TimingController_ = TimingController(StartTime) # Start timing controller.
+
+    ''' IMAGE DETECTION START '''
+    # Initialise image detector.
+    Cap = cv2.VideoCapture(0)
+    #Cap.set(cv2.CAP_PROP_FPS, 10)
+    ImageDetector = Image_Detector(StartTime)
+    LastFrameTime = StartTime # Temp.
+    LastTime = StartTime # Temp.
+    ''' IMAGE DETECTION END '''
+
     while Running == 1:
 
         ''' PYGAME EVENT HANDLER START '''
@@ -109,23 +106,15 @@ def full_system():
                             Running = 0
         ''' PYGAME EVENT HANDLER END '''
 
-        # Limit minimum time period between each control loop.
-        CurrentTime = time.perf_counter()
-        if CurrentTime - LastControl > ControlPeriod: # Time period in settings.
-            ControlOn = True
-            LastControl = CurrentTime
-        else:
-            ControlOn = False
-        if CurrentTime - LastGraphics > GraphicsPeriod: # Time period in settings.
-            GraphicsOn = True
-            LastGraphics = CurrentTime
-        else:
-            GraphicsOn = False
+        ''' TIMING CONTROL START '''
+        # Limit minimum time period between each control/graphics loop.
+        ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
+        ''' TIMING CONTROL END '''
 
         if ControlOn == True:
             ''' IMAGE DETECTION START '''
             # Capture and update position of ball.
-            ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, CurrentTime)
+            ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, time.perf_counter())
             ''' IMAGE DETECTION END '''
 
             # Calculate time since last frame.
@@ -137,8 +126,8 @@ def full_system():
             if ActiveMaze.Ball.Active == True:
                 # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
                 while ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2 and len(ActiveMaze.Checkpoints) > 1:
-                    ActiveMaze.Checkpoints.pop(0)
-                    PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S)
+                    ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
+                    PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
 
                 # Calculate control signal using the PID controller.
                 PID_Output = PID_Controller1.update(ActiveMaze.Ball.S, FrameTimeStep)
@@ -154,8 +143,20 @@ def full_system():
             # Convert control signal into actual Theta (based on measurements).
             Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display.
 
+        # Generate strings for output values to be displayed.
+        DisplayValues = {
+        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+        1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+        2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
+        3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
+        4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # D.
+        5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
+        6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
+        7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
+        }
+
+        ''' PYGAME GRAPHICS START '''
         if GraphicsOn == True:
-            ''' PYGAME GRAPHICS START '''
             # Update Sprite Ball position.
             if ActiveMaze.Ball.Active == True:
                 SpriteBall_.update(ActiveMaze.Ball.S)
@@ -168,31 +169,19 @@ def full_system():
                     ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
                 ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
 
-            GraphicsTime = time.perf_counter()
-            # Generate strings for output values to be displayed.
-            OutputValues = {
-            0 : "{0:.1f}".format(GraphicsTime - StartTime), # Time elapsed.
-            1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
-            2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
-            3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
-            4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # D.
-            5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
-            6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
-            7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
-            }
             # Update text sprites with new values.
-            Values = ActiveSprites.get_sprites_from_layer(2) # List of value text sprites.
-            for Key in OutputValues:
-                Values[Key].update(OutputValues[Key])
+            SpriteOutputValues = ActiveSprites.get_sprites_from_layer(2) # List of value text sprites.
+            for Key in DisplayValues:
+                SpriteOutputValues[Key].update(DisplayValues[Key])
 
             # Update button animations.
-            Buttons.update(GraphicsTime)
+            Buttons.update(time.perf_counter())
 
-            # Update changed areas.
-            Rects1 = ActiveSprites.draw(Screen, Background)
-            Rects2 = Buttons.draw(Screen, Background)
-            pygame.display.update(Rects1 + Rects2)
-            ''' PYGAME GRAPHICS END '''
+        # Update changed areas.
+        Rects1 = ActiveSprites.draw(Screen, Background)
+        Rects2 = Buttons.draw(Screen, Background)
+        pygame.display.update(Rects1 + Rects2) # Rects are empty if GraphicsOn == False.
+        ''' PYGAME GRAPHICS END '''
 
         # Enable below to print the timestep of a full loop.
         #CurrentTime = time.perf_counter()
@@ -203,5 +192,4 @@ def full_system():
     pygame.quit()
 
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+    full_system()

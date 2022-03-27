@@ -15,6 +15,7 @@ from objects import Maze
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
+from control.timing_controller import TimingController
 from motor_control.motor_control import motor_reset, motor_angle
 from settings import ControlPeriod, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
@@ -79,11 +80,10 @@ def pid_sim():
 
     # Start control program.
     Running = 1
-    # Start clock for time-steps.
-    CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
-    StartTime = CurrentTime # Record start time.
-    ControlOn = True # Turns control loop on and off.
-    ControlLastTime = CurrentTime # Last time control signal was updated.
+    # Start clock.
+    StartTime = time.perf_counter() # Record start time.
+    SimulationTime = StartTime # Initialise SimulationTime
+    TimingController_ = TimingController(StartTime) # Start timing controller.
     while Running == 1:
 
         ''' PYGAME EVENT HANDLER START '''
@@ -101,24 +101,23 @@ def pid_sim():
                             Running = 0
         ''' PYGAME EVENT HANDLER END '''
 
+        ''' MAZE SIMULATION START '''
         # Calculate simulation loop time-step.
-        LastTime = CurrentTime
-        CurrentTime = time.perf_counter()
-        TimeStep = CurrentTime - LastTime
+        LastSimulationTime = SimulationTime
+        SimulationTime = time.perf_counter()
+        TimeStep = SimulationTime - LastSimulationTime
 
         # Enable below to print the timestep of a full loop.
         #print("{:.0f}ms".format(TimeStep * 1000))
 
-        # Limit minimum time period between each control loop.
-        if CurrentTime - ControlLastTime > ControlPeriod: # Time period in settings.
-            ControlTimeStep = CurrentTime - ControlLastTime
-            ControlOn = True
-            ControlLastTime = CurrentTime
-        else:
-            ControlOn = False
-
         # Simulate next step of maze using theta and a given timestep.
         Output = ActiveMaze.next_step(TimeStep, Theta) # Time step given in s.
+        ''' MAZE SIMULATION END '''
+
+        ''' TIMING CONTROL START '''
+        # Limit minimum time period between each control/graphics loop.
+        ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
+        ''' TIMING CONTROL END '''
 
         if ControlOn == True:
             ''' PID CONTROL START '''
@@ -127,14 +126,17 @@ def pid_sim():
                 ProcessVariable = Output[1]
 
                 # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
-                while ((ActiveMaze.Checkpoints[0].S[0] - ProcessVariable[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ProcessVariable[1]) ** 2) ** 0.5 < 2 and len(ActiveMaze.Checkpoints) > 1:
-                    ActiveMaze.Checkpoints.pop(0)
-                    PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S)
+                while ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2 and len(ActiveMaze.Checkpoints) > 1:
+                    ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
+                    PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
 
                 # Calculate control signal using the PID controller.
                 PID_Output = PID_Controller1.update(ProcessVariable, ControlTimeStep)
                 Saturation = PID_Controller1.Saturation # For display.
                 ControlSignal = PID_Output[0]
+
+                # Convert control signal into actual Theta (based on measurements).
+                Theta = ControlSignal * np.array([3 / 20, 0.1])
             ''' PID CONTROL END'''
 
             ''' MOTOR CONTROL START'''
@@ -142,26 +144,9 @@ def pid_sim():
             #motor_angle(ControlSignal)
             ''' MOTOR CONTROL END '''
 
-            # Convert control signal into actual Theta (based on measurements).
-            Theta = ControlSignal * np.array([3 / 20, 0.1])
-
-        ''' PYGAME GRAPHICS START '''
-        # Update Sprite Ball position.
-        if ActiveMaze.Ball.Active == True:
-            SpriteBall_.update(ActiveMaze.Ball.S)
-        else:
-            SpriteBall_.kill()
-
-        # Check/update SpriteSetPoint.
-        while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(0)):
-            if len(ActiveSprites.get_sprites_from_layer(0)) != 1:
-                ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
-            ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
-
-        GraphicsTime = time.perf_counter()
         # Generate strings for output values to be displayed.
-        OutputValues = {
-        0 : "{0:.1f}".format(GraphicsTime - StartTime), # Time elapsed.
+        DisplayValues = {
+        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
         1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
         2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
         3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
@@ -170,22 +155,36 @@ def pid_sim():
         6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
         7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
         }
-        # Update text sprites with new values.
-        Values = ActiveSprites.get_sprites_from_layer(2) # List of value text sprites.
-        for Key in OutputValues:
-            Values[Key].update(OutputValues[Key])
 
-        # Update button animations.
-        Buttons.update(GraphicsTime)
+        ''' PYGAME GRAPHICS START '''
+        if GraphicsOn == True:
+            # Update Sprite Ball position.
+            if ActiveMaze.Ball.Active == True:
+                SpriteBall_.update(ActiveMaze.Ball.S)
+            else:
+                SpriteBall_.kill()
+
+            # Check/update SpriteSetPoint.
+            while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(0)):
+                if len(ActiveSprites.get_sprites_from_layer(0)) != 1:
+                    ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
+                ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
+
+            # Update text sprites with new values.
+            SpriteOutputValues = ActiveSprites.get_sprites_from_layer(2) # List of value text sprites.
+            for Key in DisplayValues:
+                SpriteOutputValues[Key].update(DisplayValues[Key])
+
+            # Update button animations.
+            Buttons.update(time.perf_counter())
 
         # Update changed areas.
         Rects1 = ActiveSprites.draw(Screen, Background)
         Rects2 = Buttons.draw(Screen, Background)
-        pygame.display.update(Rects1 + Rects2)
+        pygame.display.update(Rects1 + Rects2) # Rects are empty if GraphicsOn == False.
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()
 
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+    pid_sim()

@@ -9,18 +9,19 @@ import cv2
 import numpy as np
 
 # Import classes.
-from objects import Ball, Wall, Hole, Checkpoint, Maze
+from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 
 class Image_Detector():
 
-    def __init__(self, CurrentTime):
+    def __init__(self, StartTime):
 
         self.LastPosition = np.array([0, 0])
-        self.LastTime = CurrentTime
+        self.StartTime = StartTime
+        self.LastTime = StartTime
 
     def __repr__(self):
         # Makes the class printable.
-        return "Image Detector(Last Ball Position: %s, Time Taken: %s)" % (self.LastPosition, self.LastTime)
+        return "Image Detector(Last Ball Position: %s, Time Taken: %s)" % (self.LastPosition, round((self.LastTime - self.StartTime), 2))
 
     def initialise_maze(self):
         '''
@@ -38,16 +39,11 @@ class Image_Detector():
         Include redundancy for ball not found.
         '''
 
-        Ball1 = Ball(
-            np.array([0, 0]), # [mm]
-            np.array([0, 0]) # [mm/s]
-        )
-        Checkpoint1 = Checkpoint(
-            np.array([166, 143])
-        )
-        Maze1 = Maze(Ball1, [], [], [Checkpoint1])
+        '''
+        This function is currently not used.
+        '''
 
-        return Maze1
+        return SandboxMaze
 
     def update_ball(self, Cap, CurrentTime):
         '''

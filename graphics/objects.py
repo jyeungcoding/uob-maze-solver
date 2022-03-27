@@ -167,6 +167,8 @@ class SpriteHeader(pygame.sprite.DirtySprite):
         for Status in Statuses_Red:
             self.Surfaces[Status] = self.init_surface(Status, LightRed)
 
+        # Save current status.
+        self.CurrentStatus = "Ready"
         # Set correct surface as image.
         self.image = self.Surfaces["Ready"]
         # Create sprite rect object for positioning.
@@ -175,14 +177,17 @@ class SpriteHeader(pygame.sprite.DirtySprite):
         self.rect.y = 0 # Text position in pixels.
 
     def update(self, Status):
-        # Update surface.
-        self.image = self.Surfaces[Status]
-        # Create sprite rect object for positioning.
-        self.rect = self.image.get_rect()
-        self.rect.x = 0 # Text position in pixels.
-        self.rect.y = 0 # Text position in pixels.
+        # Only update if status has changed. 
+        if Status != self.CurrentStatus:
+            # Update surface.
+            self.image = self.Surfaces[Status]
+            # Create sprite rect object for positioning.
+            self.rect = self.image.get_rect()
+            self.rect.x = 0 # Text position in pixels.
+            self.rect.y = 0 # Text position in pixels.
 
-        self.dirty = 1 # Set for redraw.
+            self.dirty = 1 # Set for redraw.
+            self.CurrentStatus = Status
 
 class SpriteText(pygame.sprite.DirtySprite):
     # Sprite class for GUI variable text.
