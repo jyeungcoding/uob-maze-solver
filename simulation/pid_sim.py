@@ -12,7 +12,7 @@ from math import degrees
 
 # Import classes, functions and values.
 from objects import Maze
-from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_values
+from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
@@ -38,10 +38,11 @@ def pid_sim():
     pygame.display.set_caption("PID Simulation")
 
     # Generate background.
-    Background = pygame.Surface((800 * DisplayScale, 480 * DisplayScale)).convert()
+    Background = pygame.Surface((800 * DisplayScale, 480 * DisplayScale))
     Background.fill(White)
     BackgroundSprites = initialise_background(ActiveMaze.Holes, ActiveMaze.Walls)
     BackgroundSprites.draw(Background)
+    Background.convert()
 
     # Generate checkpoints, outputs LayeredDirty group.
     ActiveSprites = initialise_checkpoints(ActiveMaze.Checkpoints)
@@ -50,8 +51,15 @@ def pid_sim():
     SpriteBall_ = initialise_ball(ActiveMaze.Ball)
     ActiveSprites.add(SpriteBall_, layer = 1)
 
+    # Initialise header, add to ActiveSprites.
+    SpriteHeader = initialise_header()
+    ActiveSprites.add(SpriteHeader, layer = 3)
+
     # Initialise output values, add to ActiveSprites.
     ActiveSprites.add(initialise_values(), layer = 2)
+
+    # Initialise buttons.
+    Buttons = initialise_buttons()
     ''' PYGAME GRAPHICS END '''
 
     ''' INITIALISE PID CONTROL '''
@@ -83,6 +91,14 @@ def pid_sim():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Running = 0
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                X, Y = event.pos # Get position of click.
+                for Button in Buttons:
+                    if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
+                        # Check which button function to run.
+                        if Button.CurrentState == "Quit": # Quit button quits the program.
+                            Button.click(time.perf_counter()) # Animate button click.
+                            Running = 0
         ''' PYGAME EVENT HANDLER END '''
 
         # Calculate simulation loop time-step.
@@ -106,7 +122,7 @@ def pid_sim():
 
         if ControlOn == True:
             ''' PID CONTROL START '''
-            if Output[0] == True:
+            if Output[0] == True: # Check active.
                 # Set ProcessVariable as the ball's position.
                 ProcessVariable = Output[1]
 
@@ -142,9 +158,10 @@ def pid_sim():
                 ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
             ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
 
+        GraphicsTime = time.perf_counter()
         # Generate strings for output values to be displayed.
         OutputValues = {
-        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+        0 : "{0:.1f}".format(GraphicsTime - StartTime), # Time elapsed.
         1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
         2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
         3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
@@ -158,9 +175,13 @@ def pid_sim():
         for Key in OutputValues:
             Values[Key].update(OutputValues[Key])
 
+        # Update button animations.
+        Buttons.update(GraphicsTime)
+
         # Update changed areas.
-        Rects = ActiveSprites.draw(Screen, Background)
-        pygame.display.update(Rects)
+        Rects1 = ActiveSprites.draw(Screen, Background)
+        Rects2 = Buttons.draw(Screen, Background)
+        pygame.display.update(Rects1 + Rects2)
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()

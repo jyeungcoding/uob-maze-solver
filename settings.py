@@ -6,6 +6,7 @@ This file contains settings required for maze control and simulation.
 # Import modules.
 import numpy as np
 from math import pi
+import pygame
 
 ''' PHYSICAL DIMENSIONS '''
 # Board dimensions.
@@ -83,13 +84,15 @@ GUIScale = 1.5 * DisplayScale
 HeaderShift = np.array([0, 51]) * DisplayScale
 
 # Colours
-Black   = (0  , 0  , 0  )
-White   = (255, 255, 255)
-Blue    = (0  , 0  , 255)
-Grey    = (169, 169, 169)
-DimGrey = (105, 105, 105)
-Red     = (255, 0  , 0  )
-Purple  = (75 , 0  , 130)
+Black      = (0  , 0  , 0  )
+White      = (255, 255, 255)
+Blue       = (0  , 0  , 255)
+Grey       = (169, 169, 169)
+DimGrey    = (105, 105, 105)
+Red        = (255, 0  , 0  )
+Purple     = (75 , 0  , 130)
+LightGreen = (80 , 255, 80 )
+LightRed   = (255, 100 , 100 )
 
 # Checkpoint Colours
 CheckpointColours = {
@@ -97,6 +100,13 @@ CheckpointColours = {
 "Checkpoint" : Blue,
 "EndPoint" : Purple
 }
+
+# Initialise text module.
+pygame.font.init()
+# Create fonts.
+HeaderFont = pygame.font.SysFont("Times New Roman", 30) # Scaling handled internally.
+TextFont = pygame.font.SysFont("Times New Roman", round(20 * DisplayScale))
+ButtonFont = pygame.font.SysFont("Times New Roman", 22) # Scaling handled internally.
 
 if __name__ == "__main__":
     import doctest

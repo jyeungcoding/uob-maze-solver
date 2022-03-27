@@ -8,25 +8,19 @@ import pygame
 import numpy as np
 
 # Import classes and settings.
-from graphics.objects import SpriteBall, SpriteWall, SpriteHole, SpriteCheckpoint, SpriteText
-from settings import DisplayScale
-
-# Initialise text module.
-pygame.font.init()
-# Create fonts.
-Font1 = pygame.font.SysFont("Times New Roman", round(20 * DisplayScale))
+from graphics.objects import SpriteBall, SpriteWall, SpriteHole, SpriteCheckpoint, SpriteHeader, SpriteText, SpriteButton, SpriteVariableButton
 
 def initialise_keys():
     # Generate ouput text keys.
     Sprites = (
-    SpriteText("Time Elapsed [s]: ", Font1, np.array([515, 65])),
-    SpriteText("Position [mm]: ", Font1, np.array([515, 100])),
-    SpriteText("P [°]: ", Font1, np.array([515, 135])),
-    SpriteText("I [°]: ", Font1, np.array([515, 170])),
-    SpriteText("D [°]: ", Font1, np.array([515, 205])),
-    SpriteText("Saturation: ", Font1, np.array([515, 240])),
-    SpriteText("Control Signal [°]: ", Font1, np.array([515, 275])),
-    SpriteText("Theta [°]: ", Font1, np.array([515, 310]))
+    SpriteText("Time Elapsed [s]: ", np.array([515, 65])),
+    SpriteText("Position [mm]: ", np.array([515, 100])),
+    SpriteText("P [°]: ", np.array([515, 135])),
+    SpriteText("I [°]: ", np.array([515, 170])),
+    SpriteText("D [°]: ", np.array([515, 205])),
+    SpriteText("Saturation: ", np.array([515, 240])),
+    SpriteText("Control Signal [°]: ", np.array([515, 275])),
+    SpriteText("Theta [°]: ", np.array([515, 310]))
     )
     return Sprites
 
@@ -81,19 +75,33 @@ def initialise_ball(Ball):
     )
     return SpriteBall_
 
+def initialise_header():
+    # Initialise header. 
+    SpriteHeader_ = SpriteHeader()
+    return SpriteHeader_
+
 def initialise_values():
     # Initialise ouput text values.
     Sprites = (
-    SpriteText("0.0s", Font1, np.array([664, 65])),
-    SpriteText("( 0.0 , 0.0 )", Font1, np.array([644, 100])),
-    SpriteText("( 0.0 , 0.0 )", Font1, np.array([563, 135])),
-    SpriteText("( 0.0 , 0.0 )", Font1, np.array([560, 170])),
-    SpriteText("( 0.0 , 0.0 )", Font1, np.array([567, 205])),
-    SpriteText("( False , False )", Font1, np.array([610, 240])),
-    SpriteText("( 0.0 , 0.0 )", Font1, np.array([672, 275])),
-    SpriteText("( 0.0 , 0.0 )", Font1, np.array([599, 310]))
+    SpriteText("0.0s", np.array([664, 65])),
+    SpriteText("( 0.0 , 0.0 )", np.array([644, 100])),
+    SpriteText("( 0.0 , 0.0 )", np.array([563, 135])),
+    SpriteText("( 0.0 , 0.0 )", np.array([560, 170])),
+    SpriteText("( 0.0 , 0.0 )", np.array([567, 205])),
+    SpriteText("( False , False )", np.array([610, 240])),
+    SpriteText("( 0.0 , 0.0 )", np.array([672, 275])),
+    SpriteText("( 0.0 , 0.0 )", np.array([599, 310]))
     )
     return Sprites
+
+def initialise_buttons():
+    # Initialise buttons.
+    Buttons = pygame.sprite.LayeredDirty() # Create Dirty Sprite Group.
+    Buttons.add(SpriteVariableButton(np.array([515, 350]), ("Start", "Stop")), layer = 0)
+    Buttons.add(SpriteVariableButton(np.array([658, 350]), ("Maze 1", "Maze 2", "Maze 3")), layer = 0)
+    Buttons.add(SpriteButton(np.array([515, 415]), "Reset"), layer = 0)
+    Buttons.add(SpriteButton(np.array([658, 415]), "Quit"), layer = 0)
+    return Buttons
 
 if __name__ == "__main__":
     import doctest

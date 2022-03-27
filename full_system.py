@@ -13,7 +13,7 @@ from math import degrees
 
 # Import classes, functions and values.
 from objects import Maze
-from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_values
+from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from image_detection.image_detection import Image_Detector
 from control.pid_controller import PID_Controller
 from motor_control.motor_control import motor_reset, motor_angle
@@ -52,10 +52,11 @@ def full_system():
     pygame.display.set_caption("PID Simulation")
 
     # Generate background.
-    Background = pygame.Surface((800 * DisplayScale, 480 * DisplayScale)).convert()
+    Background = pygame.Surface((800 * DisplayScale, 480 * DisplayScale))
     Background.fill(White)
     BackgroundSprites = initialise_background(ActiveMaze.Holes, ActiveMaze.Walls)
     BackgroundSprites.draw(Background)
+    Background.convert()
 
     # Generate checkpoints, outputs LayeredDirty group.
     ActiveSprites = initialise_checkpoints(ActiveMaze.Checkpoints)
@@ -64,8 +65,15 @@ def full_system():
     SpriteBall_ = initialise_ball(ActiveMaze.Ball)
     ActiveSprites.add(SpriteBall_, layer = 1)
 
+    # Initialise header, add to ActiveSprites.
+    SpriteHeader = initialise_header()
+    ActiveSprites.add(SpriteHeader, layer = 3)
+
     # Initialise output values, add to ActiveSprites.
     ActiveSprites.add(initialise_values(), layer = 2)
+
+    # Initialise buttons.
+    Buttons = initialise_buttons()
     ''' PYGAME GRAPHICS END '''
 
     ''' INITIALISE PID CONTROL '''
@@ -85,6 +93,21 @@ def full_system():
     GraphicsOn = True # Turns graphics on and off.
     LastGraphics = CurrentTime # Last time graphics were updated.
     while Running == 1:
+
+        ''' PYGAME EVENT HANDLER START '''
+        # Check for events.
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                Running = 0
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                X, Y = event.pos # Get position of click.
+                for Button in Buttons:
+                    if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
+                        # Check which button function to run.
+                        if Button.CurrentState == "Quit": # Quit button quits the program.
+                            Button.click(time.perf_counter()) # Animate button click.
+                            Running = 0
+        ''' PYGAME EVENT HANDLER END '''
 
         # Limit minimum time period between each control loop.
         CurrentTime = time.perf_counter()
@@ -129,7 +152,7 @@ def full_system():
             ''' MOTOR CONTROL END '''
 
             # Convert control signal into actual Theta (based on measurements).
-            Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display. 
+            Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display.
 
         if GraphicsOn == True:
             ''' PYGAME GRAPHICS START '''
@@ -145,9 +168,10 @@ def full_system():
                     ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
                 ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
 
+            GraphicsTime = time.perf_counter()
             # Generate strings for output values to be displayed.
             OutputValues = {
-            0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+            0 : "{0:.1f}".format(GraphicsTime - StartTime), # Time elapsed.
             1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
             2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
             3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
@@ -161,17 +185,14 @@ def full_system():
             for Key in OutputValues:
                 Values[Key].update(OutputValues[Key])
 
-            # Update changed areas.
-            Rects = ActiveSprites.draw(Screen, Background)
-            pygame.display.update(Rects)
-            ''' PYGAME GRAPHICS END '''
+            # Update button animations.
+            Buttons.update(GraphicsTime)
 
-        ''' PYGAME EVENT HANDLER START '''
-        # Check for events.
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                Running = 0
-        ''' PYGAME EVENT HANDLER END '''
+            # Update changed areas.
+            Rects1 = ActiveSprites.draw(Screen, Background)
+            Rects2 = Buttons.draw(Screen, Background)
+            pygame.display.update(Rects1 + Rects2)
+            ''' PYGAME GRAPHICS END '''
 
         # Enable below to print the timestep of a full loop.
         #CurrentTime = time.perf_counter()

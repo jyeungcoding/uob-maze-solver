@@ -13,14 +13,14 @@ import cv2
 # Import classes, functions and values.
 from objects import Maze, Ball
 from image_detection.image_detection import Image_Detector
-from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_values
+from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from settings import ControlPeriod, DisplayScale, White, Black
 
 def image_detection_test():
 
     # Start clock for time-steps.
     CurrentTime = time.perf_counter() # time.perf_counter() is more accurate but takes more processing time.
-    StartTime = CurrentTime # Record start time. 
+    StartTime = CurrentTime # Record start time.
 
     # Initialise image detector.
     Cap = cv2.VideoCapture(0)
@@ -54,8 +54,15 @@ def image_detection_test():
     SpriteBall_ = initialise_ball(ActiveMaze.Ball)
     ActiveSprites.add(SpriteBall_, layer = 1)
 
+    # Initialise header, add to ActiveSprites.
+    SpriteHeader = initialise_header()
+    ActiveSprites.add(SpriteHeader, layer = 3)
+
     # Initialise output values, add to ActiveSprites.
     ActiveSprites.add(initialise_values(), layer = 2)
+
+    # Initialise buttons.
+    Buttons = initialise_buttons()
     ''' PYGAME GRAPHICS END '''
 
     # Start main code.
@@ -82,6 +89,14 @@ def image_detection_test():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Running = 0
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                X, Y = event.pos # Get position of click.
+                for Button in Buttons:
+                    if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
+                        # Check which button function to run.
+                        if Button.CurrentState == "Quit": # Quit button quits the program.
+                            Button.click(time.perf_counter()) # Animate button click.
+                            Running = 0
         ''' PYGAME EVENT HANDLER END '''
 
         ''' PYGAME GRAPHICS START '''
@@ -97,9 +112,10 @@ def image_detection_test():
                 ActiveSprites.get_sprites_from_layer(0)[1].update("SetPoint") # Change next checkpoint to set point.
             ActiveSprites.get_sprites_from_layer(0)[0].kill() # Remove previous set point.
 
+        GraphicsTime = time.perf_counter()
         # Generate strings for output values to be displayed.
         OutputValues = {
-        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+        0 : "{0:.1f}".format(GraphicsTime - StartTime), # Time elapsed.
         1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
         }
         # Update text sprites with new values.
@@ -107,9 +123,13 @@ def image_detection_test():
         for Key in OutputValues:
             Values[Key].update(OutputValues[Key])
 
+        # Update button animations.
+        Buttons.update(GraphicsTime)
+
         # Update changed areas.
-        Rects = ActiveSprites.draw(Screen, Background)
-        pygame.display.update(Rects)
+        Rects1 = ActiveSprites.draw(Screen, Background)
+        Rects2 = Buttons.draw(Screen, Background)
+        pygame.display.update(Rects1 + Rects2)
         ''' PYGAME GRAPHICS END '''
 
     pygame.quit()
