@@ -26,7 +26,7 @@ def motor_reset(): # Start the PWM
     os.system('sudo echo ' + str(int(default_OnTime)) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/duty_cycle')
     os.system('sudo echo 1 > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/enable')
 
-def motor_angle(Theta): # Enter the new angle
+def motor_angle2(Theta): # Enter the new angle
     # Theta (radians) should be a size 2 vector of floats. i.e. np.array([0.2 * pi, 0.2 * pi])
     OnTime = 100000 * (Theta * np.array([-1, 1]) * motor_steps + motor_limit[1]) # New on times, use numpy array to change motor direction.
 
@@ -34,6 +34,18 @@ def motor_angle(Theta): # Enter the new angle
     os.system('sudo echo ' + str(int(OnTime[0])) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/duty_cycle') # Set up the new on time for the new angle.
     # For pin35
     os.system('sudo echo ' + str(int(OnTime[1])) + ' > /sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/duty_cycle')
+
+def motor_angle(Theta): # Enter the new angle
+    # Theta (radians) should be a size 2 vector of floats. i.e. np.array([0.2 * pi, 0.2 * pi])
+    OnTime = 100000 * (Theta * np.array([-1, 1]) * motor_steps + motor_limit[1]) # New on times, use numpy array to change motor direction.
+
+
+    with open("/sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm0/duty_cycle", 'r+') as f:
+        f.truncate(0)
+        f.write(str(int(OnTime[0])))
+    with open("/sys/devices/platform/soc/fe20c000.pwm/pwm/pwmchip0/pwm1/duty_cycle", 'r+') as f:
+        f.truncate(0)
+        f.write(str(int(OnTime[1])))
 
 if __name__ == "__main__":
     import doctest
