@@ -40,6 +40,12 @@ class PID_Controller():
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Reset error buffer.
         self.BufferIteration = 0 # Reset buffer iteration number.
 
+    def reset(self):
+        self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Reset error buffer (with additional rows for linear regression).
+        self.BufferIteration = 0 # Reset buffer iteration number.
+        self.ErrorIntegral = np.array([0.0, 0.0]) # Reset integrator.
+        self.Saturation = np.array([False, False]) # Reset saturation check.
+
     def error_buffer(self, ErrorValue, TimeStep):
         # Shifts error buffer by one and adds new error and timestep values.
         self.ErrorBuffer[0:3] = np.roll(self.ErrorBuffer[0:3], -1, 1) # Shifts error buffer to the left.

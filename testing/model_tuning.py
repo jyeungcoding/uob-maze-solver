@@ -9,15 +9,14 @@ display graphics.
 import pygame
 import numpy as np
 import time
-from math import pi
+from math import degrees, pi
 
 # Import classes, functions and values.
 from objects import Maze
-from graphics.objects import SpriteBall, SpriteSetPoint
-from graphics.graphics import initialise_walls, initialise_holes, initialise_checkpoints
+from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from simulation.tilt_maze import tilt_maze
 from simulation.objects import SandboxMaze
-from settings import PixelScale, White, Black
+from settings import DisplayScale, White, Black
 
 def model_tuning():
 
@@ -31,35 +30,33 @@ def model_tuning():
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
     pygame.init()
+    # Initialise clock for limiting framerate during the menu screens.
+    Clock = pygame.time.Clock()
     # Initialise display surface.
-    Screen = pygame.display.set_mode((ActiveMaze.Size[0] * PixelScale, (ActiveMaze.Size[1] + 33) * PixelScale))
-    pygame.display.set_caption("Maze Simulation")
+    Screen = pygame.display.set_mode((800 * DisplayScale, 480 * DisplayScale))
+    #Screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) # Fullscreen mode: only use on pi touchscreen.
+    pygame.display.set_caption("PID Simulation")
 
-    # Initialise text module.
-    pygame.font.init()
-    # Create fonts.
-    Font1 = pygame.font.SysFont("Times New Roman", 7 * PixelScale)
+    # Generate background.
+    Background = initialise_background((800 * DisplayScale, 480 * DisplayScale))
 
-    # Generate graphic objects.
-    # Generate ball.
-    BallList = pygame.sprite.Group()
-    SpriteBall1 = SpriteBall(
-        ActiveMaze.Ball.S, # [mm], numpy vector, size 2.
-        ActiveMaze.Ball.R, # [mm], numpy vector, size 2.
-    )
-    BallList.add(SpriteBall1)
-    # Generate walls.
-    WallList = initialise_walls(ActiveMaze.Walls)
-    # Generate holes.
-    HoleList = initialise_holes(ActiveMaze.Holes)
-    # Generate checkpoints.
-    CheckpointList = initialise_checkpoints(ActiveMaze.Checkpoints)
+    # Create Dirty Sprite Group with holes, walls, checkpoints and keys.
+    ActiveSprites = initialise_dirty_group(ActiveMaze)
 
-    # Set the first SpriteCheckpoint as the SpriteSetPoint and remove it from CheckpointList so it isn't drawn twice.
-    CheckpointIter1 = iter(CheckpointList) # Sprite groups aren't indexed, so it is necessary to create an iterable.
-    CheckpointIter2 = iter(CheckpointList)
-    SpriteSetPoint1 = SpriteSetPoint(next(CheckpointIter1).S) # Set point is drawn red instead of blue.
-    next(CheckpointIter2).kill()
+    # Generate buttons, add to Buttons and ActiveSprites groups.
+    Buttons = initialise_buttons()
+    ActiveSprites.add(Buttons.sprites(), layer = 5)
+
+    # Generate header, add to ActiveSprites.
+    SpriteHeader = initialise_header()
+    ActiveSprites.add(SpriteHeader, layer = 6)
+
+    # Generate output values, add to ActiveSprites.
+    ActiveSprites.add(initialise_values(), layer = 4)
+
+    # Generate ball, add to ActiveSprites.
+    SpriteBall_ = initialise_ball(ActiveMaze.Ball)
+    ActiveSprites.add(SpriteBall_, layer = 7)
     ''' PYGAME GRAPHICS END '''
 
     # Theta (radians) should be a size 2 vector of floats.
@@ -74,6 +71,10 @@ def model_tuning():
     StartTime = CurrentTime # Record start time
     TimeStep = 0
     while Running == 1:
+        ''' PYGAME GRAPHICS START '''
+        # Update header.
+        SpriteHeader.update("Running")
+        ''' PYGAME GRAPHICS END '''
 
         Clock = CurrentTime - StartTime
         if Clock < 1:
@@ -91,40 +92,46 @@ def model_tuning():
             ActiveMaze.Checkpoints.pop(0)
             SetPoint = ActiveMaze.Checkpoints[0].S
 
-        ''' PYGAME GRAPHICS START '''
+        ''' PYGAME EVENT HANDLER START '''
         # Check for events.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Running = 0
+        ''' PYGAME EVENT HANDLER END '''
 
+        # Generate strings for output values to be displayed.
+        DisplayValues = {
+        0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+        1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+        7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
+        }
+
+        ''' PYGAME GRAPHICS START '''
         # Update Sprite Ball position.
         if ActiveMaze.Ball.Active == True:
-            SpriteBall1.rect.centerx = ActiveMaze.Ball.S[0] * PixelScale # Ball position in pixels based on center of ball.
-            SpriteBall1.rect.centery = ActiveMaze.Ball.S[1] * PixelScale # Ball position in pixels based on center of ball.
+            SpriteBall_.update(ActiveMaze.Ball.S)
         else:
-            SpriteBall1.kill()
+            SpriteBall_.kill()
 
-        # Check/update SpriteSetPoint, remove last SpriteCheckpoint if necessary.
-        while (len(ActiveMaze.Checkpoints) < len(CheckpointList) + 1) and len(ActiveMaze.Checkpoints) > 0:
-            SpriteSetPoint1 = SpriteSetPoint(next(CheckpointIter1).S)
-            next(CheckpointIter2).kill()
+        # Check/update SpriteSetPoint.
+        while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(2)):
+            if len(ActiveSprites.get_sprites_from_layer(2)) != 1:
+                ActiveSprites.get_sprites_from_layer(2)[1].update("SetPoint") # Change next checkpoint to set point.
+            ActiveSprites.get_sprites_from_layer(2)[0].kill() # Remove previous set point.
 
-        # Create surface with text describing the ball's position.
-        BallPositionTxt = Font1.render(str(ActiveMaze.Ball), False, Black)
-        # Create surface with text displaying theta in degrees.
-        ThetaTxt = Font1.render("Theta: %s" % (np.round(Theta * 360 / (2 * pi), 1)), False, Black)
+        # Update text sprites with new values.
+        SpriteOutputValues = ActiveSprites.get_sprites_from_layer(4) # List of value text sprites.
+        CheckKey = len(SpriteOutputValues)
+        for Key in DisplayValues:
+            if Key < CheckKey: # Check if index exists.
+                SpriteOutputValues[Key].update(DisplayValues[Key])
 
-        # Update graphics. Could optimise.
-        Screen.fill(White)
-        WallList.draw(Screen) # Draw walls.
-        HoleList.draw(Screen) # Draw holes.
-        CheckpointList.draw(Screen) # Draw checkpoints.
-        Screen.blit(SpriteSetPoint1.image, SpriteSetPoint1.rect) # Draw set point.
-        BallList.draw(Screen) # Draw ball.
-        # Blit text to screen.
-        Screen.blit(BallPositionTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 6) * PixelScale))
-        Screen.blit(ThetaTxt, (7 * PixelScale, (ActiveMaze.Size[1] + 17) * PixelScale))
-        pygame.display.flip() # Update display.
+        # Update button animations.
+        Buttons.update(time.perf_counter())
+
+        # Update changed areas.
+        Rects = ActiveSprites.draw(Screen, Background)
+        pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
         ''' PYGAME GRAPHICS END '''
 
         # Calculate time elapsed in simulation loop.
