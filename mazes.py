@@ -6,10 +6,13 @@ This file stores the Maze objects for Maze 1,2 and 3.
 # Import modules.
 import numpy as np
 
+from objects import Maze
+
 # Delete this line when you're done:
 from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
 
 # Please replace these with the actual mazes.
+
 Maze1 = SandboxMaze
 Maze2 = SimpleMaze
 Maze3 = CircleMaze

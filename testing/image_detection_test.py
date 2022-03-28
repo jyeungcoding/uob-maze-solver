@@ -19,7 +19,7 @@ from image_detection.image_detection import Image_Detector
 from control.timing_controller import TimingController
 from control.timer import PerformanceTimer
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
-from settings import DisplayScale, White
+from settings import MaxFrequency, DisplayScale, White
 
 def image_detection_test():
 
@@ -164,6 +164,7 @@ def image_detection_test():
                                     Button.click(time.perf_counter()) # Animate button click.
                                     Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
                                     ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                    change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning = 0
@@ -196,8 +197,6 @@ def image_detection_test():
                     # Update Sprite Ball position.
                     if ActiveMaze.Ball.Active == True:
                         SpriteBall_.update(ActiveMaze.Ball.S)
-                    else:
-                        SpriteBall_.kill()
 
                     # Check/update SpriteSetPoint.
                     while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(2)):
@@ -215,9 +214,13 @@ def image_detection_test():
                     # Update button animations.
                     Buttons.update(time.perf_counter())
 
+                if ActiveMaze.Ball.Active == False:
+                    SpriteBall_.kill()
+
                 # Update changed areas.
                 Rects = ActiveSprites.draw(Screen, Background)
                 pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
+                Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
                 # Enable below to print the timestep of a full loop.
@@ -253,6 +256,7 @@ def image_detection_test():
                                     elif Button.CurrentState == "Reset":
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                        change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
@@ -296,6 +300,7 @@ def image_detection_test():
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
                     pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
+                    Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                     ''' PYGAME GRAPHICS END '''
 
                 ''' ------ PAUSED SCREEN END ------ '''
@@ -326,6 +331,7 @@ def image_detection_test():
                                         Button.click(time.perf_counter()) # Animate button click.
                                         Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                        change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0

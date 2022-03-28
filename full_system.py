@@ -21,7 +21,7 @@ from control.pid_controller import PID_Controller
 from control.timing_controller import TimingController
 from control.timer import PerformanceTimer
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
 def full_system():
 
@@ -174,6 +174,7 @@ def full_system():
                                     Button.click(time.perf_counter()) # Animate button click.
                                     Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
                                     ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                    change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning, Completed = 0, 0
@@ -240,8 +241,6 @@ def full_system():
                     # Update Sprite Ball position.
                     if ActiveMaze.Ball.Active == True:
                         SpriteBall_.update(ActiveMaze.Ball.S)
-                    else:
-                        SpriteBall_.kill()
 
                     # Check/update SpriteSetPoint.
                     while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(2)):
@@ -259,9 +258,13 @@ def full_system():
                     # Update button animations.
                     Buttons.update(time.perf_counter())
 
+                if ActiveMaze.Ball.Active == False:
+                    SpriteBall_.kill()
+
                 # Update changed areas.
                 Rects = ActiveSprites.draw(Screen, Background)
                 pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
+                Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
                 # Enable below to print the timestep of a full loop.
@@ -296,6 +299,7 @@ def full_system():
                                     elif Button.CurrentState == "Reset":
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                        change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning, Paused, Completed = 0, 0, 0
@@ -337,6 +341,7 @@ def full_system():
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
                     pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
+                    Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                     ''' PYGAME GRAPHICS END '''
 
                 ''' ------ PAUSED SCREEN END ------ '''
@@ -365,6 +370,7 @@ def full_system():
                                         Button.click(time.perf_counter()) # Animate button click.
                                         Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                        change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning, BallLost, Completed = 0, 0, 0

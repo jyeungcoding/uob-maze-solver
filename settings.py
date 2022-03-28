@@ -28,6 +28,10 @@ ControlPeriod = 0.2 # [s] (Set to zero.)
 
 # Minimum time period of each graphics loop.
 GraphicsPeriod = 0.05 # [s]
+
+# Maximum frequency of whole loop.
+MaxFrequency = 50 # [Hz]
+
 """
 # PID Coefficients
 Kp = 30e-5
@@ -58,6 +62,11 @@ MinSignal = np.array([pi/360, pi/360])
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 4, pi / 4])
 
+# Tolerance distance for calibration.
+CalibrationTolerance = 3 # [mm]
+
+# Time before calibrated.
+CalibrationTime = 4 # s
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.

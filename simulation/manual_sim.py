@@ -19,7 +19,7 @@ from graphics.graphics import initialise_background, initialise_dirty_group, ini
 from simulation.tilt_maze import tilt_maze
 from control.timing_controller import TimingController
 from control.timer import PerformanceTimer
-from settings import DisplayScale, White, Black
+from settings import MaxFrequency, DisplayScale, White, Black
 
 def manual_sim():
 
@@ -160,6 +160,7 @@ def manual_sim():
                                     Button.click(time.perf_counter()) # Animate button click.
                                     Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
                                     ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                    change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning = 0
@@ -204,8 +205,6 @@ def manual_sim():
                     # Update Sprite Ball position.
                     if ActiveMaze.Ball.Active == True:
                         SpriteBall_.update(ActiveMaze.Ball.S)
-                    else:
-                        SpriteBall_.kill()
 
                     # Check/update SpriteSetPoint.
                     while len(ActiveMaze.Checkpoints) < len(ActiveSprites.get_sprites_from_layer(2)):
@@ -223,9 +222,13 @@ def manual_sim():
                     # Update button animations.
                     Buttons.update(time.perf_counter())
 
+                if ActiveMaze.Ball.Active == False:
+                    SpriteBall_.kill()
+
                 # Update changed areas.
                 Rects = ActiveSprites.draw(Screen, Background)
                 pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
+                Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
                 # Enable below to print the timestep of a full loop.
@@ -261,6 +264,7 @@ def manual_sim():
                                     elif Button.CurrentState == "Reset":
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                        change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
@@ -310,6 +314,7 @@ def manual_sim():
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
                     pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
+                    Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                     ''' PYGAME GRAPHICS END '''
 
                 ''' ------ PAUSED SCREEN END ------ '''
@@ -340,6 +345,7 @@ def manual_sim():
                                         Button.click(time.perf_counter()) # Animate button click.
                                         Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
+                                        change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning = 0
