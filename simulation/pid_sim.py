@@ -291,7 +291,7 @@ def pid_sim():
                                     # Check which button function to run.
                                     if Button.CurrentState == "Start":
                                         Button.click(time.perf_counter()) # Animate button click.
-                                        PID_Controller_.reset() # Reset PID controller. 
+                                        PID_Controller_.reset() # Reset PID controller.
                                         Paused = 0
                                     elif Button.CurrentState == "Reset":
                                         Button.click(time.perf_counter()) # Animate button click.
