@@ -68,7 +68,7 @@ def full_system():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 ProgramOn = 0
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 X, Y = event.pos # Get position of click.
                 for Button in Buttons:
                     if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
@@ -162,7 +162,7 @@ def full_system():
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         ProgramOn, SystemRunning = 0, 0
-                    if event.type == pygame.MOUSEBUTTONDOWN:
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
                         X, Y = event.pos # Get position of click.
                         for Button in Buttons:
                             if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
@@ -284,7 +284,7 @@ def full_system():
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             ProgramOn, SystemRunning, Paused = 0, 0, 0
-                        if event.type == pygame.MOUSEBUTTONDOWN:
+                        elif event.type == pygame.MOUSEBUTTONDOWN:
                             X, Y = event.pos # Get position of click.
                             for Button in Buttons:
                                 if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
@@ -356,7 +356,7 @@ def full_system():
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             ProgramOn, SystemRunning, BallLost = 0, 0, 0
-                        if event.type == pygame.MOUSEBUTTONDOWN:
+                        elif event.type == pygame.MOUSEBUTTONDOWN:
                             X, Y = event.pos # Get position of click.
                             for Button in Buttons:
                                 if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
