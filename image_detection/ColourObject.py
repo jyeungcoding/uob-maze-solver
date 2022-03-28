@@ -6,7 +6,7 @@ cap = cv2.VideoCapture(0)
 
 while True:
     _, frame1 = cap.read()
-    frame = frame1[20:480, 30: 570]
+    frame = frame1[6:480, 62: 606]
     Gauss_frame = cv2.GaussianBlur(frame, (5, 5), 0)
     hsv_frame = cv2.cvtColor(Gauss_frame, cv2.COLOR_BGR2HSV)
     """
