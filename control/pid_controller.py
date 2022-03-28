@@ -26,6 +26,7 @@ class PID_Controller():
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Initialise error buffer (with additional rows for linear regression).
         self.BufferIteration = 0 # Record buffer iteration number.
         self.ErrorIntegral = np.array([0.0, 0.0]) # Initialise integrator.
+        self.ControlSignalCalibrated = np.array([0,0]) # Theta for zero tilt. Change after calibration.
         self.Saturation = np.array([False, False]) # Initialise saturation check.
         self.SaturationLimit = SaturationLimit # Control signal maximum angle limit.
         self.MinSignal = MinSignal # Control signal minimum angle limit.
@@ -39,6 +40,10 @@ class PID_Controller():
         self.ErrorIntegral = np.array([0.0, 0.0]) # Reset error integral.
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Reset error buffer.
         self.BufferIteration = 0 # Reset buffer iteration number.
+
+    def calibrate(self, ControlSignalCalibrated):
+        # Theta for zero tilt. Change after calibration.
+        self.ControlSignalCalibrated = ControlSignalCalibrated
 
     def reset(self):
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Reset error buffer (with additional rows for linear regression).
@@ -140,6 +145,7 @@ class PID_Controller():
         ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
         ThetaSignal = self.min_signal(ThetaSignal) # Apply minimum signal if necessary.
         ControlSignal = self.gearing(ThetaSignal) # Convert theta to motor angle.
+        ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
 
         return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm

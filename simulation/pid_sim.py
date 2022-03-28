@@ -128,6 +128,12 @@ def pid_sim():
             PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
             ''' INITIALISE PID CONTROL '''
 
+            ''' INITIALISE CALIBRATOR '''
+            Calibrator_ = Calibrator() # Initialise SimulationTime
+            ControlSignal = np.array([0, 0]) # Start at 0.
+            ControlSignalCalibrated = np.array([0, 0]) # Record theta for 'true' level after calibration.
+            ''' INITIALISE CALIBRATOR '''
+
             ''' INITIALISE MOTOR CONTROL '''
             #motor_reset()
             ''' INITIALISE MOTOR CONTROL '''
@@ -141,17 +147,19 @@ def pid_sim():
             # Start clock.
             StartTime = time.perf_counter() # Record start time.
             SimulationTime = StartTime # Initialise SimulationTime
-            Calibrator_ = Calibrator() # Initialise SimulationTime
             TimingController_ = TimingController(StartTime) # Start timing controller.
             PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
             while SystemRunning == 1:
 
                 ''' PYGAME GRAPHICS START '''
                 # Update header.
-                if Completed == 0:
-                    SpriteHeader.update("Running")
+                if CalibrationDone == 0:
+                    SpriteHeader.update("Calibrating")
                 else:
-                    SpriteHeader.update("Completed")
+                    if Completed == 0:
+                        SpriteHeader.update("Running")
+                    else:
+                        SpriteHeader.update("Completed")
                 ''' PYGAME GRAPHICS END '''
 
                 ''' PYGAME EVENT HANDLER START '''
@@ -174,7 +182,7 @@ def pid_sim():
                                     change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
-                                    SystemRunning, Completed = 0, 0
+                                    SystemRunning, Completed, CalibrationDone = 0, 0, 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
                                     Button.click(time.perf_counter()) # Animate button click.
                                     ProgramOn, SystemRunning = 0, 0
@@ -205,7 +213,12 @@ def pid_sim():
                         ProcessVariable = Output[1]
 
                         if CalibrationDone == 0:
-                            CalibrationDone = Calibrator_.update(ProcessVariable, Theta, time.perf_counter())[0]
+                            ''' CALIBRATION START '''
+                            # Calibrate to record level theta.
+                            CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, time.perf_counter())
+                            if CalibrationDone == True:
+                                PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
+                            ''' CALIBRATION START '''
                         else:
                             # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
                             if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
@@ -307,7 +320,7 @@ def pid_sim():
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
-                                        SystemRunning, Paused, Completed = 0, 0, 0
+                                        SystemRunning, Paused, Completed, CalibrationDone = 0, 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, Paused = 0, 0, 0
@@ -392,7 +405,7 @@ def pid_sim():
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
-                                        SystemRunning, BallLost, Completed = 0, 0, 0
+                                        SystemRunning, BallLost, Completed, CalibrationDone = 0, 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, BallLost = 0, 0, 0
