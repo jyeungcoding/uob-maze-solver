@@ -294,6 +294,11 @@ def manual_sim():
                     ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
                     ''' TIMING CONTROL END '''
 
+                    DisplayValues = {
+                    0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                    1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+                    }
+
                     ''' PYGAME GRAPHICS START '''
                     if GraphicsOn == True:
                         # Update Sprite Ball position.
@@ -307,6 +312,13 @@ def manual_sim():
                             if len(ActiveSprites.get_sprites_from_layer(2)) != 1:
                                 ActiveSprites.get_sprites_from_layer(2)[1].update("SetPoint") # Change next checkpoint to set point.
                             ActiveSprites.get_sprites_from_layer(2)[0].kill() # Remove previous set point.
+
+                        # Update text sprites with new values.
+                        SpriteOutputValues = ActiveSprites.get_sprites_from_layer(4) # List of value text sprites.
+                        CheckKey = len(SpriteOutputValues)
+                        for Key in DisplayValues:
+                            if Key < CheckKey: # Check if index exists.
+                                SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
                     Buttons.update(time.perf_counter())

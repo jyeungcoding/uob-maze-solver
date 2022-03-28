@@ -230,7 +230,7 @@ def full_system():
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                 2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
                 3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
-                4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # D.
+                4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[3][0]), degrees(PID_Output[3][1])), # D.
                 5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
                 6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
                 7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
@@ -321,6 +321,11 @@ def full_system():
                     ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
                     ''' TIMING CONTROL END '''
 
+                    DisplayValues = {
+                    0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                    1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+                    }
+
                     ''' PYGAME GRAPHICS START '''
                     if GraphicsOn == True:
                         # Update Sprite Ball position.
@@ -334,6 +339,13 @@ def full_system():
                             if len(ActiveSprites.get_sprites_from_layer(2)) != 1:
                                 ActiveSprites.get_sprites_from_layer(2)[1].update("SetPoint") # Change next checkpoint to set point.
                             ActiveSprites.get_sprites_from_layer(2)[0].kill() # Remove previous set point.
+
+                        # Update text sprites with new values.
+                        SpriteOutputValues = ActiveSprites.get_sprites_from_layer(4) # List of value text sprites.
+                        CheckKey = len(SpriteOutputValues)
+                        for Key in DisplayValues:
+                            if Key < CheckKey: # Check if index exists.
+                                SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
                     Buttons.update(time.perf_counter())

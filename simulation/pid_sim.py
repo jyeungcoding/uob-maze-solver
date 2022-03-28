@@ -204,13 +204,16 @@ def pid_sim():
                         # Set ProcessVariable as the ball's position.
                         ProcessVariable = Output[1]
 
-                        # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
-                        if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
-                            if len(ActiveMaze.Checkpoints) > 1:
-                                ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
-                                PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
-                            elif len(ActiveMaze.Checkpoints) == 1:
-                                Completed = 1
+                        if CalibrationDone == 0:
+                            CalibrationDone = Calibrator_.update(ProcessVariable, Theta, time.perf_counter())[0]
+                        else:
+                            # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
+                            if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
+                                if len(ActiveMaze.Checkpoints) > 1:
+                                    ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
+                                    PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
+                                elif len(ActiveMaze.Checkpoints) == 1:
+                                    Completed = 1
 
                         # Calculate control signal using the PID controller.
                         PID_Output = PID_Controller_.update(ProcessVariable, ControlTimeStep)
@@ -232,7 +235,7 @@ def pid_sim():
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                 2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
                 3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
-                4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # D.
+                4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[3][0]), degrees(PID_Output[3][1])), # D.
                 5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
                 6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
                 7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
@@ -325,6 +328,11 @@ def pid_sim():
                     ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
                     ''' TIMING CONTROL END '''
 
+                    DisplayValues = {
+                    0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                    1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
+                    }
+
                     ''' PYGAME GRAPHICS START '''
                     if GraphicsOn == True:
                         # Update Sprite Ball position.
@@ -338,6 +346,13 @@ def pid_sim():
                             if len(ActiveSprites.get_sprites_from_layer(2)) != 1:
                                 ActiveSprites.get_sprites_from_layer(2)[1].update("SetPoint") # Change next checkpoint to set point.
                             ActiveSprites.get_sprites_from_layer(2)[0].kill() # Remove previous set point.
+
+                        # Update text sprites with new values.
+                        SpriteOutputValues = ActiveSprites.get_sprites_from_layer(4) # List of value text sprites.
+                        CheckKey = len(SpriteOutputValues)
+                        for Key in DisplayValues:
+                            if Key < CheckKey: # Check if index exists.
+                                SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
                     Buttons.update(time.perf_counter())
