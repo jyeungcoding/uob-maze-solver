@@ -1,0 +1,55 @@
+Metadata-Version: 2.1
+Name: rpi-hardware-pwm
+Version: 0.1.4
+Summary: Control Hardware PWM on the Raspberry Pi
+Home-page: https://github.com/Pioreactor/rpi_hardware_pwm
+Author: Cam Davidson-Pilon
+Author-email: cam@pioreactor.com
+License: OSI Approved :: GNU General Public License v3 (GPLv3)
+Keywords: raspberry pi,pwm,hardware
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Topic :: System :: Hardware
+Requires-Python: >=3.5
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# rpi hardware pwm
+![CI status](https://github.com/pioreactor/rpi_hardware_pwm/actions/workflows/ci.yaml/badge.svg)
+[![PyPI version](https://badge.fury.io/py/rpi-hardware-pwm.svg)](https://badge.fury.io/py/rpi-hardware-pwm)
+
+Access the hardware PWM of a Raspberry Pi with Python. More lightweight than alternatives.
+
+### Installation
+
+1. On the Raspberry Pi, add `dtoverlay=pwm-2chan` to `/boot/config.txt`. This defaults to `GPIO_18` as the pin for `PWM0` and `GPIO_19` as the pin for `PWM1`.
+    - Alternatively, you can change `GPIO_18` to `GPIO_12` and `GPIO_19` to `GPIO_13` using `dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4`.
+2. **Reboot your Raspberry Pi**.
+    - You can check everything is working on running `lsmod | grep pwm` and looking for `pwm_bcm2835`
+3. Install this library: `sudo pip3 install rpi-hardware-pwm`
+
+
+
+### Examples
+
+```python
+from rpi_hardware_pwm import HardwarePWM
+
+pwm = HardwarePWM(pwm_channel=0, hz=60)
+pwm.start(100) # full duty cycle
+
+pwm.change_duty_cycle(50)
+pwm.change_frequency(25_000)
+
+pwm.stop()
+
+
+```
+
+### History
+
+The original code is from [jdimpson/syspwm](https://github.com/jdimpson/syspwm), We've updated it to Python3 and
+made it look like the `RPi.GPIO` library's API (but more Pythonic than that.), and we use it in [Pioreactor](https://pioreactor.com) bioreactor system.
+
+
+

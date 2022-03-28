@@ -18,6 +18,7 @@ from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from image_detection.image_detection import Image_Detector
 from control.pid_controller import PID_Controller
+from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.timer import PerformanceTimer
 from motor_control.motor_control import motor_reset, motor_angle
@@ -129,6 +130,12 @@ def full_system():
             PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
             ''' INITIALISE PID CONTROL '''
 
+            ''' INITIALISE CALIBRATOR '''
+            Calibrator_ = Calibrator() # Initialise SimulationTime
+            ControlSignal = np.array([0, 0]) # Start at 0.
+            ControlSignalCalibrated = np.array([0, 0]) # Record control signal angle for 'true' level after calibration.
+            ''' INITIALISE CALIBRATOR '''
+
             ''' INITIALISE MOTOR CONTROL '''
             motor_reset()
             ''' INITIALISE MOTOR CONTROL '''
@@ -151,10 +158,13 @@ def full_system():
 
                 ''' PYGAME GRAPHICS START '''
                 # Update header.
-                if Completed == 0:
-                    SpriteHeader.update("Running")
+                if CalibrationDone == 0:
+                    SpriteHeader.update("Calibrating")
                 else:
-                    SpriteHeader.update("Completed")
+                    if Completed == 0:
+                        SpriteHeader.update("Running")
+                    else:
+                        SpriteHeader.update("Completed")
                 ''' PYGAME GRAPHICS END '''
 
                 ''' PYGAME EVENT HANDLER START '''
@@ -177,7 +187,7 @@ def full_system():
                                     change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
-                                    SystemRunning, Completed = 0, 0
+                                    SystemRunning, Completed, CalibrationDone = 0, 0, 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
                                     Button.click(time.perf_counter()) # Animate button click.
                                     ProgramOn, SystemRunning = 0, 0
@@ -202,13 +212,21 @@ def full_system():
                     LastFrameTime = CurrentTime
 
                     ''' PID CONTROL START '''
-                    # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
-                    if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
-                        if len(ActiveMaze.Checkpoints) > 1:
-                            ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
-                            PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
-                        elif len(ActiveMaze.Checkpoints) == 1:
-                            Completed = 1
+                    if CalibrationDone == 0:
+                        ''' CALIBRATION START '''
+                        # Calibrate to record level theta.
+                        CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, time.perf_counter())
+                        if CalibrationDone == True:
+                            PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
+                        ''' CALIBRATION START '''
+                    else:
+                        # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
+                        if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
+                            if len(ActiveMaze.Checkpoints) > 1:
+                                ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
+                                PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
+                            elif len(ActiveMaze.Checkpoints) == 1:
+                                Completed = 1
 
                     # Calculate control signal using the PID controller.
                     PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, FrameTimeStep)
@@ -305,7 +323,7 @@ def full_system():
                                         SystemRunning, Paused, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
-                                        ProgramOn, SystemRunning, Paused = 0, 0, 0
+                                        ProgramOn, SystemRunning, Paused, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' IMAGE DETECTION START '''
@@ -388,7 +406,7 @@ def full_system():
                                         SystemRunning, BallLost, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
-                                        ProgramOn, SystemRunning, BallLost = 0, 0, 0
+                                        ProgramOn, SystemRunning, BallLost, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' PYGAME GRAPHICS START '''

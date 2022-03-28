@@ -24,7 +24,7 @@ HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
 # Minimum time period of each control loop.
-ControlPeriod = 0.2 # [s] (Set to zero.)
+ControlPeriod = 0.1 # [s] (Set to zero.)
 
 # Minimum time period of each graphics loop.
 GraphicsPeriod = 0.05 # [s]
@@ -60,13 +60,13 @@ BufferSize = 3
 MinSignal = np.array([pi/360, pi/360])
 
 # Maximum motor angle.
-SaturationLimit = np.array([pi / 4, pi / 4])
+SaturationLimit = np.array([pi / 3, pi / 3])
 
 # Tolerance distance for calibration.
-CalibrationTolerance = 3 # [mm]
+CalibrationTolerance = 2 # [mm]
 
 # Time before calibrated.
-CalibrationTime = 4 # s
+CalibrationTime = 3 # s
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
@@ -80,7 +80,7 @@ FrameBounce = 0.06
 WallBounce = 0.01
 
 # Simulated +- error value from image detection.
-ImageNoise = 2 # [mm]
+ImageNoise = 1 # [mm]
 
 ''' GRAPHICAL SETTINGS '''
 # GUI display scaling factor. Use 1 for pi touchscreen.
