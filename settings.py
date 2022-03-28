@@ -6,6 +6,7 @@ This file contains settings required for maze control and simulation.
 # Import modules.
 import numpy as np
 from math import pi
+import pygame
 
 ''' PHYSICAL DIMENSIONS '''
 # Board dimensions.
@@ -23,11 +24,15 @@ HoleRadius = 7.37 # [mm]
 
 ''' CONTROL SETTINGS '''
 # Minimum time period of each control loop.
-ControlPeriod = 0.2 # [s]
+ControlPeriod = 0.2 # [s] (Set to zero.)
 
 # Minimum time period of each graphics loop.
-GraphicsPeriod = 0.2 # [s]
+GraphicsPeriod = 0.05 # [s]
 
+# Maximum frequency of whole loop.
+MaxFrequency = 50 # [Hz]
+
+"""
 # PID Coefficients
 Kp = 30e-5
 Ki = 0e-5
@@ -41,6 +46,27 @@ MinSignal = np.array([0, 0])
 
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 4, pi / 4])
+"""
+
+# PID Coefficients
+Kp = 4e-4
+Ki = 1e-4
+Kd = 4e-4
+
+# Number of error values to buffer for PID derivative calculation.
+BufferSize = 3
+
+# Minimum tilt angle allowed.
+MinSignal = np.array([pi/360, pi/360])
+
+# Maximum motor angle.
+SaturationLimit = np.array([pi / 4, pi / 4])
+
+# Tolerance distance for calibration.
+CalibrationTolerance = 3 # [mm]
+
+# Time before calibrated.
+CalibrationTime = 4 # s
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
@@ -57,17 +83,39 @@ WallBounce = 0.01
 ImageNoise = 2 # [mm]
 
 ''' GRAPHICAL SETTINGS '''
-# Scaling factor from mm to pixels. (Integers only please. )
-PixelScale = 3 # PyGame rounds pixels to the nearest ones digit, can cause slight graphical errors.
+# GUI display scaling factor. Use 1 for pi touchscreen.
+DisplayScale = 1
+
+# Maze to GUI scaling factor. Don't change.
+GUIScale = 1.5 * DisplayScale
+
+# Maze shift for GUI display.
+HeaderShift = np.array([0, 51]) * DisplayScale
 
 # Colours
-Black   = (0  , 0  , 0  )
-White   = (255, 255, 255)
-Blue    = (0  , 0  , 255)
-Grey    = (169, 169, 169)
-DimGrey = (105, 105, 105)
-Red     = (255, 0  , 0  )
-Purple  = (75 , 0  , 130)
+Black      = (0  , 0  , 0  )
+White      = (255, 255, 255)
+Blue       = (0  , 0  , 255)
+Grey       = (169, 169, 169)
+DimGrey    = (105, 105, 105)
+Red        = (255, 0  , 0  )
+Purple     = (75 , 0  , 130)
+LightGreen = (80 , 255, 80 )
+LightRed   = (255, 100 , 100 )
+
+# Checkpoint Colours
+CheckpointColours = {
+"SetPoint" : Red,
+"Checkpoint" : Blue,
+"EndPoint" : Purple
+}
+
+# Initialise text module.
+pygame.font.init()
+# Create fonts.
+HeaderFont = pygame.font.SysFont("Times New Roman", 30) # Scaling handled internally.
+TextFont = pygame.font.SysFont("Times New Roman", round(20 * DisplayScale))
+ButtonFont = pygame.font.SysFont("Times New Roman", 22) # Scaling handled internally.
 
 if __name__ == "__main__":
     import doctest
