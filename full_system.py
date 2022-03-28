@@ -55,12 +55,7 @@ def full_system():
     ''' PYGAME GRAPHICS END '''
 
     # Start program.
-    ProgramOn = 1 # 1 while main program is running.
-    SystemRunning = 0 # 1 while control system is running.
-    CalibrationDone = 0 # 1 when calibration is done.
-    Paused = 0 # 1 when paused.
-    BallLost = 0 # 1 when ball is lost.
-    Completed = 0 # 1 when maze is completed.
+    ProgramOn, SystemRunning, CalibrationDone, Paused, BallLost, Completed = 1, 0, 0, 0, 0, 0
     while ProgramOn == 1:
 
         ''' PYGAME GRAPHICS START '''
@@ -131,7 +126,7 @@ def full_system():
 
             ''' INITIALISE PID CONTROL '''
             # Initialise PID controller object, see control/pid_controller.py for more information.
-            PID_Controller1 = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
+            PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
             ''' INITIALISE PID CONTROL '''
 
             ''' INITIALISE MOTOR CONTROL '''
@@ -166,8 +161,7 @@ def full_system():
                 # Check for events.
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        ProgramOn = 0
-                        SystemRunning = 0
+                        ProgramOn, SystemRunning = 0, 0
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         X, Y = event.pos # Get position of click.
                         for Button in Buttons:
@@ -182,12 +176,10 @@ def full_system():
                                     ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
-                                    SystemRunning = 0
-                                    Completed = 0
+                                    SystemRunning, Completed = 0, 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
                                     Button.click(time.perf_counter()) # Animate button click.
-                                    ProgramOn = 0
-                                    SystemRunning = 0
+                                    ProgramOn, SystemRunning = 0, 0
                 ''' PYGAME EVENT HANDLER END '''
 
                 ''' IMAGE DETECTION START '''
@@ -213,13 +205,13 @@ def full_system():
                     if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
                         if len(ActiveMaze.Checkpoints) > 1:
                             ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
-                            PID_Controller1.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
+                            PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
                         elif len(ActiveMaze.Checkpoints) == 1:
                             Completed = 1
 
                     # Calculate control signal using the PID controller.
-                    PID_Output = PID_Controller1.update(ActiveMaze.Ball.S, FrameTimeStep)
-                    Saturation = PID_Controller1.Saturation # For display.
+                    PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, FrameTimeStep)
+                    Saturation = PID_Controller_.Saturation # For display.
                     ControlSignal = PID_Output[0]
                     ''' PID CONTROL END'''
                     # Make sure you deal with the cases where no control signal is generated when Active == False.
@@ -291,9 +283,7 @@ def full_system():
                     # Check for events.
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
-                            ProgramOn = 0
-                            SystemRunning = 0
-                            Paused = 0
+                            ProgramOn, SystemRunning, Paused = 0, 0, 0
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             X, Y = event.pos # Get position of click.
                             for Button in Buttons:
@@ -301,20 +291,17 @@ def full_system():
                                     # Check which button function to run.
                                     if Button.CurrentState == "Start":
                                         Button.click(time.perf_counter()) # Animate button click.
+                                        PID_Controller_.reset() # Reset PID controller.
                                         Paused = 0
                                     elif Button.CurrentState == "Reset":
                                         Button.click(time.perf_counter()) # Animate button click.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
-                                        SystemRunning = 0
-                                        Paused = 0
-                                        Completed = 0
+                                        SystemRunning, Paused, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
-                                        ProgramOn = 0
-                                        SystemRunning = 0
-                                        Paused = 0
+                                        ProgramOn, SystemRunning, Paused = 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' IMAGE DETECTION START '''
@@ -368,9 +355,7 @@ def full_system():
                     # Check for events.
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
-                            ProgramOn = 0
-                            SystemRunning = 0
-                            BallLost = 0
+                            ProgramOn, SystemRunning, BallLost = 0, 0, 0
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             X, Y = event.pos # Get position of click.
                             for Button in Buttons:
@@ -382,14 +367,10 @@ def full_system():
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
-                                        SystemRunning = 0
-                                        BallLost = 0
-                                        Completed = 0
+                                        SystemRunning, BallLost, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(time.perf_counter()) # Animate button click.
-                                        ProgramOn = 0
-                                        SystemRunning = 0
-                                        BallLost = 0
+                                        ProgramOn, SystemRunning, BallLost = 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' PYGAME GRAPHICS START '''
