@@ -9,7 +9,7 @@ from math import pi
 from time import sleep, perf_counter
 
 # Import functions.
-from motor_control.motor_control import motor_angle, motor_angle2, motor_reset
+from motor_control.motor_control import motor_angle, motor_reset
 
 def test1():
     motor_reset()
