@@ -14,7 +14,7 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warmup
 time.sleep(0.1)
 # capture frames from the camera
-frames = camera.capture_continuous(rawCapture, format="bgr", resize=(640, 480), use_video_port=True): # Creates an inerable of frames.
+frames = camera.capture_continuous(rawCapture, format="bgr", resize=(640, 480), use_video_port=True) # Creates an inerable of frames.
 while True:
 	try:
 		frame = next(frames)
