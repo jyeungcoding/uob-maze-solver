@@ -14,7 +14,7 @@ ControlRate = 20 # Frequency of control loop. [Hz]
 # Initialise the camera.
 # Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232.
 # Sets the framerate at which video-port based image captures will run.
-Camera = PiCamera(sensor_mode = 4, framerate = ControlRate) """ See if fixing the camera settings improves performance. """
+Camera = PiCamera(sensor_mode = 4, framerate = ControlRate) # See if fixing the camera settings improves performance.
 # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
 Capture = PiRGBArray(Camera, size=(640, 480)) # Size should be the same as the size of the input frames.
 sleep(0.2) # Wait for the camera to warm up.
@@ -32,14 +32,15 @@ while True:
 		#Img = Capture.array # The line above is equivalent to this since next(Frames) returns Capture filled with the current frame.
 		Capture.truncate(0) # Clear Capture so the next frame can be inserted.
 		ControlOn = True
+		cv2.imshow("Frame", Img)
 	except StopIteration:
 		ControlOn = False
 		break
 	""" IMAGE CAPTURE END """
 
 	""" IMAGE DETECTION START """
-	if ControlOn = True:
-
+	if ControlOn == True:
+		pass
 	""" IMAGE DETECTION END """
 
 	if cv2.waitKey(1) & 0xFF == ord('q'):
