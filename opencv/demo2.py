@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Note from this demo: capturing each frame using the image port creates too much of
+a delay. Use the video port and capture_continuous() instead. 
+"""
 
 from picamera.array import PiRGBArray
 from picamera import PiCamera
@@ -17,12 +21,12 @@ while True:
 	camera.capture(rawCapture, format="bgr", resize=(640, 480))
 	# grab the raw NumPy array representing the image, then initialize the timestamp
 	# and occupied/unoccupied text
-	image = frame.array
+	image = rawCapture.array
 	# show the frame
 	cv2.imshow("Frame", image)
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
-	cv2.waitKey(50)
+	key = cv2.waitKey(50) & 0xFF
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break
