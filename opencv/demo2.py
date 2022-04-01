@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Note from this demo: capturing each frame using the image port creates too much of
-a delay. Use the video port and capture_continuous() instead. 
+a delay. Use the video port and capture_continuous() instead.
 """
 
 from picamera.array import PiRGBArray
@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 
 # initialize the camera and grab a reference to the raw camera capture
-camera = PiCamera(sensor_mode=4)
+camera = PiCamera(sensor_mode=3)
 # It seems that the camera arg doesn't actually do anything, just saves a reference to the camera.
 rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warmup
