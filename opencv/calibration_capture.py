@@ -10,14 +10,14 @@ import time
 import cv2
 import numpy as np
 
-Camera = PiCamera()
+Camera = PiCamera(sensor_mode = 7)
 print(Camera.resolution)
-rawCapture = PiRGBArray(Camera, size=(1024, 768))
+rawCapture = PiRGBArray(Camera, size=(640, 480))
 time.sleep(0.2)
 
 ImageNumber = 1
 while ImageNumber < 21:
-	Camera.capture(rawCapture, format="bgr", resize=(1024, 768))
+	Camera.capture(rawCapture, format="bgr", resize=(640, 480), use_video_port = True)
 	Image = rawCapture.array
 	cv2.imshow("calibration_images/{}.jpg".format(ImageNumber), Image)
 
