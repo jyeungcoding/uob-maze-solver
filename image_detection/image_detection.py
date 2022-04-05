@@ -139,7 +139,7 @@ class ImageProcessor():
 				Position = self.LastPosition
 			else:
 				Active = False
-				Position = None
+				Position = self.LastPosition
 		return Active, Position
 
 	def update(self, CurrentTime, Image):
