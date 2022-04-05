@@ -10,7 +10,7 @@ from picamera import PiCamera
 import cv2
 import pygame
 import numpy as np
-from time import sleep perf_counter
+from time import sleep, perf_counter
 from math import degrees
 from copy import deepcopy
 

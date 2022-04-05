@@ -10,7 +10,7 @@ from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array
 from picamera import PiCamera
 import cv2
 import pygame
-from time import sleep perf_counter
+from time import sleep, perf_counter
 from copy import deepcopy
 
 # Import classes, functions and values.
