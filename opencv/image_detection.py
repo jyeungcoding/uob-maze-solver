@@ -27,7 +27,7 @@ class ImageProcessor():
 		self.DistortionCoefficients = np.int32([[0.16793948, -0.03380622, -0.00421432,  0.00209455, -1.29781314]]) # Calculated using calibration script.
 		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
 		self.KernelBlur = (7, 7) # How much to blur the image by.
-		self.KernelED = np.ones((2, 2)) # How much to erode or dialate by.
+		self.KernelED = np.ones((3, 3)) # How much to erode or dialate by.
 		self.IterationsED = 2 # How many iterations to erode or dialate by.
 		self.WaitTime = 1 # [s] Maximum time allowed while ball cannot be found.
 
@@ -80,10 +80,10 @@ class ImageProcessor():
 		ImageCorrected = cv2.warpPerspective(ImageHSV, TransformationMatrix, (self.MazeSize[0], self.MazeSize[1])) # Correct the perspective warp.
 
 		# Uncomment below to display the results.
-		#ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		#cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
-		#self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
+		self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
 		return ImageCorrected
 
@@ -110,11 +110,11 @@ class ImageProcessor():
 			Centre = None
 
 		# Uncomment below to display the results.
-		#ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		#try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
-		#except: pass
-		#self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
+		except: pass
+		self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
 		return BallFound, Centre
 
