@@ -15,7 +15,7 @@ from copy import deepcopy
 
 # Import classes, functions and values.
 from mazes import Maze1, Maze2, Maze3
-from objects import Maze
+from objects import Maze, Ball
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from control.timing_controller import TimingController
 from image_detection.image_detection import ImageProcessor
