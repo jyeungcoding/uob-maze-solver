@@ -20,11 +20,12 @@ while ImageNumber < 21:
 	Image = rawCapture.array
 	cv2.imshow("calibration/{0:s}.jpg".format(ImageNumber), Image)
 
+	key = cv2.waitKey(1) & 0xFF
 	if key == ord("c"):
 		cv2.imwrite(("calibration/{0:s}.jpg".format(ImageNumber), Image)
 		ImageNumber += 1
 
 	rawCapture.truncate(0)
-	time.wait(0.1)
 	if key == ord("q"):
 		break
+Camera.close()
