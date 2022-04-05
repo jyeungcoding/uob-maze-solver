@@ -22,7 +22,7 @@ from image_detection.image_detection import ImageProcessor
 from control.pid_controller import PID_Controller
 from control.calibrator import Calibrator
 from control.timing_controller import TimingController
-from control.timer import PerformanceTimer
+from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
 from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal, MazeSize, HSVLimitsBlue, HSVLimitsGreen
 
@@ -160,7 +160,7 @@ def full_system():
             TimeElapsed = 0
             StartTime = perf_counter() # Record start time.
             TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
+            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information.
 
             """ IMAGE PROCESSOR INITIALISATION START """
             ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor.
@@ -313,9 +313,9 @@ def full_system():
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
-                # Enable below to print the timestep of a full loop.
-                #if ControlOn == True or GraphicsOn == True:
-                    #print("{:.0f}ms".format(PerformanceTimer_.update(perf_counter()) * 1000))
+                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, perf_counter())
+                # Enable below to print the timestep of a full loop. Note that this is very CPU intensive!
+                #print(LogEntry)
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
@@ -458,6 +458,8 @@ def full_system():
     ''' QUIT PYGAME '''
     pygame.quit()
     ''' QUIT PYGAME '''
+
+    PerformanceLog_.export("log.txt")
 
 if __name__ == "__main__":
     full_system()

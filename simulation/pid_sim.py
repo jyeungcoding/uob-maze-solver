@@ -18,7 +18,7 @@ from graphics.graphics import initialise_background, initialise_dirty_group, ini
 from control.pid_controller import PID_Controller
 from control.calibrator import Calibrator
 from control.timing_controller import TimingController
-from control.timer import PerformanceTimer
+from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
 from settings import MaxFrequency, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
@@ -149,7 +149,7 @@ def pid_sim():
             StartTime = time.perf_counter() # Record start time.
             SimulationTime = StartTime # Initialise SimulationTime
             TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
+            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information.
             while SystemRunning == 1:
 
                 ''' PYGAME GRAPHICS START '''
@@ -289,8 +289,9 @@ def pid_sim():
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
-                # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(time.perf_counter()) * 1000))
+                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, perf_counter())
+                # Enable below to print the timestep of a full loop. Note that this is very CPU intensive!
+                #print(LogEntry)
 
                 ''' ------ RUNNING SCREEN END ------ '''
 

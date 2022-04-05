@@ -20,7 +20,7 @@ from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from control.timing_controller import TimingController
 from image_detection.image_detection import ImageProcessor
-from control.timer import PerformanceTimer
+from control.performance_log import PerformanceLog
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from settings import MaxFrequency, DisplayScale, White, MazeSize, HSVLimitsBlue, HSVLimitsGreen
 
@@ -147,7 +147,7 @@ def image_detection_test():
             # Start clock.
             StartTime = perf_counter() # Record start time.
             TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
+            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information. 
 
             """ IMAGE PROCESSOR INITIALISATION START """
             ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor.
@@ -256,8 +256,9 @@ def image_detection_test():
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
-                # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(perf_counter()) * 1000))
+                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, perf_counter())
+                # Enable below to print the timestep of a full loop. Note that this is very CPU intensive!
+                #print(LogEntry)
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
