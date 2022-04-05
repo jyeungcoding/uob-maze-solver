@@ -14,8 +14,8 @@ class ImageProcessor():
 
 	def __init__(self, StartTime, MazeSize, HSVLimitsBlue, HSVLimitsGreen):
 		# Initialise values.
-		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]])
-		self.LastPosition = None
+		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]]) # Points for perspective correction.
+		self.LastPosition = np.array([False, False])
 		self.StartTime = StartTime
 		self.LastTime = StartTime
 
@@ -136,7 +136,7 @@ class ImageProcessor():
 			self.LastTime = CurrentTime
 			self.LastPosition = Position
 		else:
-			if CurrentTime - self.LastTime < self.WaitTime and self.LastPosition != None:
+			if CurrentTime - self.LastTime < self.WaitTime and np.any(np.equal(self.LastPosition, np.array([False, False]))) == False:
 				Active = True
 				Position = self.LastPosition
 			else:
