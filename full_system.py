@@ -5,8 +5,10 @@ motor control, and the graphics are all implemented from modular functions.
 '''
 
 # Import modules.
-import pygame
+from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
+from picamera import PiCamera
 import cv2
+import pygame
 import numpy as np
 import time
 from math import degrees
@@ -16,13 +18,13 @@ from copy import deepcopy
 from mazes import Maze1, Maze2, Maze3
 from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
-from image_detection.image_detection import Image_Detector
+from image_detection import ImageProcessor
 from control.pid_controller import PID_Controller
 from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.timer import PerformanceTimer
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal, MazeSize, HSVLimitsBlue, HSVLimitsGreen
 
 def full_system():
 
@@ -140,19 +142,28 @@ def full_system():
             motor_reset()
             ''' INITIALISE MOTOR CONTROL '''
 
+            """ PICAMERA INITIALISATION START """
+        	# Initialise the camera.
+        	# Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
+        	Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
+        	# Camera.framerate = 20 # Can set the camera's framerate.
+        	# Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
+        	Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
+        	sleep(0.2) # Wait for the camera to warm up.
+        	# Outputs an infinite iterable that inserts the next frame into Capture as the output every time you call it.
+        	# Change frame format to BGR (for openCV) and resize it to (640, 480) for faster processing. Use video port for faster frame capture.
+        	Frames = Camera.capture_continuous(Capture, format = "bgr", resize = (640, 480), use_video_port = True)
+        	""" PICAMERA INITIALISATION END """
+
             # Start clock.
+            TimeElapsed = 0
             StartTime = time.perf_counter() # Record start time.
             TimingController_ = TimingController(StartTime) # Start timing controller.
             PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
 
-            ''' IMAGE DETECTION START '''
-            # Initialise image detector.
-            Cap = cv2.VideoCapture(0)
-            #Cap.set(cv2.CAP_PROP_FPS, 10)
-            ImageDetector = Image_Detector(StartTime)
-            LastFrameTime = StartTime # Temp.
-            LastTime = StartTime # Temp.
-            ''' IMAGE DETECTION END '''
+            """ IMAGE PROCESSOR INITIALISATION START """
+        	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
+        	""" IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
 
@@ -193,23 +204,17 @@ def full_system():
                                     ProgramOn, SystemRunning = 0, 0
                 ''' PYGAME EVENT HANDLER END '''
 
-                ''' IMAGE DETECTION START '''
-                # Capture and update position of ball.
-                ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, time.perf_counter())
-                if ActiveMaze.Ball.Active == False:
-                    BallLost = 1 # If ball is lost.
-                ''' IMAGE DETECTION END '''
-
                 ''' TIMING CONTROL START '''
                 # Limit minimum time period between each control/graphics loop.
                 ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
                 ''' TIMING CONTROL END '''
 
                 if ControlOn == True:
-                    # Calculate time since last frame.
-                    CurrentTime = time.perf_counter()
-                    FrameTimeStep = CurrentTime - LastFrameTime
-                    LastFrameTime = CurrentTime
+                    ''' IMAGE DETECTION START '''
+                    ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
+                    if ActiveMaze.Ball.Active == False:
+                        BallLost = 1 # If ball is lost.
+                    ''' IMAGE DETECTION END '''
 
                     ''' PID CONTROL START '''
                     if CalibrationDone == 0:
@@ -229,7 +234,7 @@ def full_system():
                                 Completed = 1
 
                     # Calculate control signal using the PID controller.
-                    PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, FrameTimeStep)
+                    PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, ControlTimeStep)
                     Saturation = PID_Controller_.Saturation # For display.
                     ControlSignal = PID_Output[0]
                     ''' PID CONTROL END'''
@@ -242,9 +247,12 @@ def full_system():
                     # Convert control signal into actual Theta (based on measurements).
                     Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display.
 
+                if Completed == 0:
+                    TimeElapsed = time.perf_counter() - StartTime
+
                 # Generate strings for output values to be displayed.
                 DisplayValues = {
-                0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                 2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
                 3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.

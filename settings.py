@@ -25,7 +25,10 @@ HoleRadius = 7.37 # [mm]
 ''' IMAGE DETECTION SETTINGS '''
 
 # Upper and lower HSV limits for the blue ball.
-HSVLimitsBlue = np.array([[110, 137, 52], [120, 224, 118]])
+HSVLimitsBlue = np.array([[91, 78, 4], [130, 176, 63]])
+
+# Upper and lower HSV limits for the green frame.
+HSVLimitsGreen = np.array([[29, 12, 15], [81, 171, 105]])
 
 ''' CONTROL SETTINGS '''
 # Minimum time period of each control loop.

@@ -6,20 +6,22 @@ screen using the pygame module.
 '''
 
 # Import modules.
+from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
+from picamera import PiCamera
+import cv2
 import pygame
 import time
-import cv2
 from copy import deepcopy
 
 # Import classes, functions and values.
 from mazes import Maze1, Maze2, Maze3
 from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
-from image_detection.image_detection import Image_Detector
 from control.timing_controller import TimingController
+from image_detection import ImageProcessor
 from control.timer import PerformanceTimer
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
-from settings import MaxFrequency, DisplayScale, White
+from settings import MaxFrequency, DisplayScale, White, MazeSize, HSVLimitsBlue, HSVLimitsGreen
 
 def image_detection_test():
 
@@ -127,17 +129,27 @@ def image_detection_test():
             ActiveSprites.add(SpriteBall_, layer = 7)
             ''' PYGAME GRAPHICS END '''
 
+            """ PICAMERA INITIALISATION START """
+        	# Initialise the camera.
+        	# Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
+        	Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
+        	# Camera.framerate = 20 # Can set the camera's framerate.
+        	# Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
+        	Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
+        	sleep(0.2) # Wait for the camera to warm up.
+        	# Outputs an infinite iterable that inserts the next frame into Capture as the output every time you call it.
+        	# Change frame format to BGR (for openCV) and resize it to (640, 480) for faster processing. Use video port for faster frame capture.
+        	Frames = Camera.capture_continuous(Capture, format = "bgr", resize = (640, 480), use_video_port = True)
+        	""" PICAMERA INITIALISATION END """
+
             # Start clock.
             StartTime = time.perf_counter() # Record start time.
             TimingController_ = TimingController(StartTime) # Start timing controller.
             PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
 
-            ''' IMAGE DETECTION START '''
-            # Initialise image detector.
-            Cap = cv2.VideoCapture(0)
-            #Cap.set(cv2.CAP_PROP_FPS, 10)
-            ImageDetector = Image_Detector(StartTime)
-            ''' IMAGE DETECTION END '''
+        	""" IMAGE PROCESSOR INITIALISATION START """
+        	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
+        	""" IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
 
@@ -174,17 +186,23 @@ def image_detection_test():
                                     SystemRunning = 0
                 ''' PYGAME EVENT HANDLER END '''
 
-                ''' IMAGE DETECTION START '''
-                # Update ball position.
-                ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, time.perf_counter())
-                if ActiveMaze.Ball.Active == False:
-                    BallLost = 1 # If ball is lost.
-                ''' IMAGE DETECTION END '''
-
                 ''' TIMING CONTROL START '''
                 # Limit minimum time period between each control/graphics loop.
                 ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
                 ''' TIMING CONTROL END '''
+
+                """ IMAGE CAPTURE START """
+                if ControlOn = True:
+            		Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+            		Frame = next(Frames) # If there is a new frame, grab it.
+            		Image = Frame.array # Store the array from the frame object.
+        		""" IMAGE CAPTURE END """
+
+                ''' IMAGE DETECTION START '''
+                ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
+                if ActiveMaze.Ball.Active == False:
+                    BallLost = 1 # If ball is lost.
+                ''' IMAGE DETECTION END '''
 
                 # Generate strings for output values to be displayed.
                 DisplayValues = {

@@ -145,6 +145,7 @@ def pid_sim():
             PID_Output = [np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0])]
 
             # Start clock.
+            TimeElapsed = 0
             StartTime = time.perf_counter() # Record start time.
             SimulationTime = StartTime # Initialise SimulationTime
             TimingController_ = TimingController(StartTime) # Start timing controller.
@@ -242,9 +243,12 @@ def pid_sim():
                     #motor_angle(ControlSignal)
                     ''' MOTOR CONTROL END '''
 
+                if Completed == 0:
+                    TimeElapsed = time.perf_counter() - StartTime
+
                 # Generate strings for output values to be displayed.
                 DisplayValues = {
-                0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                 2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
                 3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
