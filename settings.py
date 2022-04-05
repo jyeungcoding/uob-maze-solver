@@ -11,7 +11,7 @@ import pygame
 ''' PHYSICAL DIMENSIONS '''
 # Board dimensions.
 FrameSize = np.array([332, 286]) # [mm]
-MazeSize = np.array([274.5, 229.5]) # [mm]
+MazeSize = np.array([275, 230]) # [mm]
 FrameHorizontal = (FrameSize[1] - MazeSize[1]) / 2 # [mm]
 FrameVertical = (FrameSize[0] - MazeSize[0]) / 2 # [mm]
 
@@ -21,6 +21,11 @@ BallMass = 0.009 # [kg]
 
 # Hole dimensions.
 HoleRadius = 7.37 # [mm]
+
+''' IMAGE DETECTION SETTINGS '''
+
+# Upper and lower HSV limits for the blue ball.
+HSVLimitsBlue = np.array([[110, 137, 52], [120, 224, 118]])
 
 ''' CONTROL SETTINGS '''
 # Minimum time period of each control loop.
