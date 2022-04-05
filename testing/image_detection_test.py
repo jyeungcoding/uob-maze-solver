@@ -191,12 +191,12 @@ def image_detection_test():
                 ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
                 ''' TIMING CONTROL END '''
 
-                if ControlOn = True:
-                """ IMAGE CAPTURE START """
-                Capture.truncate(0) # Clear Capture so the next frame can be inserted.
-                Frame = next(Frames) # If there is a new frame, grab it.
-                Image = Frame.array # Store the array from the frame object.
-                """ IMAGE CAPTURE END """
+                if ControlOn == True:
+                    """ IMAGE CAPTURE START """
+                    Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                    Frame = next(Frames) # If there is a new frame, grab it.
+                    Image = Frame.array # Store the array from the frame object.
+                    """ IMAGE CAPTURE END """
 
                 ''' IMAGE DETECTION START '''
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
