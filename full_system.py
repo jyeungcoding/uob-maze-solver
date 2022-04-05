@@ -459,7 +459,7 @@ def full_system():
     pygame.quit()
     ''' QUIT PYGAME '''
 
-    PerformanceLog_.export("log.txt")
+    PerformanceLog_.export("log.txt") # Export performance log. 
 
 if __name__ == "__main__":
     full_system()

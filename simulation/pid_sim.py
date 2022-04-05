@@ -430,5 +430,7 @@ def pid_sim():
 
     pygame.quit()
 
+    PerformanceLog_.export("log.txt") # Export performance log. 
+
 if __name__ == "__main__":
     pid_sim()

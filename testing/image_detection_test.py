@@ -147,7 +147,7 @@ def image_detection_test():
             # Start clock.
             StartTime = perf_counter() # Record start time.
             TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information. 
+            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information.
 
             """ IMAGE PROCESSOR INITIALISATION START """
             ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor.
@@ -415,6 +415,8 @@ def image_detection_test():
     ''' QUIT PYGAME '''
     pygame.quit()
     ''' QUIT PYGAME '''
+
+    PerformanceLog_.export("log.txt") # Export performance log. 
 
 if __name__ == "__main__":
     image_detection_test()
