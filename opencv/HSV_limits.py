@@ -40,7 +40,7 @@ Root.geometry("700x160")
 Root.title("HSV Limit Calibration")
 
 # Load image.
-Path = "4.png" # Change this to the filename required.
+Path = "111.jpg" # Change this to the filename required.
 Image = cv2.imread(Path) # Load image.
 ImageHSV = cv2.cvtColor(Image, cv2.COLOR_BGR2HSV) # Convert image to HSV format.
 

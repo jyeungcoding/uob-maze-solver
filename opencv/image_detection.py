@@ -23,8 +23,8 @@ class ImageProcessor():
 		self.MazeSize = MazeSize # Load the maze's size.
 		self.HSVLimitsBlue = HSVLimitsBlue # Upper and lower HSV limits for the blue ball.
 		self.HSVLimitsGreen = HSVLimitsGreen # Upper and lower HSV limits for the green frame.
-		self.CameraMatrix = np.int32([[1.29409337e3, 0, 2.93592049e2], [0, 1.29120556e3, 2.77680928e2], [0, 0, 1]]) # Calculated using calibration script.
-		self.DistortionCoefficients = np.int32([[1.48790119e-1, 1.24457987, -3.57051905e-3, -1.45828342e-2, -1.18925649e+1]]) # Calculated using calibration script.
+		self.CameraMatrix = np.int32([[500.58972602, 0, 322.3603059], [0, 500.2860463, 255.41210124], [0, 0, 1]]) # Calculated using calibration script.
+		self.DistortionCoefficients = np.int32([[0.16793948, -0.03380622, -0.00421432,  0.00209455, -1.29781314]]) # Calculated using calibration script.
 		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
 		self.KernelBlur = (7, 7) # How much to blur the image by.
 		self.KernelED = np.ones((2, 2)) # How much to erode or dialate by.
@@ -125,8 +125,8 @@ class ImageProcessor():
 		Img3 = np.vstack((Img1, Img2)) # Stack all images together. Convert to BGR if necessary.
 
 		cv2.imshow(WindowName, Img3) # Draw all results.
-		cv2.waitKey(0) # Wait until key is pressed.
-		cv2.destroyWindow(WindowName)
+		#cv2.waitKey(0) # Wait until key is pressed.
+		#cv2.destroyWindow(WindowName)
 
 	def position_buffer(self, CurrentTime, BallFound, Centre):
 		# Outputs the last position of the ball for a short time if there is one, and if the ball cannot be found.
@@ -136,7 +136,7 @@ class ImageProcessor():
 			self.LastTime = CurrentTime
 			self.LastPosition = Position
 		else:
-			if CurrentTime - self.LastTime < self.WaitTime and Position != None:
+			if CurrentTime - self.LastTime < self.WaitTime and self.LastPosition != None:
 				Active = True
 				Position = self.LastPosition
 			else:
@@ -154,9 +154,9 @@ class ImageProcessor():
 		the maze, opposite to a traditional coordinate system.
 		'''
 
-		ImageUndistorted = cv2.undistort(Image, self.CameraMatrix, self.DistortionCoefficients, None) # Correct for lens distortion.
+		#ImageUndistorted = cv2.undistort(Image, self.CameraMatrix, self.DistortionCoefficients, None) # Correct for lens distortion.
 
-		ImageBlurred = cv2.GaussianBlur(ImageUndistorted, self.KernelBlur, 0) # Blur image to remove high frequency noise.
+		ImageBlurred = cv2.GaussianBlur(Image, self.KernelBlur, 0) # Blur image to remove high frequency noise.
 		ImageHSV = cv2.cvtColor(ImageBlurred, cv2.COLOR_BGR2HSV) # Convert image to HSV format.
 
 		ImageCorrected = self.correct_perspective(ImageHSV) # Correct the maze's tilt perspective.
@@ -168,13 +168,13 @@ class ImageProcessor():
 def main():
 	# For testing on a signle image.
 	MazeSize = np.array([275, 230]) # [mm]
-	HSVLimitsBlue = np.array([[110, 137, 52], [120, 224, 118]])
-	HSVLimitsGreen = np.array([[44, 33, 111], [71, 152, 189]])
+	HSVLimitsBlue = np.array([[80, 131, 38], [110, 231, 96]])
+	HSVLimitsGreen = np.array([[42, 83, 50], [62, 199, 157]])
 	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
-	LastTime = perf_counter()
-	ImageProcessor_.update(perf_counter(), cv2.imread("5.png"))
-	TimeStep = perf_counter() - LastTime
-	print("TimeStep: " + str(TimeStep * 1000))
+	#LastTime = perf_counter()
+	ImageProcessor_.update(perf_counter(), cv2.imread("111.jpg"))
+	#TimeStep = perf_counter() - LastTime
+	#print("TimeStep: " + str(TimeStep * 1000))
 
 if __name__ == "__main__":
 	main()

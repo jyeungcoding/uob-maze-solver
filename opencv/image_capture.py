@@ -22,7 +22,7 @@ def main():
 	""" PICAMERA INITIALISATION START """
 	# Initialise the camera.
 	# Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
-	Camera = PiCamera(sensor_mode = 7) # See if fixing the camera settings improves performance.
+	Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
 	# Camera.framerate = 20 # Can set the camera's framerate.
 	# Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
 	Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
@@ -34,8 +34,8 @@ def main():
 
 	""" IMAGE PROCESSOR INITIALISATION START """
 	MazeSize = np.array([275, 230]) # [mm]
-	HSVLimitsBlue = np.array([[110, 137, 52], [120, 224, 118]])
-	HSVLimitsGreen = np.array([[44, 33, 111], [71, 152, 189]])
+	HSVLimitsBlue = np.array([[80, 131, 38], [110, 231, 96]])
+	HSVLimitsGreen = np.array([[42, 83, 50], [62, 199, 157]])
 	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
 	""" IMAGE PROCESSOR INITIALISATION END """
 	while True:
