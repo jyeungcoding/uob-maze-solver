@@ -77,7 +77,7 @@ def full_system():
                     if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                         # Check which button function to run.
                         if Button.CurrentState == "Start":
-                            Button.click(time.perf_counter()) # Animate button click.
+                            Button.click(perf_counter()) # Animate button click.
                             SystemRunning = 1
                         elif Button.CurrentState == "Maze 1" or Button.CurrentState == "Maze 2" or Button.CurrentState == "Maze 3":
                             if Button.CurrentState == "Maze 1":
@@ -86,16 +86,16 @@ def full_system():
                                 CurrentMaze = Maze3
                             elif Button.CurrentState == "Maze 3":
                                 CurrentMaze = Maze1
-                            Button.click(time.perf_counter()) # Animate button click.
+                            Button.click(perf_counter()) # Animate button click.
                             change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                         elif Button.CurrentState == "Quit": # Quit button quits the program.
-                            Button.click(time.perf_counter()) # Animate button click.
+                            Button.click(perf_counter()) # Animate button click.
                             ProgramOn = 0
         ''' PYGAME EVENT HANDLER END '''
 
         ''' PYGAME GRAPHICS START '''
         # Update button animations.
-        Buttons.update(time.perf_counter())
+        Buttons.update(perf_counter())
         # Update changed areas.
         Rects = ActiveSprites.draw(Screen, Background)
         pygame.display.update(Rects)
@@ -157,7 +157,7 @@ def full_system():
 
             # Start clock.
             TimeElapsed = 0
-            StartTime = time.perf_counter() # Record start time.
+            StartTime = perf_counter() # Record start time.
             TimingController_ = TimingController(StartTime) # Start timing controller.
             PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
 
@@ -189,24 +189,24 @@ def full_system():
                             if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                                 # Check which button function to run.
                                 if Button.CurrentState == "Stop":
-                                    Button.click(time.perf_counter()) # Animate button click.
+                                    Button.click(perf_counter()) # Animate button click.
                                     Paused = 1
                                 elif Button.CurrentState == "Reset":
-                                    Button.click(time.perf_counter()) # Animate button click.
-                                    Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
+                                    Button.click(perf_counter()) # Animate button click.
+                                    Buttons.get_sprite(0).click(perf_counter()) # Change stop button to start.
                                     ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                     change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning, Completed, CalibrationDone = 0, 0, 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
-                                    Button.click(time.perf_counter()) # Animate button click.
+                                    Button.click(perf_counter()) # Animate button click.
                                     ProgramOn, SystemRunning = 0, 0
                 ''' PYGAME EVENT HANDLER END '''
 
                 ''' TIMING CONTROL START '''
                 # Limit minimum time period between each control/graphics loop.
-                ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
+                ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(perf_counter())
                 ''' TIMING CONTROL END '''
 
                 if ControlOn == True:
@@ -220,7 +220,7 @@ def full_system():
                     if CalibrationDone == 0:
                         ''' CALIBRATION START '''
                         # Calibrate to record level theta.
-                        CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, time.perf_counter())
+                        CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, perf_counter())
                         if CalibrationDone == True:
                             PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
                         ''' CALIBRATION START '''
@@ -248,7 +248,7 @@ def full_system():
                     Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display.
 
                 if Completed == 0:
-                    TimeElapsed = time.perf_counter() - StartTime
+                    TimeElapsed = perf_counter() - StartTime
 
                 # Generate strings for output values to be displayed.
                 DisplayValues = {
@@ -282,7 +282,7 @@ def full_system():
                             SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
-                    Buttons.update(time.perf_counter())
+                    Buttons.update(perf_counter())
 
                 if ActiveMaze.Ball.Active == False:
                     SpriteBall_.kill()
@@ -294,7 +294,7 @@ def full_system():
                 ''' PYGAME GRAPHICS END '''
 
                 # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(time.perf_counter()) * 1000))
+                #print("{:.0f}ms".format(PerformanceTimer_.update(perf_counter()) * 1000))
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
@@ -319,24 +319,24 @@ def full_system():
                                 if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                                     # Check which button function to run.
                                     if Button.CurrentState == "Start":
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         PID_Controller_.reset() # Reset PID controller.
                                         Paused = 0
                                     elif Button.CurrentState == "Reset":
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning, Paused, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, Paused, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' IMAGE DETECTION START '''
                     # Capture and update position of ball.
-                    ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, time.perf_counter())
+                    ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, perf_counter())
                     if ActiveMaze.Ball.Active == False:
                         BallLost = 1 # If ball is lost.
                         Paused = 0
@@ -344,11 +344,11 @@ def full_system():
 
                     ''' TIMING CONTROL START '''
                     # Limit minimum time period between each control/graphics loop.
-                    ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
+                    ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(perf_counter())
                     ''' TIMING CONTROL END '''
 
                     DisplayValues = {
-                    0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                    0 : "{0:.1f}".format(perf_counter() - StartTime), # Time elapsed.
                     1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                     }
 
@@ -374,7 +374,7 @@ def full_system():
                                 SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
-                    Buttons.update(time.perf_counter())
+                    Buttons.update(perf_counter())
 
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
@@ -405,21 +405,21 @@ def full_system():
                                 if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                                     # Check which button function to run.
                                     if Button.CurrentState == "Reset":
-                                        Button.click(time.perf_counter()) # Animate button click.
-                                        Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
+                                        Button.click(perf_counter()) # Animate button click.
+                                        Buttons.get_sprite(0).click(perf_counter()) # Change stop button to start.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning, BallLost, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, BallLost, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' PYGAME GRAPHICS START '''
                     # Update button animations.
-                    Buttons.update(time.perf_counter())
+                    Buttons.update(perf_counter())
 
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
