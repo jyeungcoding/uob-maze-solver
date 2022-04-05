@@ -10,9 +10,6 @@ import cv2
 import numpy as np
 from time import perf_counter
 
-# Import settings.
-from settings import MazeSize, HSVLimitsBlue, HSVLimitsGreen
-
 class ImageProcessor():
 
 	def __init__(self, StartTime, MazeSize, HSVLimitsBlue, HSVLimitsGreen):
@@ -166,13 +163,6 @@ class ImageProcessor():
 
 		return Active, Position
 
-def main():
-	# For testing on a signle image.
-	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
-	#LastTime = perf_counter()
-	ImageProcessor_.update(perf_counter(), cv2.imread("111.jpg"))
-	#TimeStep = perf_counter() - LastTime
-	#print("TimeStep: " + str(TimeStep * 1000))
-
 if __name__ == "__main__":
-	main()
+	import doctest
+    doctest.testmod()

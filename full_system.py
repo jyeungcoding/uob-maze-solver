@@ -123,7 +123,7 @@ def full_system():
             # Generate output values, add to ActiveSprites.
             ActiveSprites.add(initialise_values(), layer = 4)
             # Generate ball, add to ActiveSprites.
-            SpriteBall_ = initialise_ball(ActiveMaze.Ball)
+            SpriteBall_ = initialise_ball(Ball(np.array([-20, -20])))
             ActiveSprites.add(SpriteBall_, layer = 7)
             ''' PYGAME GRAPHICS END '''
 
