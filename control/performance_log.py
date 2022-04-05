@@ -22,7 +22,7 @@ class PerformanceLog():
         # Save entry to log.
         LogEntry = "ControlOn: {}, GraphicsOn: {}, TimeStep: {}ms".format(ControlOn, GraphicsOn, TimeStep * 1000)
         self.Log.append(LogEntry)
-        if len(self.Log) > 50: # If log has over 30 entries, pop the first entry.
+        if len(self.Log) > 50: # If log has over 50 entries, pop the first entry.
             self.Log.pop(0)
         return LogEntry
 
