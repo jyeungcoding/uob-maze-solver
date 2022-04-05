@@ -10,6 +10,9 @@ import cv2
 import numpy as np
 from time import perf_counter
 
+# Import settings.
+from settings import MazeSize, HSVLimitsBlue, HSVLimitsGreen
+
 class ImageProcessor():
 
 	def __init__(self, StartTime, MazeSize, HSVLimitsBlue, HSVLimitsGreen):
@@ -59,7 +62,7 @@ class ImageProcessor():
 				ContourRect = Contours[Hierarchy[0][MaxContourIndex][2]] # Use index and hierarchy to find the internal contour.
 
 			Perimeter = cv2.arcLength(ContourRect, True) # Find the perimeter of ContourRect.
-			print("Rect Perimeter: " + str(Perimeter)) # Print the perimeter.
+			#print("Rect Perimeter: " + str(Perimeter)) # Print the perimeter.
 			if Perimeter > 1500: # Sanity check: the contour has to be a minimum perimeter.
 				Corners = cv2.approxPolyDP(ContourRect, self.EpsilonMultiple * Perimeter, True) # Find the approximate corners of the contour.
 				if len(Corners) == 4:
@@ -78,10 +81,10 @@ class ImageProcessor():
 		ImageCorrected = cv2.warpPerspective(ImageHSV, TransformationMatrix, (self.MazeSize[0], self.MazeSize[1])) # Correct the perspective warp.
 
 		# Uncomment below to display the results.
-		ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
-		self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		#ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
+		#self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
 		return ImageCorrected
 
@@ -95,7 +98,7 @@ class ImageProcessor():
 
 		if len(Contours) > 0: # Check if any contours were found.
 			MaxContour = max(Contours, key = lambda Contour: cv2.contourArea(Contour)) # Select the largest contour.
-			print("Ball Area: " + str(cv2.contourArea(MaxContour))) # Print the top down area of the largest contour.
+			#print("Ball Area: " + str(cv2.contourArea(MaxContour))) # Print the top down area of the largest contour.
 			if cv2.contourArea(MaxContour) > 15: # Sanity check: the contour has to be a minimum size.
 				EnclosingCircle = cv2.minEnclosingCircle(MaxContour) # Find the minumum enclosing circle arond the largest contour. Output: ((x, y), r).
 				Centre = np.array([EnclosingCircle[0][0], EnclosingCircle[0][1]]) # Save position as the centre of the circle.
@@ -108,11 +111,11 @@ class ImageProcessor():
 			Centre = None
 
 		# Uncomment below to display the results.
-		ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
-		except: pass
-		self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		#ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
+		#except: pass
+		#self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
 		return BallFound, Centre
 
@@ -165,9 +168,6 @@ class ImageProcessor():
 
 def main():
 	# For testing on a signle image.
-	MazeSize = np.array([275, 230]) # [mm]
-	HSVLimitsBlue = np.array([[91, 78, 4], [130, 176, 63]])
-	HSVLimitsGreen = np.array([[29, 12, 15], [81, 171, 105]])
 	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
 	#LastTime = perf_counter()
 	ImageProcessor_.update(perf_counter(), cv2.imread("111.jpg"))
