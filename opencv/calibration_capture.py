@@ -23,7 +23,7 @@ while ImageNumber < 21:
 
 	key = cv2.waitKey(1) & 0xFF
 	if key == ord("c"):
-		cv2.imwrite("calibration/{}.jpg".format(ImageNumber), Image)
+		cv2.imwrite("calibration_images/{}.jpg".format(ImageNumber), Image)
 		cv2.destroyWindow("calibration_images/{}.jpg".format(ImageNumber))
 		ImageNumber += 1
 
