@@ -27,8 +27,6 @@ class ImageProcessor():
 		self.DistortionCoefficients = np.int32([[0.16793948, -0.03380622, -0.00421432,  0.00209455, -1.29781314]]) # Calculated using calibration script.
 		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
 		self.KernelBlur = (7, 7) # How much to blur the image by.
-		self.KernelED = np.ones((3, 3)) # How much to erode or dialate by.
-		self.IterationsED = 2 # How many iterations to erode or dialate by.
 		self.WaitTime = 1 # [s] Maximum time allowed while ball cannot be found.
 
 	def __repr__(self):
@@ -48,8 +46,8 @@ class ImageProcessor():
 	def correct_perspective(self, ImageHSV):
 		# Correct the maze's tilt perspective.
 		Mask = cv2.inRange(ImageHSV, self.HSVLimitsGreen[0], self.HSVLimitsGreen[1]) # Use the lower and upper HSV limits to create a mask.
-		MaskDilated = cv2.dilate(Mask, self.KernelED, iterations = self.IterationsED) # Dilate and then erode to remove any black blobs in the frame mask.
-		MaskEroded = cv2.erode(MaskDilated, self.KernelED, iterations = self.IterationsED)
+		MaskDilated = cv2.dilate(Mask, np.ones((3, 3)), iterations = 2) # Dilate and then erode to remove any black blobs in the frame mask.
+		MaskEroded = cv2.erode(MaskDilated, np.ones((3, 3)), iterations = 2)
 		Contours, Hierarchy = cv2.findContours(MaskDilated, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE) # Find all contours in the mask. Include simple hierarchy.
 
 		if len(Contours) != 0:
@@ -90,8 +88,8 @@ class ImageProcessor():
 	def ball_detection(self, ImageCorrected):
 		# Detect ball position.
 		Mask = cv2.inRange(ImageCorrected, self.HSVLimitsBlue[0], self.HSVLimitsBlue[1]) # Use the lower and upper HSV limits to create a mask.
-		MaskEroded = cv2.erode(Mask, self.KernelED, iterations = self.IterationsED) # Erode and dialate to remove any small blobs left.
-		MaskDilated = cv2.dilate(MaskEroded, self.KernelED, iterations = self.IterationsED)
+		MaskEroded = cv2.erode(Mask, np.ones((3, 3)), iterations = 1) # Erode and dialate to remove any small blobs left.
+		MaskDilated = cv2.dilate(MaskEroded, np.ones((3, 3)), iterations = 1)
 
 		Contours = cv2.findContours(MaskDilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0] # Find all external contours in the mask.
 
