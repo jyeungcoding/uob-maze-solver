@@ -210,6 +210,12 @@ def full_system():
                 ''' TIMING CONTROL END '''
 
                 if ControlOn == True:
+                    """ IMAGE CAPTURE START """
+                    Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                    Frame = next(Frames) # If there is a new frame, grab it.
+                    Image = Frame.array # Store the array from the frame object.
+                    """ IMAGE CAPTURE END """
+
                     ''' IMAGE DETECTION START '''
                     ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
                     if ActiveMaze.Ball.Active == False:
@@ -334,18 +340,19 @@ def full_system():
                                         ProgramOn, SystemRunning, Paused, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
-                    ''' IMAGE DETECTION START '''
-                    # Capture and update position of ball.
-                    ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, perf_counter())
-                    if ActiveMaze.Ball.Active == False:
-                        BallLost = 1 # If ball is lost.
-                        Paused = 0
-                    ''' IMAGE DETECTION END '''
+                    if ControlOn == True:
+                        """ IMAGE CAPTURE START """
+                        Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                        Frame = next(Frames) # If there is a new frame, grab it.
+                        Image = Frame.array # Store the array from the frame object.
+                        """ IMAGE CAPTURE END """
 
-                    ''' TIMING CONTROL START '''
-                    # Limit minimum time period between each control/graphics loop.
-                    ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(perf_counter())
-                    ''' TIMING CONTROL END '''
+                        ''' IMAGE DETECTION START '''
+                        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
+                        if ActiveMaze.Ball.Active == False:
+                            BallLost = 1 # If ball is lost.
+                            Paused = 0
+                        ''' IMAGE DETECTION END '''
 
                     DisplayValues = {
                     0 : "{0:.1f}".format(perf_counter() - StartTime), # Time elapsed.
