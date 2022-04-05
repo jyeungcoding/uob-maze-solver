@@ -19,12 +19,12 @@ ImageNumber = 1
 while ImageNumber < 21:
 	Camera.capture(rawCapture, format="bgr", resize=(1024, 768))
 	Image = rawCapture.array
-	cv2.imshow("calibration/{}.jpg".format(ImageNumber), Image)
+	cv2.imshow("calibration_images/{}.jpg".format(ImageNumber), Image)
 
 	key = cv2.waitKey(1) & 0xFF
 	if key == ord("c"):
 		cv2.imwrite("calibration/{}.jpg".format(ImageNumber), Image)
-		cv2.destroyWindow("calibration/{}.jpg".format(ImageNumber))
+		cv2.destroyWindow("calibration_images/{}.jpg".format(ImageNumber))
 		ImageNumber += 1
 
 	rawCapture.truncate(0)

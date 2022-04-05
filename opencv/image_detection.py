@@ -23,6 +23,8 @@ class ImageProcessor():
 		self.MazeSize = MazeSize # Load the maze's size.
 		self.HSVLimitsBlue = HSVLimitsBlue # Upper and lower HSV limits for the blue ball.
 		self.HSVLimitsGreen = HSVLimitsGreen # Upper and lower HSV limits for the green frame.
+		self.CameraMatrix =
+		self.DistortionCoefficients = 
 		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
 		self.KernelBlur = (7, 7) # How much to blur the image by.
 		self.KernelED = np.ones((2, 2)) # How much to erode or dialate by.
@@ -117,23 +119,24 @@ class ImageProcessor():
 		return BallFound, Centre
 
 	def display(self, WindowName, ImageResult, Mask, MaskEroded, MaskDilated):
-		# Stack all images together. Convert to BGR if necessary.
+		# Stacks images together and dispays them in one window.
 		Img1 = np.hstack((ImageResult, cv2.cvtColor(Mask, cv2.COLOR_GRAY2BGR)))
 		Img2 = np.hstack((cv2.cvtColor(MaskEroded, cv2.COLOR_GRAY2BGR), cv2.cvtColor(MaskDilated, cv2.COLOR_GRAY2BGR)))
-		Img3 = np.vstack((Img1, Img2))
+		Img3 = np.vstack((Img1, Img2)) # Stack all images together. Convert to BGR if necessary.
 
 		cv2.imshow(WindowName, Img3) # Draw all results.
 		cv2.waitKey(0) # Wait until key is pressed.
+		cv2.destroyWindow(WindowName)
 
 	def position_buffer(self, CurrentTime, BallFound, Centre):
-		# Outputs the last position of the ball for a short time if the ball cannot be found.
+		# Outputs the last position of the ball for a short time if there is one, and if the ball cannot be found.
 		if BallFound == True:
 			Active = True
 			Position = Centre
 			self.LastTime = CurrentTime
 			self.LastPosition = Position
 		else:
-			if CurrentTime - self.LastTime < self.WaitTime:
+			if CurrentTime - self.LastTime < self.WaitTime and Position != None:
 				Active = True
 				Position = self.LastPosition
 			else:
@@ -151,7 +154,9 @@ class ImageProcessor():
 		the maze, opposite to a traditional coordinate system.
 		'''
 
-		ImageBlurred = cv2.GaussianBlur(Image, self.KernelBlur, 0) # Blur image to remove high frequency noise.
+		ImageUndistorted = cv2.undistort(Image, self.CameraMatrix, self.DistortionCoefficients, None) # Correct for lens distortion.
+
+		ImageBlurred = cv2.GaussianBlur(ImageUndistorted, self.KernelBlur, 0) # Blur image to remove high frequency noise.
 		ImageHSV = cv2.cvtColor(ImageBlurred, cv2.COLOR_BGR2HSV) # Convert image to HSV format.
 
 		ImageCorrected = self.correct_perspective(ImageHSV) # Correct the maze's tilt perspective.
