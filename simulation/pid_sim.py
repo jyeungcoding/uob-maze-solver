@@ -289,7 +289,7 @@ def pid_sim():
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
-                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, perf_counter())
+                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, time.perf_counter())
                 # Enable below to print the timestep of a full loop. Note that this is very CPU intensive!
                 #print(LogEntry)
 

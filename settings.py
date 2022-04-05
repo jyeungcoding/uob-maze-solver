@@ -35,7 +35,7 @@ HSVLimitsGreen = np.array([[29, 12, 15], [81, 171, 105]])
 ControlFrequency = 15 # [Hz]
 
 # Maximum frequency of the graphics loop.
-GraphicsFrequency = 5 # [Hz]
+GraphicsFrequency = 4 # [Hz]
 
 # Maximum frequency of whole loop.
 MaxFrequency = 50 # [Hz]

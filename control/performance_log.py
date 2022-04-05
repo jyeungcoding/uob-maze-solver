@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 This file contains a class for the a performance logger that records the timesteps
-and control signals of each loop. A maximum of 30 entries are saved at a time.
+and control signals of each loop. A maximum of 50 entries are saved at a time.
 '''
 
 class PerformanceLog():
@@ -22,7 +22,7 @@ class PerformanceLog():
         # Save entry to log.
         LogEntry = "ControlOn: {}, GraphicsOn: {}, TimeStep: {}ms".format(ControlOn, GraphicsOn, TimeStep * 1000)
         self.Log.append(LogEntry)
-        if len(self.Log) > 30: # If log has over 30 entries, pop the first entry.
+        if len(self.Log) > 50: # If log has over 30 entries, pop the first entry.
             self.Log.pop(0)
         return LogEntry
 
