@@ -16,7 +16,7 @@ from copy import deepcopy
 
 # Import classes, functions and values.
 from mazes import Maze1, Maze2, Maze3
-from objects import Maze, Ball
+from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from image_detection.image_detection import ImageProcessor
 from control.pid_controller import PID_Controller
@@ -31,6 +31,7 @@ def full_system():
     ''' ------ MENU SCREEN START ------ '''
     # Set starting maze.
     CurrentMaze = Maze1
+    CurrentMaze.Ball.S = np.array([-20, -20])
 
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
@@ -123,7 +124,7 @@ def full_system():
             # Generate output values, add to ActiveSprites.
             ActiveSprites.add(initialise_values(), layer = 4)
             # Generate ball, add to ActiveSprites.
-            SpriteBall_ = initialise_ball(Ball(np.array([-20, -20])))
+            SpriteBall_ = initialise_ball(ActiveMaze.Ball)
             ActiveSprites.add(SpriteBall_, layer = 7)
             ''' PYGAME GRAPHICS END '''
 
