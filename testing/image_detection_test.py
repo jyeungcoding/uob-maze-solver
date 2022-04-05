@@ -18,7 +18,7 @@ from mazes import Maze1, Maze2, Maze3
 from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from control.timing_controller import TimingController
-from image_detection import ImageProcessor
+from image_detection.image_detection import ImageProcessor
 from control.timer import PerformanceTimer
 from graphics.graphics import initialise_background, initialise_checkpoints, initialise_ball, initialise_header, initialise_values, initialise_buttons
 from settings import MaxFrequency, DisplayScale, White, MazeSize, HSVLimitsBlue, HSVLimitsGreen

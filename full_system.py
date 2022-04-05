@@ -18,7 +18,7 @@ from copy import deepcopy
 from mazes import Maze1, Maze2, Maze3
 from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
-from image_detection import ImageProcessor
+from image_detection.image_detection import ImageProcessor
 from control.pid_controller import PID_Controller
 from control.calibrator import Calibrator
 from control.timing_controller import TimingController
