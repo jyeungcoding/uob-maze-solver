@@ -450,9 +450,10 @@ def full_system():
 
                 ''' ------ BALL LOST SCREEN END ------ '''
 
-            ''' SHUT DOWN CAMERA '''
-            Camera.close()
-            ''' SHUT DOWN CAMERA '''
+            ''' SHUT DOWN PICAMERA '''
+            Camera.close() # Shut down camera, clear GPU processes.
+            del Frames # Clear frame iterator. 
+            ''' SHUT DOWN PICAMERA '''
 
     ''' QUIT PYGAME '''
     pygame.quit()
