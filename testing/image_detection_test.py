@@ -151,6 +151,11 @@ def image_detection_test():
 
             """ IMAGE PROCESSOR INITIALISATION START """
             ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
+            ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Initialise ball position.
+            while ActiveMaze.Ball.Active == False and perf_counter() - StartTime < 3: # Try to find ball for up to 3 seconds.
+                ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
+            if ActiveMaze.Ball.Active == False:
+                BallLost = 1 # Ball is lost if not found for over 3 seconds.
             """ IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
@@ -202,7 +207,6 @@ def image_detection_test():
 
                     ''' IMAGE DETECTION START '''
                     ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
-                    print(ActiveMaze.Ball.Active, ActiveMaze.Ball.S)
                     if ActiveMaze.Ball.Active == False:
                         BallLost = 1 # If ball is lost.
                     ''' IMAGE DETECTION END '''
@@ -352,7 +356,7 @@ def image_detection_test():
 
                     ''' PYGAME GRAPHICS START '''
                     # Update header.
-                    SpriteHeader.update("Ball Lost")
+                    SpriteHeader.update("Ball Lost / Not Found")
                     ''' PYGAME GRAPHICS END '''
 
                     ''' PYGAME EVENT HANDLER START '''

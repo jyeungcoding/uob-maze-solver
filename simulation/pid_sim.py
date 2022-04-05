@@ -389,7 +389,7 @@ def pid_sim():
 
                     ''' PYGAME GRAPHICS START '''
                     # Update header.
-                    SpriteHeader.update("Ball Lost")
+                    SpriteHeader.update("Ball Lost / Not Found")
                     ''' PYGAME GRAPHICS END '''
 
                     ''' PYGAME EVENT HANDLER START '''
