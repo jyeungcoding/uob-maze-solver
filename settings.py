@@ -31,11 +31,11 @@ HSVLimitsBlue = np.array([[91, 78, 4], [130, 176, 63]])
 HSVLimitsGreen = np.array([[29, 12, 15], [81, 171, 105]])
 
 ''' CONTROL SETTINGS '''
-# Minimum time period of each control loop.
-ControlPeriod = 0.1 # [s] (Set to zero.)
+# Maximum frequency of the control loop.
+ControlFrequency = 10 # [Hz]
 
-# Minimum time period of each graphics loop.
-GraphicsPeriod = 0.05 # [s]
+# Maximum frequency of th graphics loop.
+GraphicsFrequency = 5 # [Hz]
 
 # Maximum frequency of whole loop.
 MaxFrequency = 50 # [Hz]

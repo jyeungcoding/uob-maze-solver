@@ -56,19 +56,6 @@ def image_detection_test():
     ActiveSprites.add(SpriteHeader, layer = 6)
     ''' PYGAME GRAPHICS END '''
 
-    """ PICAMERA INITIALISATION START """
-    # Initialise the camera.
-    # Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
-    Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
-    # Camera.framerate = 20 # Can set the camera's framerate.
-    # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
-    Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
-    sleep(0.2) # Wait for the camera to warm up.
-    # Outputs an infinite iterable that inserts the next frame into Capture as the output every time you call it.
-    # Change frame format to BGR (for openCV) and resize it to (640, 480) for faster processing. Use video port for faster frame capture.
-    Frames = Camera.capture_continuous(Capture, format = "bgr", resize = (640, 480), use_video_port = True)
-    """ PICAMERA INITIALISATION END """
-
     # Start program.
     ProgramOn = 1 # 1 while main program is running.
     SystemRunning = 0 # 1 while control system is running.
@@ -143,6 +130,19 @@ def image_detection_test():
             SpriteBall_ = initialise_ball(ActiveMaze.Ball)
             ActiveSprites.add(SpriteBall_, layer = 7)
             ''' PYGAME GRAPHICS END '''
+
+            """ PICAMERA INITIALISATION START """
+            # Initialise the camera.
+            # Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
+            Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
+            # Camera.framerate = 20 # Can set the camera's framerate.
+            # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
+            Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
+            sleep(0.2) # Wait for the camera to warm up.
+            # Outputs an infinite iterable that inserts the next frame into Capture as the output every time you call it.
+            # Change frame format to BGR (for openCV) and resize it to (640, 480) for faster processing. Use video port for faster frame capture.
+            Frames = Camera.capture_continuous(Capture, format = "bgr", resize = (640, 480), use_video_port = True)
+            """ PICAMERA INITIALISATION END """
 
             # Start clock.
             StartTime = perf_counter() # Record start time.
@@ -407,9 +407,9 @@ def image_detection_test():
 
                 ''' ------ BALL LOST SCREEN END ------ '''
 
-    ''' SHUT DOWN PICAMERA '''
-    Camera.close() # Shut down camera, clear GPU processes.
-    ''' SHUT DOWN PICAMERA '''
+            ''' SHUT DOWN PICAMERA '''
+            Camera.close() # Shut down camera, clear GPU processes.
+            ''' SHUT DOWN PICAMERA '''
 
     ''' QUIT PYGAME '''
     pygame.quit()
