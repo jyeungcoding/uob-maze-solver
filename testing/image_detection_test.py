@@ -150,10 +150,19 @@ def image_detection_test():
             PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
 
             """ IMAGE PROCESSOR INITIALISATION START """
-            ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
+            ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor.
+
+            Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+            Frame = next(Frames) # If there is a new frame, grab it.
+            Image = Frame.array # Store the array from the frame object.
             ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Initialise ball position.
+
             while ActiveMaze.Ball.Active == False and perf_counter() - StartTime < 3: # Try to find ball for up to 3 seconds.
+                Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                Frame = next(Frames) # If there is a new frame, grab it.
+                Image = Frame.array # Store the array from the frame object.
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
+
             if ActiveMaze.Ball.Active == False:
                 BallLost = 1 # Ball is lost if not found for over 3 seconds.
             """ IMAGE PROCESSOR INITIALISATION END """
