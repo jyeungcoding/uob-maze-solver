@@ -149,7 +149,7 @@ def full_system():
             # Camera.framerate = 20 # Can set the camera's framerate.
             # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
             Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
-            sleep(0.2) # Wait for the camera to warm up.
+            time.sleep(0.2) # Wait for the camera to warm up.
             # Outputs an infinite iterable that inserts the next frame into Capture as the output every time you call it.
             # Change frame format to BGR (for openCV) and resize it to (640, 480) for faster processing. Use video port for faster frame capture.
             Frames = Camera.capture_continuous(Capture, format = "bgr", resize = (640, 480), use_video_port = True)
