@@ -314,7 +314,8 @@ def full_system():
                 ''' PYGAME GRAPHICS END '''
 
                 # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(perf_counter()) * 1000))
+                #if ControlOn == True or GraphicsOn == True:
+                    #print("{:.0f}ms".format(PerformanceTimer_.update(perf_counter()) * 1000))
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
