@@ -34,8 +34,8 @@ def main():
 
 	""" IMAGE PROCESSOR INITIALISATION START """
 	MazeSize = np.array([275, 230]) # [mm]
-	HSVLimitsBlue = np.array([[80, 131, 38], [110, 231, 96]])
-	HSVLimitsGreen = np.array([[42, 83, 50], [62, 199, 157]])
+	HSVLimitsBlue = np.array([[97, 45, 10], [139, 157, 73]])
+	HSVLimitsGreen = np.array([[26, 33, 18], [76, 194, 87]])
 	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
 	""" IMAGE PROCESSOR INITIALISATION END """
 	while True:
