@@ -408,7 +408,13 @@ def image_detection_test():
 
                 ''' ------ BALL LOST SCREEN END ------ '''
 
+            ''' SHUT DOWN CAMERA '''
+            Camera.close()
+            ''' SHUT DOWN CAMERA '''
+
+    ''' QUIT PYGAME '''
     pygame.quit()
+    ''' QUIT PYGAME '''
 
 if __name__ == "__main__":
     image_detection_test()

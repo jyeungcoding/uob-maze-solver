@@ -163,7 +163,7 @@ def full_system():
             PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
 
             """ IMAGE PROCESSOR INITIALISATION START """
-            ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor. 
+            ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor.
 
             Capture.truncate(0) # Clear Capture so the next frame can be inserted.
             Frame = next(Frames) # If there is a new frame, grab it.
@@ -451,7 +451,13 @@ def full_system():
 
                 ''' ------ BALL LOST SCREEN END ------ '''
 
+            ''' SHUT DOWN CAMERA '''
+            Camera.close()
+            ''' SHUT DOWN CAMERA '''
+
+    ''' QUIT PYGAME '''
     pygame.quit()
+    ''' QUIT PYGAME '''
 
 if __name__ == "__main__":
     full_system()
