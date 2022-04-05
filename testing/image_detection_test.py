@@ -202,6 +202,7 @@ def image_detection_test():
 
                     ''' IMAGE DETECTION START '''
                     ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
+                    print(ActiveMaze.Ball.Active, ActiveMaze.Ball.S)
                     if ActiveMaze.Ball.Active == False:
                         BallLost = 1 # If ball is lost.
                     ''' IMAGE DETECTION END '''
