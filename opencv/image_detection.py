@@ -28,7 +28,7 @@ class ImageProcessor():
 		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
 		self.KernelBlur = (7, 7) # How much to blur the image by.
 		self.KernelED = np.ones((2, 2)) # How much to erode or dialate by.
-		self.IterationsED = 1 # How many iterations to erode or dialate by.
+		self.IterationsED = 2 # How many iterations to erode or dialate by.
 		self.WaitTime = 1 # [s] Maximum time allowed while ball cannot be found.
 
 	def __repr__(self):
@@ -48,8 +48,8 @@ class ImageProcessor():
 	def correct_perspective(self, ImageHSV):
 		# Correct the maze's tilt perspective.
 		Mask = cv2.inRange(ImageHSV, self.HSVLimitsGreen[0], self.HSVLimitsGreen[1]) # Use the lower and upper HSV limits to create a mask.
-		MaskEroded = cv2.erode(Mask, self.KernelED, iterations = self.IterationsED) # Erode and dialate to remove any small blobs left.
-		MaskDilated = cv2.dilate(MaskEroded, self.KernelED, iterations = self.IterationsED)
+		MaskDilated = cv2.dilate(Mask, self.KernelED, iterations = self.IterationsED) # Dilate and then erode to remove any black blobs in the frame mask.
+		MaskEroded = cv2.erode(MaskDilated, self.KernelED, iterations = self.IterationsED)
 		Contours, Hierarchy = cv2.findContours(MaskDilated, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE) # Find all contours in the mask. Include simple hierarchy.
 
 		if len(Contours) != 0:
@@ -80,10 +80,10 @@ class ImageProcessor():
 		ImageCorrected = cv2.warpPerspective(ImageHSV, TransformationMatrix, (self.MazeSize[0], self.MazeSize[1])) # Correct the perspective warp.
 
 		# Uncomment below to display the results.
-		ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
-		self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		#ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
+		#self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
 		return ImageCorrected
 
@@ -110,11 +110,11 @@ class ImageProcessor():
 			Centre = None
 
 		# Uncomment below to display the results.
-		ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
-		except: pass
-		self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		#ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
+		#except: pass
+		#self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
 		return BallFound, Centre
 
@@ -154,7 +154,7 @@ class ImageProcessor():
 		the maze, opposite to a traditional coordinate system.
 		'''
 
-		#ImageUndistorted = cv2.undistort(Image, self.CameraMatrix, self.DistortionCoefficients, None) # Correct for lens distortion.
+		#ImageUndistorted = cv2.undistort(Image, self.CameraMatrix, self.DistortionCoefficients, None) # Correct for lens distortion. Not used to save processing power.
 
 		ImageBlurred = cv2.GaussianBlur(Image, self.KernelBlur, 0) # Blur image to remove high frequency noise.
 		ImageHSV = cv2.cvtColor(ImageBlurred, cv2.COLOR_BGR2HSV) # Convert image to HSV format.
