@@ -47,7 +47,6 @@ ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.sh
 
 print(mtx)
 print(dist)
-exit()
 
 img = cv2.imread('calibration_images/1.jpg')
 h,  w = img.shape[:2]

@@ -23,8 +23,8 @@ class ImageProcessor():
 		self.MazeSize = MazeSize # Load the maze's size.
 		self.HSVLimitsBlue = HSVLimitsBlue # Upper and lower HSV limits for the blue ball.
 		self.HSVLimitsGreen = HSVLimitsGreen # Upper and lower HSV limits for the green frame.
-		self.CameraMatrix = np.int32([[800.63243414, 0, 519.26530628], [0, 800.12063176, 405.51177386], [0, 0, 1]]) # Calculated using calibration script.
-		self.DistortionCoefficients = np.int32([[0.17215735, -0.06920398, -0.00384496, 0.00294005, -1.10768728]]) # Calculated using calibration script.
+		self.CameraMatrix = np.int32([[1.29409337e3, 0, 2.93592049e2], [0, 1.29120556e3, 2.77680928e2], [0, 0, 1]]) # Calculated using calibration script.
+		self.DistortionCoefficients = np.int32([[1.48790119e-1, 1.24457987, -3.57051905e-3, -1.45828342e-2, -1.18925649e+1]]) # Calculated using calibration script.
 		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
 		self.KernelBlur = (7, 7) # How much to blur the image by.
 		self.KernelED = np.ones((2, 2)) # How much to erode or dialate by.
