@@ -41,18 +41,23 @@ GraphicsFrequency = 4 # [Hz]
 MaxFrequency = 50 # [Hz]
 
 # PID Coefficients
-Kp = 3e-4
+Kp = 4e-4
 Ki = 1e-4
-Kd = 4e-4
+Kd = 2e-4
+
+# PID Coefficients
+#Kp = 2e-3
+#Ki = 1e-4
+#Kd = 4e-3
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 2
+BufferSize = 3
 
 # Minimum tilt angle allowed.
-MinTheta = np.array([pi/360, pi/360])
+MinTheta = np.array([pi/180, pi/180])
 
 # Minimum tilt angle allowed when ball is stationary.
-MinThetaStationary = np.array([pi/90, pi/90])
+MinThetaStationary = np.array([pi/180, pi/180])
 
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 6, pi / 6])
