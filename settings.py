@@ -25,38 +25,25 @@ HoleRadius = 7.37 # [mm]
 ''' IMAGE DETECTION SETTINGS '''
 
 # Upper and lower HSV limits for the blue ball.
-HSVLimitsBlue = np.array([[110, 137, 52], [120, 224, 118]])
+HSVLimitsBlue = np.array([[70, 58, 0], [120, 201, 75]])
+
+# Upper and lower HSV limits for the green frame.
+HSVLimitsGreen = np.array([[22, 95, 23], [86, 248, 148]])
 
 ''' CONTROL SETTINGS '''
-# Minimum time period of each control loop.
-ControlPeriod = 0.1 # [s] (Set to zero.)
+# Maximum frequency of the control loop.
+ControlFrequency = 15 # [Hz]
 
-# Minimum time period of each graphics loop.
-GraphicsPeriod = 0.05 # [s]
+# Maximum frequency of the graphics loop.
+GraphicsFrequency = 4 # [Hz]
 
 # Maximum frequency of whole loop.
 MaxFrequency = 50 # [Hz]
 
-"""
-# PID Coefficients
-Kp = 30e-5
-Ki = 0e-5
-Kd = 28e-5
-
-# Number of error values to buffer for PID derivative calculation.
-BufferSize = 2
-
-# Minimum tilt angle allowed.
-MinSignal = np.array([0, 0])
-
-# Maximum motor angle.
-SaturationLimit = np.array([pi / 4, pi / 4])
-"""
-
 # PID Coefficients
 Kp = 4e-4
 Ki = 1e-4
-Kd = 4e-4
+Kd = 2e-4
 
 # Number of error values to buffer for PID derivative calculation.
 BufferSize = 3
@@ -65,7 +52,7 @@ BufferSize = 3
 MinSignal = np.array([pi/360, pi/360])
 
 # Maximum motor angle.
-SaturationLimit = np.array([pi / 3, pi / 3])
+SaturationLimit = np.array([pi / 4, pi / 4])
 
 # Tolerance distance for calibration.
 CalibrationTolerance = 2 # [mm]

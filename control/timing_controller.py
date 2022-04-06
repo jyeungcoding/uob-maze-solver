@@ -6,11 +6,14 @@ settings in settings.py.
 '''
 
 # Import modules.
-from settings import ControlPeriod, GraphicsPeriod
+from settings import ControlFrequency, GraphicsFrequency
 
 class TimingController():
 
     def __init__(self, Time):
+        self.ControlPeriod = 1 / ControlFrequency # Calculate period from frequency.
+        self.GraphicsPeriod = 1 / GraphicsFrequency
+
         self.ControlOn = True # Control signal for control loop.
         self.ControlTimeStep = 0 # Save next time step of control loop.
         self.LastControl = Time # Save last time ControlOn was True.
@@ -22,14 +25,14 @@ class TimingController():
         return "Timing Controller(ControlOn: %s, LastControl: %s, GraphicsOn: %s, LastGraphics: %s)" % (self.ControlOn, round(self.LastControl, 2), self.GraphicsOn, round(self.LastGraphics, 2))
 
     def update(self, Time):
-        if Time - self.LastControl > ControlPeriod:
+        if Time - self.LastControl > self.ControlPeriod:
             self.ControlOn = True
             self.ControlTimeStep = Time - self.LastControl
             self.LastControl = Time
         else:
             self.ControlOn = False
 
-        if Time - self.LastGraphics > GraphicsPeriod:
+        if Time - self.LastGraphics > self.GraphicsPeriod:
             self.GraphicsOn = True
             self.LastGraphics = Time
         else:

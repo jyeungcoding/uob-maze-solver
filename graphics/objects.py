@@ -158,7 +158,7 @@ class SpriteHeader(pygame.sprite.DirtySprite):
         super().__init__()
         # Defined statuses.
         Statuses_Green = ("Ready", "Calibrating", "Running", "Completed")
-        Statuses_Red = ("Paused", "Ball Lost")
+        Statuses_Red = ("Paused", "Ball Lost / Not Found")
 
         # Generate surfaces for each status.
         self.Surfaces = {}

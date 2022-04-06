@@ -5,10 +5,12 @@ motor control, and the graphics are all implemented from modular functions.
 '''
 
 # Import modules.
-import pygame
+from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
+from picamera import PiCamera
 import cv2
+import pygame
 import numpy as np
-import time
+from time import sleep, perf_counter
 from math import degrees
 from copy import deepcopy
 
@@ -16,19 +18,20 @@ from copy import deepcopy
 from mazes import Maze1, Maze2, Maze3
 from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
-from image_detection.image_detection import Image_Detector
+from image_detection.image_detection import ImageProcessor
 from control.pid_controller import PID_Controller
 from control.calibrator import Calibrator
 from control.timing_controller import TimingController
-from control.timer import PerformanceTimer
+from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal, MazeSize, HSVLimitsBlue, HSVLimitsGreen
 
 def full_system():
 
     ''' ------ MENU SCREEN START ------ '''
     # Set starting maze.
     CurrentMaze = Maze1
+    CurrentMaze.Ball.S = np.array([-20, -20])
 
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
@@ -75,7 +78,7 @@ def full_system():
                     if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                         # Check which button function to run.
                         if Button.CurrentState == "Start":
-                            Button.click(time.perf_counter()) # Animate button click.
+                            Button.click(perf_counter()) # Animate button click.
                             SystemRunning = 1
                         elif Button.CurrentState == "Maze 1" or Button.CurrentState == "Maze 2" or Button.CurrentState == "Maze 3":
                             if Button.CurrentState == "Maze 1":
@@ -84,16 +87,16 @@ def full_system():
                                 CurrentMaze = Maze3
                             elif Button.CurrentState == "Maze 3":
                                 CurrentMaze = Maze1
-                            Button.click(time.perf_counter()) # Animate button click.
+                            Button.click(perf_counter()) # Animate button click.
                             change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                         elif Button.CurrentState == "Quit": # Quit button quits the program.
-                            Button.click(time.perf_counter()) # Animate button click.
+                            Button.click(perf_counter()) # Animate button click.
                             ProgramOn = 0
         ''' PYGAME EVENT HANDLER END '''
 
         ''' PYGAME GRAPHICS START '''
         # Update button animations.
-        Buttons.update(time.perf_counter())
+        Buttons.update(perf_counter())
         # Update changed areas.
         Rects = ActiveSprites.draw(Screen, Background)
         pygame.display.update(Rects)
@@ -140,19 +143,41 @@ def full_system():
             motor_reset()
             ''' INITIALISE MOTOR CONTROL '''
 
-            # Start clock.
-            StartTime = time.perf_counter() # Record start time.
-            TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
+            """ PICAMERA INITIALISATION START """
+            # Initialise the camera.
+            # Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
+            Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
+            # Camera.framerate = 20 # Can set the camera's framerate.
+            # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
+            Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
+            sleep(0.2) # Wait for the camera to warm up.
+            # Outputs an infinite iterable that inserts the next frame into Capture as the output every time you call it.
+            # Change frame format to BGR (for openCV) and resize it to (640, 480) for faster processing. Use video port for faster frame capture.
+            Frames = Camera.capture_continuous(Capture, format = "bgr", resize = (640, 480), use_video_port = True)
+            """ PICAMERA INITIALISATION END """
 
-            ''' IMAGE DETECTION START '''
-            # Initialise image detector.
-            Cap = cv2.VideoCapture(0)
-            #Cap.set(cv2.CAP_PROP_FPS, 10)
-            ImageDetector = Image_Detector(StartTime)
-            LastFrameTime = StartTime # Temp.
-            LastTime = StartTime # Temp.
-            ''' IMAGE DETECTION END '''
+            # Start clock.
+            TimeElapsed = 0
+            StartTime = perf_counter() # Record start time.
+            TimingController_ = TimingController(StartTime) # Start timing controller.
+            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information.
+
+            """ IMAGE PROCESSOR INITIALISATION START """
+            ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen) # Initialise image processor.
+
+            Frame = next(Frames) # If there is a new frame, grab it.
+            Image = Frame.array # Store the array from the frame object.
+            ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Initialise ball position.
+
+            while ActiveMaze.Ball.Active == False and perf_counter() - StartTime < 3: # Try to find ball for up to 3 seconds.
+                Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                Frame = next(Frames) # If there is a new frame, grab it.
+                Image = Frame.array # Store the array from the frame object.
+                ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
+
+            if ActiveMaze.Ball.Active == False:
+                BallLost = 1 # Ball is lost if not found for over 3 seconds.
+            """ IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
 
@@ -178,44 +203,44 @@ def full_system():
                             if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                                 # Check which button function to run.
                                 if Button.CurrentState == "Stop":
-                                    Button.click(time.perf_counter()) # Animate button click.
+                                    Button.click(perf_counter()) # Animate button click.
                                     Paused = 1
                                 elif Button.CurrentState == "Reset":
-                                    Button.click(time.perf_counter()) # Animate button click.
-                                    Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
+                                    Button.click(perf_counter()) # Animate button click.
+                                    Buttons.get_sprite(0).click(perf_counter()) # Change stop button to start.
                                     ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                     change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                     ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                     SpriteBall_.kill() # Erase ball.
                                     SystemRunning, Completed, CalibrationDone = 0, 0, 0
                                 elif Button.CurrentState == "Quit": # Quit button quits the program.
-                                    Button.click(time.perf_counter()) # Animate button click.
+                                    Button.click(perf_counter()) # Animate button click.
                                     ProgramOn, SystemRunning = 0, 0
                 ''' PYGAME EVENT HANDLER END '''
 
-                ''' IMAGE DETECTION START '''
-                # Capture and update position of ball.
-                ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, time.perf_counter())
-                if ActiveMaze.Ball.Active == False:
-                    BallLost = 1 # If ball is lost.
-                ''' IMAGE DETECTION END '''
-
                 ''' TIMING CONTROL START '''
                 # Limit minimum time period between each control/graphics loop.
-                ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
+                ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(perf_counter())
                 ''' TIMING CONTROL END '''
 
                 if ControlOn == True:
-                    # Calculate time since last frame.
-                    CurrentTime = time.perf_counter()
-                    FrameTimeStep = CurrentTime - LastFrameTime
-                    LastFrameTime = CurrentTime
+                    """ IMAGE CAPTURE START """
+                    Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                    Frame = next(Frames) # If there is a new frame, grab it.
+                    Image = Frame.array # Store the array from the frame object.
+                    """ IMAGE CAPTURE END """
+
+                    ''' IMAGE DETECTION START '''
+                    ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
+                    if ActiveMaze.Ball.Active == False:
+                        BallLost = 1 # If ball is lost.
+                    ''' IMAGE DETECTION END '''
 
                     ''' PID CONTROL START '''
                     if CalibrationDone == 0:
                         ''' CALIBRATION START '''
                         # Calibrate to record level theta.
-                        CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, time.perf_counter())
+                        CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, perf_counter())
                         if CalibrationDone == True:
                             PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
                         ''' CALIBRATION START '''
@@ -229,7 +254,7 @@ def full_system():
                                 Completed = 1
 
                     # Calculate control signal using the PID controller.
-                    PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, FrameTimeStep)
+                    PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, ControlTimeStep)
                     Saturation = PID_Controller_.Saturation # For display.
                     ControlSignal = PID_Output[0]
                     ''' PID CONTROL END'''
@@ -242,9 +267,12 @@ def full_system():
                     # Convert control signal into actual Theta (based on measurements).
                     Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display.
 
+                if Completed == 0:
+                    TimeElapsed = perf_counter() - StartTime
+
                 # Generate strings for output values to be displayed.
                 DisplayValues = {
-                0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                 2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
                 3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
@@ -274,7 +302,7 @@ def full_system():
                             SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
-                    Buttons.update(time.perf_counter())
+                    Buttons.update(perf_counter())
 
                 if ActiveMaze.Ball.Active == False:
                     SpriteBall_.kill()
@@ -285,8 +313,9 @@ def full_system():
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
-                # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(time.perf_counter()) * 1000))
+                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, perf_counter())
+                # Enable below to print the timestep of a full loop. Note that this is very CPU intensive!
+                #print(LogEntry)
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
@@ -311,36 +340,37 @@ def full_system():
                                 if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                                     # Check which button function to run.
                                     if Button.CurrentState == "Start":
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         PID_Controller_.reset() # Reset PID controller.
                                         Paused = 0
                                     elif Button.CurrentState == "Reset":
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning, Paused, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, Paused, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
-                    ''' IMAGE DETECTION START '''
-                    # Capture and update position of ball.
-                    ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageDetector.update_ball(Cap, time.perf_counter())
-                    if ActiveMaze.Ball.Active == False:
-                        BallLost = 1 # If ball is lost.
-                        Paused = 0
-                    ''' IMAGE DETECTION END '''
+                    if ControlOn == True:
+                        """ IMAGE CAPTURE START """
+                        Capture.truncate(0) # Clear Capture so the next frame can be inserted.
+                        Frame = next(Frames) # If there is a new frame, grab it.
+                        Image = Frame.array # Store the array from the frame object.
+                        """ IMAGE CAPTURE END """
 
-                    ''' TIMING CONTROL START '''
-                    # Limit minimum time period between each control/graphics loop.
-                    ControlOn, ControlTimeStep, GraphicsOn = TimingController_.update(time.perf_counter())
-                    ''' TIMING CONTROL END '''
+                        ''' IMAGE DETECTION START '''
+                        ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
+                        if ActiveMaze.Ball.Active == False:
+                            BallLost = 1 # If ball is lost.
+                            Paused = 0
+                        ''' IMAGE DETECTION END '''
 
                     DisplayValues = {
-                    0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                    0 : "{0:.1f}".format(perf_counter() - StartTime), # Time elapsed.
                     1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                     }
 
@@ -366,7 +396,7 @@ def full_system():
                                 SpriteOutputValues[Key].update(DisplayValues[Key])
 
                     # Update button animations.
-                    Buttons.update(time.perf_counter())
+                    Buttons.update(perf_counter())
 
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
@@ -383,7 +413,7 @@ def full_system():
 
                     ''' PYGAME GRAPHICS START '''
                     # Update header.
-                    SpriteHeader.update("Ball Lost")
+                    SpriteHeader.update("Ball Lost / Not Found")
                     ''' PYGAME GRAPHICS END '''
 
                     ''' PYGAME EVENT HANDLER START '''
@@ -397,21 +427,21 @@ def full_system():
                                 if Button.rect.collidepoint(X, Y): # Check for collision with buttons.
                                     # Check which button function to run.
                                     if Button.CurrentState == "Reset":
-                                        Button.click(time.perf_counter()) # Animate button click.
-                                        Buttons.get_sprite(0).click(time.perf_counter()) # Change stop button to start.
+                                        Button.click(perf_counter()) # Animate button click.
+                                        Buttons.get_sprite(0).click(perf_counter()) # Change stop button to start.
                                         ActiveMaze = deepcopy(CurrentMaze) # Reset maze.
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
                                         SystemRunning, BallLost, Completed = 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
-                                        Button.click(time.perf_counter()) # Animate button click.
+                                        Button.click(perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, BallLost, CalibrationDone = 0, 0, 0, 0
                     ''' PYGAME EVENT HANDLER END '''
 
                     ''' PYGAME GRAPHICS START '''
                     # Update button animations.
-                    Buttons.update(time.perf_counter())
+                    Buttons.update(perf_counter())
 
                     # Update changed areas.
                     Rects = ActiveSprites.draw(Screen, Background)
@@ -421,7 +451,15 @@ def full_system():
 
                 ''' ------ BALL LOST SCREEN END ------ '''
 
+            ''' SHUT DOWN PICAMERA '''
+            Camera.close() # Shut down camera, clear GPU processes.
+            ''' SHUT DOWN PICAMERA '''
+
+    ''' QUIT PYGAME '''
     pygame.quit()
+    ''' QUIT PYGAME '''
+
+    PerformanceLog_.export("log.txt") # Export performance log. 
 
 if __name__ == "__main__":
     full_system()

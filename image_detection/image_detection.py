@@ -1,121 +1,168 @@
 #!/usr/bin/env python3
 '''
 This file contains a class for the image detection system, including all memory elements
-and functions needed to fetch the position of the checkpoitns and the ball.
+and functions needed to fetch the position of the checkpoints and the ball. Remember to
+disable the display functions to save processing power!
 '''
 
 # Import modules.
 import cv2
 import numpy as np
+from time import perf_counter
 
-# Import objects.
-from simulation.objects import SandboxMaze, SimpleMaze, CircleMaze
+class ImageProcessor():
 
-class Image_Detector():
+	def __init__(self, StartTime, MazeSize, HSVLimitsBlue, HSVLimitsGreen):
+		# Initialise values.
+		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]]) # Points for perspective correction.
+		self.LastPosition = np.array([False, False])
+		self.StartTime = StartTime
+		self.LastTime = StartTime
 
-    def __init__(self, StartTime):
+		# Initialise settings.
+		self.MazeSize = MazeSize # Load the maze's size.
+		self.HSVLimitsBlue = HSVLimitsBlue # Upper and lower HSV limits for the blue ball.
+		self.HSVLimitsGreen = HSVLimitsGreen # Upper and lower HSV limits for the green frame.
+		self.CameraMatrix = np.int32([[500.58972602, 0, 322.3603059], [0, 500.2860463, 255.41210124], [0, 0, 1]]) # Calculated using calibration script.
+		self.DistortionCoefficients = np.int32([[0.16793948, -0.03380622, -0.00421432,  0.00209455, -1.29781314]]) # Calculated using calibration script.
+		self.EpsilonMultiple = 0.1 # Affects how accurately contour corners are detected.
+		self.KernelBlur = (7, 7) # How much to blur the image by.
+		self.WaitTime = 1 # [s] Maximum time allowed while ball cannot be found.
 
-        self.LastPosition = np.array([0, 0])
-        self.StartTime = StartTime
-        self.LastTime = StartTime
+	def __repr__(self):
+	    # Makes the class printable.
+	    return "Image Detector(Last Ball Position: %s, Time Detected: %s)" % (self.LastPosition, round((self.LastTime - self.StartTime), 2))
 
-    def __repr__(self):
-        # Makes the class printable.
-        return "Image Detector(Last Ball Position: %s, Time Taken: %s)" % (self.LastPosition, round((self.LastTime - self.StartTime), 2))
+	def order_points(self, Points):
+		# Orders four points clockwise from the top left corner.
+		XSorted = Points[np.lexsort((Points[:,1], Points[:,0]))] # Sort the points by their x-coordinates.
+		LeftPoints = XSorted[:2] # The two leftmost points are the first two in XSorted.
+		LeftYSorted = LeftPoints[np.lexsort((LeftPoints[:,0], LeftPoints[:,1]))] # Sort these two points by their y-coordinates.
+		RightPoints = XSorted[2:] # The two rightmost points are the last two in XSorted.
+		RightYSorted = RightPoints[np.lexsort((RightPoints[:,0], RightPoints[:,1]))] # Sort these two points by their y-coordinates.
+		OrderedPoints = np.float32([LeftYSorted[0], RightYSorted[0], RightYSorted[1], LeftYSorted[1]]) # Order the points.
+		return OrderedPoints
 
-    def initialise_maze(self):
-        '''
-        This function is run once at the beginning of the program. It captures all elements in the
-        maze (ball and checkpoints) and outputs a single Maze object as defined in
-        'objects.py'. Please check 'objects.py' for the required specifications. Please remember
-        that the y axis starts at the top left corner and increases as you go down the maze,
-        opposite to a traditional coordinate system. Furthermore, the side frames of the maze are
-        included in the coordiate system so the "true" area where maze objects can exists should
-        be from (28.75, 28.25) to (303.25, 257.75). Do check this based on the frame and maze
-        sizes in the settings file though.
-        '''
+	def correct_perspective(self, ImageHSV):
+		# Correct the maze's tilt perspective.
+		Mask = cv2.inRange(ImageHSV, self.HSVLimitsGreen[0], self.HSVLimitsGreen[1]) # Use the lower and upper HSV limits to create a mask.
+		MaskDilated = cv2.dilate(Mask, np.ones((3, 3)), iterations = 2) # Dilate and then erode to remove any black blobs in the frame mask.
+		MaskEroded = cv2.erode(MaskDilated, np.ones((3, 3)), iterations = 2)
+		Contours, Hierarchy = cv2.findContours(MaskDilated, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE) # Find all contours in the mask. Include simple hierarchy.
 
-        '''
-        Include redundancy for ball not found.
-        '''
+		if len(Contours) != 0:
+			if len(Contours) == 1:
+				ContourRect = Contours[0] # If there is only one contour found.
+			else:
+				MaxContour = max(Contours, key = lambda Contour: cv2.arcLength(Contour, True)) # Select the contour with the largest perimeter. (Assume the rect is the largest contour.)
+				MaxContourIndex = Contours.index(MaxContour) # Find index of MaxContour.
+				ContourRect = Contours[Hierarchy[0][MaxContourIndex][2]] # Use index and hierarchy to find the internal contour.
 
-        '''
-        This function is currently not used.
-        '''
+			Perimeter = cv2.arcLength(ContourRect, True) # Find the perimeter of ContourRect.
+			#print("Rect Perimeter: " + str(Perimeter)) # Print the perimeter.
+			if Perimeter > 1500: # Sanity check: the contour has to be a minimum perimeter.
+				Corners = cv2.approxPolyDP(ContourRect, self.EpsilonMultiple * Perimeter, True) # Find the approximate corners of the contour.
+				if len(Corners) == 4:
+					Points = Corners[:, 0] # Set points as the four corners.
+					InitialPoints = self.order_points(Points) # Order the points clockwise from the top left corner.
+					self.LastInitialPoints = InitialPoints # Save the new points.
+				else:
+					InitialPoints = self.LastInitialPoints # If new points were not found, use the last set of points.
+			else:
+				InitialPoints = self.LastInitialPoints # If new points were not found, use the last set of points.
+		else:
+			InitialPoints = self.LastInitialPoints # If new points were not found, use the last set of points.
 
-        return SandboxMaze
+		TransformedPoints = np.float32([[0, 0], [self.MazeSize[0], 0], [self.MazeSize[0], self.MazeSize[1]], [0, self.MazeSize[1]]]) # Points to warp to.
+		TransformationMatrix = cv2.getPerspectiveTransform(InitialPoints, TransformedPoints) # Generate matrix for transformation.
+		ImageCorrected = cv2.warpPerspective(ImageHSV, TransformationMatrix, (self.MazeSize[0], self.MazeSize[1])) # Correct the perspective warp.
 
-    def update_ball(self, Cap, CurrentTime):
-        '''
-        This function is run during every processing loop to update the position of the ball in
-        our maze objects. The output should be in the format of a tuple: Active, Position.
-        Active should be a boolean value and should be set to True as long as the ball is still
-        on the maze, and False when the ball has fallen through a hole. The Position of the Ball
-        should be provided as np.array([x, y]). See objects.py for more information.
-        '''
+		# Uncomment below to display the results.
+		#ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
+		#self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
 
-        _, frame1 = Cap.read()
-        frame = frame1[6:480, 62: 606]
-        Gauss_frame = cv2.GaussianBlur(frame, (5, 5), 0)
-        hsv_frame = cv2.cvtColor(Gauss_frame, cv2.COLOR_BGR2HSV)
-        """
-        # Red color
-        low_red = np.array([161, 155, 84])
-        high_red = np.array([179, 255, 255])
-        red_mask = cv2.inRange(hsv_frame, low_red, high_red)
-        red = cv2.bitwise_and(frame, frame, mask=red_mask)
-        """
-        # Blue color
-        low_blue = np.array([94, 80, 2])
-        high_blue = np.array([126, 255, 255])
-        blue_mask = cv2.inRange(hsv_frame, low_blue, high_blue)
-        blue = cv2.bitwise_and(frame, frame, mask=blue_mask)
-        """
-        # Green color
-        low_green = np.array([25, 52, 72])
-        high_green = np.array([102, 255, 255])
-        green_mask = cv2.inRange(hsv_frame, low_green, high_green)
-        green = cv2.bitwise_and(frame, frame, mask=green_mask)
-        """
-        contours, _ = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        if len(contours) == 0:
-            #np.array([])
-            if CurrentTime - self.LastTime > 5:
-                Active = False
-                Position = np.array([0, 0])
-            else:
-                Active = True
-                Position = self.LastPosition
+		return ImageCorrected
 
-        # ((x, y), radius) = cv2.minEnclosingCircle(c)
-        #centers = np.zeros((len(contours), 2), dtype=np.int32)
-        for i, c in enumerate(contours):
-            area = cv2.contourArea(c)
-            M = cv2.moments(c)  # Moment calculation required to get centre
-            if M["m00"] != 0 and area > 100:
-                self.LastTime = CurrentTime
-                Active = True
-                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))   # Equation to get centre of contour
-                Position = np.array(((center[0] / 1.176), (center[1] / 1.012658)), dtype=np.int32)
-                self.LastPosition = Position
-            else:
-                if CurrentTime - self.LastTime > 5:
-                    Active = False
-                    Position = np.array([0, 0])
-                else:
-                    Active = True
-                    Position = self.LastPosition
-            #centers[i] = center
+	def ball_detection(self, ImageCorrected):
+		# Detect ball position.
+		Mask = cv2.inRange(ImageCorrected, self.HSVLimitsBlue[0], self.HSVLimitsBlue[1]) # Use the lower and upper HSV limits to create a mask.
+		MaskEroded = cv2.erode(Mask, np.ones((3, 3)), iterations = 1) # Erode and dialate to remove any small blobs left.
+		MaskDilated = cv2.dilate(MaskEroded, np.ones((3, 3)), iterations = 1)
 
-        cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
+		Contours = cv2.findContours(MaskDilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0] # Find all external contours in the mask.
 
-        #cv2.imshow("Frame", frame)
-        #cv2.imshow("Red", red)
-        #cv2.imshow("Blue", blue)
-        #cv2.imshow("Green", green)
-        # cv2.imshow("Result", result)
+		if len(Contours) > 0: # Check if any contours were found.
+			MaxContour = max(Contours, key = lambda Contour: cv2.contourArea(Contour)) # Select the largest contour.
+			#print("Ball Area: " + str(cv2.contourArea(MaxContour))) # Print the top down area of the largest contour.
+			if cv2.contourArea(MaxContour) > 15: # Sanity check: the contour has to be a minimum size.
+				EnclosingCircle = cv2.minEnclosingCircle(MaxContour) # Find the minumum enclosing circle arond the largest contour. Output: ((x, y), r).
+				Centre = np.array([EnclosingCircle[0][0], EnclosingCircle[0][1]]) # Save position as the centre of the circle.
+				BallFound = True
+			else:
+				BallFound = False
+				Centre = None
+		else:
+			BallFound = False
+			Centre = None
 
-        return Active, Position
+		# Uncomment below to display the results.
+		#ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
+		#except: pass
+		#self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+
+		return BallFound, Centre
+
+	def display(self, WindowName, ImageResult, Mask, MaskEroded, MaskDilated):
+		# Stacks images together and dispays them in one window.
+		Img1 = np.hstack((ImageResult, cv2.cvtColor(Mask, cv2.COLOR_GRAY2BGR)))
+		Img2 = np.hstack((cv2.cvtColor(MaskEroded, cv2.COLOR_GRAY2BGR), cv2.cvtColor(MaskDilated, cv2.COLOR_GRAY2BGR)))
+		Img3 = np.vstack((Img1, Img2)) # Stack all images together. Convert to BGR if necessary.
+
+		cv2.imshow(WindowName, Img3) # Draw all results.
+		#cv2.waitKey(0) # Wait until key is pressed.
+		#cv2.destroyWindow(WindowName)
+
+	def position_buffer(self, CurrentTime, BallFound, Centre):
+		# Outputs the last position of the ball for a short time if there is one, and if the ball cannot be found.
+		if BallFound == True:
+			Active = True
+			Position = Centre
+			self.LastTime = CurrentTime
+			self.LastPosition = Position
+		else:
+			if CurrentTime - self.LastTime < self.WaitTime and np.any(np.equal(self.LastPosition, np.array([False, False]))) == False:
+				Active = True
+				Position = self.LastPosition
+			else:
+				Active = False
+				Position = self.LastPosition
+		return Active, Position
+
+	def update(self, CurrentTime, Image):
+		'''
+		This function updates the position of the ball, it's output should be in the format of a
+		tuple: Active, Position. Active should be a boolean value and should be set to True as long
+		as the ball is still on the maze, and False when the ball has fallen through a hole. The
+		Position of the Ball should be provided as np.array([x, y]). See objects.py for more information.
+		Please remember that the y axis starts at the top left corner and increases as you go down
+		the maze, opposite to a traditional coordinate system.
+		'''
+
+		#ImageUndistorted = cv2.undistort(Image, self.CameraMatrix, self.DistortionCoefficients, None) # Correct for lens distortion. Not used to save processing power.
+
+		ImageBlurred = cv2.GaussianBlur(Image, self.KernelBlur, 0) # Blur image to remove high frequency noise.
+		ImageHSV = cv2.cvtColor(ImageBlurred, cv2.COLOR_BGR2HSV) # Convert image to HSV format.
+
+		ImageCorrected = self.correct_perspective(ImageHSV) # Correct the maze's tilt perspective.
+		BallFound, Centre = self.ball_detection(ImageCorrected) # Try to detect the position of the ball.
+		Active, Position = self.position_buffer(CurrentTime, BallFound, Centre) # Outputs the last position of the ball for a short time if the ball cannot be found.
+		Position += np.array([28.5, 28]) # Add frame width and height. 
+
+		return Active, Position
 
 if __name__ == "__main__":
     import doctest

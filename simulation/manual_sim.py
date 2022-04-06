@@ -18,7 +18,6 @@ from objects import Maze
 from graphics.graphics import initialise_background, initialise_dirty_group, initialise_buttons, initialise_header, initialise_values, initialise_ball, change_maze
 from simulation.tilt_maze import tilt_maze
 from control.timing_controller import TimingController
-from control.timer import PerformanceTimer
 from settings import MaxFrequency, DisplayScale, White, Black
 
 def manual_sim():
@@ -134,7 +133,6 @@ def manual_sim():
             StartTime = time.perf_counter() # Record start time.
             LastTime = StartTime
             TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
             while SystemRunning == 1:
 
                 ''' PYGAME GRAPHICS START '''
@@ -230,9 +228,6 @@ def manual_sim():
                 pygame.display.update(Rects) # Rects is empty if GraphicsOn == False.
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
-
-                # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(time.perf_counter()) * 1000))
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
@@ -338,7 +333,7 @@ def manual_sim():
 
                     ''' PYGAME GRAPHICS START '''
                     # Update header.
-                    SpriteHeader.update("Ball Lost")
+                    SpriteHeader.update("Ball Lost / Not Found")
                     ''' PYGAME GRAPHICS END '''
 
                     ''' PYGAME EVENT HANDLER START '''

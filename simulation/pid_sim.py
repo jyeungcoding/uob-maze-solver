@@ -18,7 +18,7 @@ from graphics.graphics import initialise_background, initialise_dirty_group, ini
 from control.pid_controller import PID_Controller
 from control.calibrator import Calibrator
 from control.timing_controller import TimingController
-from control.timer import PerformanceTimer
+from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
 from settings import MaxFrequency, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
 
@@ -145,10 +145,11 @@ def pid_sim():
             PID_Output = [np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0])]
 
             # Start clock.
+            TimeElapsed = 0
             StartTime = time.perf_counter() # Record start time.
             SimulationTime = StartTime # Initialise SimulationTime
             TimingController_ = TimingController(StartTime) # Start timing controller.
-            PerformanceTimer_ = PerformanceTimer(StartTime) # Performance timer for measuring time period of each loop.
+            PerformanceLog_ = PerformanceLog(StartTime) # Performance log. See control/performance_log.py for more information.
             while SystemRunning == 1:
 
                 ''' PYGAME GRAPHICS START '''
@@ -242,9 +243,12 @@ def pid_sim():
                     #motor_angle(ControlSignal)
                     ''' MOTOR CONTROL END '''
 
+                if Completed == 0:
+                    TimeElapsed = time.perf_counter() - StartTime
+
                 # Generate strings for output values to be displayed.
                 DisplayValues = {
-                0 : "{0:.1f}".format(time.perf_counter() - StartTime), # Time elapsed.
+                0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                 2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
                 3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
@@ -285,8 +289,9 @@ def pid_sim():
                 Clock.tick(MaxFrequency) # Limit to MaxFrequency to conserve processing power.
                 ''' PYGAME GRAPHICS END '''
 
-                # Enable below to print the timestep of a full loop.
-                #print("{:.0f}ms".format(PerformanceTimer_.update(time.perf_counter()) * 1000))
+                LogEntry = PerformanceLog_.update(ControlOn, GraphicsOn, time.perf_counter())
+                # Enable below to print the timestep of a full loop. Note that this is very CPU intensive!
+                #print(LogEntry)
 
                 ''' ------ RUNNING SCREEN END ------ '''
 
@@ -385,7 +390,7 @@ def pid_sim():
 
                     ''' PYGAME GRAPHICS START '''
                     # Update header.
-                    SpriteHeader.update("Ball Lost")
+                    SpriteHeader.update("Ball Lost / Not Found")
                     ''' PYGAME GRAPHICS END '''
 
                     ''' PYGAME EVENT HANDLER START '''
@@ -424,6 +429,8 @@ def pid_sim():
                 ''' ------ BALL LOST SCREEN END ------ '''
 
     pygame.quit()
+
+    PerformanceLog_.export("log.txt") # Export performance log. 
 
 if __name__ == "__main__":
     pid_sim()

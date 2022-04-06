@@ -166,8 +166,8 @@ class ImageProcessor():
 def main():
 	# For testing on a signle image.
 	MazeSize = np.array([275, 230]) # [mm]
-	HSVLimitsBlue = np.array([[91, 78, 4], [130, 176, 63]])
-	HSVLimitsGreen = np.array([[29, 12, 15], [81, 171, 105]])
+	HSVLimitsBlue = np.array([[70, 58, 0], [120, 201, 75]])
+	HSVLimitsGreen = np.array([[22, 95, 23], [86, 248, 148]])
 	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
 	#LastTime = perf_counter()
 	ImageProcessor_.update(perf_counter(), cv2.imread("111.jpg"))
