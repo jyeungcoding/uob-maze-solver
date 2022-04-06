@@ -44,6 +44,7 @@ class PID_Controller():
     def calibrate(self, ControlSignalCalibrated):
         # Theta for zero tilt. Change after calibration.
         self.ControlSignalCalibrated = ControlSignalCalibrated
+        self.reset()
 
     def reset(self):
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Reset error buffer (with additional rows for linear regression).

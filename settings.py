@@ -40,26 +40,10 @@ GraphicsFrequency = 4 # [Hz]
 # Maximum frequency of whole loop.
 MaxFrequency = 50 # [Hz]
 
-"""
-# PID Coefficients
-Kp = 30e-5
-Ki = 0e-5
-Kd = 28e-5
-
-# Number of error values to buffer for PID derivative calculation.
-BufferSize = 2
-
-# Minimum tilt angle allowed.
-MinSignal = np.array([0, 0])
-
-# Maximum motor angle.
-SaturationLimit = np.array([pi / 4, pi / 4])
-"""
-
 # PID Coefficients
 Kp = 4e-4
 Ki = 1e-4
-Kd = 4e-4
+Kd = 2e-4
 
 # Number of error values to buffer for PID derivative calculation.
 BufferSize = 3
@@ -68,7 +52,7 @@ BufferSize = 3
 MinSignal = np.array([pi/360, pi/360])
 
 # Maximum motor angle.
-SaturationLimit = np.array([pi / 3, pi / 3])
+SaturationLimit = np.array([pi / 4, pi / 4])
 
 # Tolerance distance for calibration.
 CalibrationTolerance = 2 # [mm]
