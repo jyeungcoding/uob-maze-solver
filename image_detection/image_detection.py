@@ -160,6 +160,7 @@ class ImageProcessor():
 		ImageCorrected = self.correct_perspective(ImageHSV) # Correct the maze's tilt perspective.
 		BallFound, Centre = self.ball_detection(ImageCorrected) # Try to detect the position of the ball.
 		Active, Position = self.position_buffer(CurrentTime, BallFound, Centre) # Outputs the last position of the ball for a short time if the ball cannot be found.
+		Position += np.array([57, 56]) # Add frame width and height. 
 
 		return Active, Position
 
