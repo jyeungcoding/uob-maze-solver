@@ -240,9 +240,11 @@ def full_system():
                     ''' PID CONTROL START '''
                     if CalibrationDone == 0:
                         ''' CALIBRATION START '''
+                        PID_Controller_.MinTheta, PID_Controller_.MinThetaStationary = np.array([0, 0]), np.array([0, 0]) # Ignore min theta while calibrating.
                         # Calibrate to record level theta.
                         CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, perf_counter())
                         if CalibrationDone == True:
+                            PID_Controller_.MinTheta, PID_Controller_.MinThetaStationary = MinTheta, MinThetaStationary # Reset min theta. 
                             PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
                         ''' CALIBRATION START '''
                     else:
