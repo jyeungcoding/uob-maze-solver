@@ -99,16 +99,18 @@ class PID_Controller():
     def min_theta(self, ThetaSignal):
         # Apply minimum signal if necessary.
         if self.ErrorBuffer[1, self.BufferSize - 1] == self.ErrorBuffer[1, self.BufferSize - 2] and \
-        self.ErrorBuffer[2, self.BufferSize - 1] == self.ErrorBuffer[2, self.BufferSize - 2]:
-            pass
-        if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinTheta[0]:
-            ThetaSignal[0] = self.MinTheta[0]
-        elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinTheta[0]:
-            ThetaSignal[0] = -self.MinTheta[0]
-        if ThetaSignal[1] > 0 and ThetaSignal[1] < self.MinTheta[1]:
-            ThetaSignal[1] = self.MinTheta[1]
-        elif ThetaSignal[1] < 0 and ThetaSignal[1] > -self.MinTheta[1]:
-            ThetaSignal[1] = -self.MinTheta[1]
+                self.ErrorBuffer[2, self.BufferSize - 1] == self.ErrorBuffer[2, self.BufferSize - 2]:
+            Minimum = self.MinThetaStationary
+        else:
+            Minimum = self.MinTheta
+        if ThetaSignal[0] > 0 and ThetaSignal[0] < Minimum[0]:
+            ThetaSignal[0] = Minimum[0]
+        elif ThetaSignal[0] < 0 and ThetaSignal[0] > -Minimum[0]:
+            ThetaSignal[0] = -Minimum[0]
+        if ThetaSignal[1] > 0 and ThetaSignal[1] < Minimum[1]:
+            ThetaSignal[1] = Minimum[1]
+        elif ThetaSignal[1] < 0 and ThetaSignal[1] > -Minimum[1]:
+            ThetaSignal[1] = -Minimum[1]
         return ThetaSignal
 
     def gearing(self, ThetaSignal):
