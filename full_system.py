@@ -176,6 +176,7 @@ def full_system():
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
 
             if ActiveMaze.Ball.Active == False:
+                ActiveMaze.Ball.S = np.array([0, 0])
                 BallLost = 1 # Ball is lost if not found for over 3 seconds.
             """ IMAGE PROCESSOR INITIALISATION END """
 
