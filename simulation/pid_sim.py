@@ -20,7 +20,7 @@ from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal
+from settings import MaxFrequency, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinTheta, MinThetaStationary
 
 def pid_sim():
 
@@ -125,7 +125,7 @@ def pid_sim():
 
             ''' INITIALISE PID CONTROL '''
             # Initialise PID controller object, see control/pid_controller.py for more information.
-            PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinSignal)
+            PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta, MinThetaStationary)
             ''' INITIALISE PID CONTROL '''
 
             ''' INITIALISE CALIBRATOR '''
@@ -430,7 +430,7 @@ def pid_sim():
 
     pygame.quit()
 
-    PerformanceLog_.export("log.txt") # Export performance log. 
+    PerformanceLog_.export("log.txt") # Export performance log.
 
 if __name__ == "__main__":
     pid_sim()

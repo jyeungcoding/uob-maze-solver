@@ -11,7 +11,7 @@ import numpy as np
 
 class PID_Controller():
 
-    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit, MinTheta):
+    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit, MinTheta, MinThetaStationary):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
         if type(SetPoint) != np.ndarray:
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
@@ -29,8 +29,8 @@ class PID_Controller():
         self.ControlSignalCalibrated = np.array([0,0]) # Theta for zero tilt. Change after calibration.
         self.Saturation = np.array([False, False]) # Initialise saturation check.
         self.SaturationLimit = SaturationLimit # Control signal maximum angle limit.
-        self.MinTheta = MinTheta # Minimum output theta. 
-        self.MinThetaStationary = MinThetaStationary # Minimum output theta when stationary. 
+        self.MinTheta = MinTheta # Minimum output theta.
+        self.MinThetaStationary = MinThetaStationary # Minimum output theta when stationary.
 
     def __repr__(self):
         # Makes the class printable.
