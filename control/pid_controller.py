@@ -58,7 +58,6 @@ class PID_Controller():
         self.ErrorBuffer[0:3] = np.roll(self.ErrorBuffer[0:3], -1, 1) # Shifts error buffer to the left.
         self.ErrorBuffer[0:3, self.BufferSize - 1] = TimeStep + self.ErrorBuffer[0, self.BufferSize - 2], ErrorValue[0], ErrorValue[1] # Update rightmost values.
         self.BufferIteration += 1 # Update buffer iteration number.
-        print(self.ErrorBuffer)
 
     def conditional_integrator(self, ErrorValue, TimeStep):
         # Conditional integrator, clamps if ControlSignal is saturated and the error is the same sign as the integral.
@@ -99,14 +98,17 @@ class PID_Controller():
 
     def min_theta(self, ThetaSignal):
         # Apply minimum signal if necessary.
+        if self.ErrorBuffer[1, self.BufferSize - 1] == self.ErrorBuffer[1, self.BufferSize - 2] and \
+        self.ErrorBuffer[2, self.BufferSize - 1] == self.ErrorBuffer[2, self.BufferSize - 2]:
+            pass
         if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinTheta[0]:
-            ThetaSignal[0] = self.MinSignal[0]
+            ThetaSignal[0] = self.MinTheta[0]
         elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinTheta[0]:
-            ThetaSignal[0] = -self.MinSignal[0]
+            ThetaSignal[0] = -self.MinTheta[0]
         if ThetaSignal[1] > 0 and ThetaSignal[1] < self.MinTheta[1]:
-            ThetaSignal[1] = self.MinSignal[1]
+            ThetaSignal[1] = self.MinTheta[1]
         elif ThetaSignal[1] < 0 and ThetaSignal[1] > -self.MinTheta[1]:
-            ThetaSignal[1] = -self.MinSignal[1]
+            ThetaSignal[1] = -self.MinTheta[1]
         return ThetaSignal
 
     def gearing(self, ThetaSignal):

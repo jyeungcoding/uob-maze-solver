@@ -416,7 +416,7 @@ def image_detection_test():
     pygame.quit()
     ''' QUIT PYGAME '''
 
-    PerformanceLog_.export("log.txt") # Export performance log. 
+    PerformanceLog_.export("log.txt") # Export performance log.
 
 if __name__ == "__main__":
     image_detection_test()
