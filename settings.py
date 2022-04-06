@@ -42,17 +42,17 @@ MaxFrequency = 50 # [Hz]
 
 # PID Coefficients
 Kp = 3e-4
-Ki = 4e-4
-Kd = 3e-4
+Ki = 1e-4
+Kd = 4e-4
 
 # Number of error values to buffer for PID derivative calculation.
-BufferSize = 3
+BufferSize = 2
 
 # Minimum tilt angle allowed.
 MinTheta = np.array([pi/360, pi/360])
 
 # Minimum tilt angle allowed when ball is stationary.
-MinThetaStationary = np.array([pi/360, pi/360])
+MinThetaStationary = np.array([pi/90, pi/90])
 
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 6, pi / 6])
@@ -64,7 +64,7 @@ CalibrationTolerance = 2 # [mm]
 CalibrationTime = 4 # [s]
 
 # How close the ball has to be to each checkpoint. 
-CheckpointRadius = 3 # [mm]
+CheckpointRadius = 5 # [mm]
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
