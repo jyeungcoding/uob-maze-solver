@@ -24,7 +24,7 @@ from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal, MazeSize, HSVLimitsBlue, HSVLimitsGreen
+from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinSignal, MazeSize, CheckpointRadius, HSVLimitsBlue, HSVLimitsGreen
 
 def full_system():
 
@@ -146,7 +146,7 @@ def full_system():
             """ PICAMERA INITIALISATION START """
             # Initialise the camera.
             # Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
-            Camera = PiCamera(sensor_mode = 4) # See if fixing the camera settings improves performance.
+            Camera = PiCamera(sensor_mode = 4, resolution = (1024, 768)) # See if fixing the camera settings improves performance.
             # Camera.framerate = 20 # Can set the camera's framerate.
             # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
             Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
@@ -246,7 +246,7 @@ def full_system():
                         ''' CALIBRATION START '''
                     else:
                         # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
-                        if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
+                        if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < CheckpointRadius:
                             if len(ActiveMaze.Checkpoints) > 1:
                                 ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
                                 PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.

@@ -4,7 +4,7 @@
 Tested effect of sensor_mode and resize on the time delay for each capture. Resizing down
 resulted in significatly lower time delays; sensor_mode seemed to decrease the time delay
 slightly as it was increased. Time delays over a range of 30-100ms were achieved with
-sensor_mode at 7 and resize at (640, 480).
+sensor_mode at 4 and resize at (640, 480).
 """
 
 from picamera.array import PiRGBArray
@@ -14,7 +14,8 @@ import cv2
 import numpy as np
 
 # initialize the camera and grab a reference to the raw camera capture
-camera = PiCamera(sensor_mode=7)
+camera = PiCamera(sensor_mode=4, resolution = (1024, 768))
+
 #camera.framerate=20 # Sets the framerate at which video-port based image captures will run.
 # It seems that the camera arg doesn't actually do anything, just saves a reference to the camera.
 rawCapture = PiRGBArray(camera, size=(640, 480))
@@ -24,14 +25,11 @@ time.sleep(0.2)
 frames = camera.capture_continuous(rawCapture, format="bgr", resize=(640, 480), use_video_port=True) # Creates an inerable of frames.
 while True:
 	try:
-		LastTime = time.perf_counter()
 		frame = next(frames)
-		TimeStep = time.perf_counter() - LastTime
-		print(TimeStep * 1000)
 		# grab the raw NumPy array representing the image, then initialize the timestamp
 		# and occupied/unoccupied text
-		#image = frame.array
-		#cv2.imshow("Frame", image) # show the frame
+		image = frame.array
+		cv2.imshow("Frame", image) # show the frame
 		key = cv2.waitKey(1) & 0xFF
 		# clear the stream in preparation for the next frame
 		rawCapture.truncate(0)

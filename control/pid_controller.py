@@ -11,7 +11,7 @@ import numpy as np
 
 class PID_Controller():
 
-    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit, MinSignal):
+    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit, MinTheta):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
         if type(SetPoint) != np.ndarray:
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
@@ -29,7 +29,8 @@ class PID_Controller():
         self.ControlSignalCalibrated = np.array([0,0]) # Theta for zero tilt. Change after calibration.
         self.Saturation = np.array([False, False]) # Initialise saturation check.
         self.SaturationLimit = SaturationLimit # Control signal maximum angle limit.
-        self.MinSignal = MinSignal # Control signal minimum angle limit.
+        self.MinTheta = MinTheta # Minimum output theta. 
+        self.MinThetaStationary = MinThetaStationary # Minimum output theta when stationary. 
 
     def __repr__(self):
         # Makes the class printable.
@@ -57,6 +58,7 @@ class PID_Controller():
         self.ErrorBuffer[0:3] = np.roll(self.ErrorBuffer[0:3], -1, 1) # Shifts error buffer to the left.
         self.ErrorBuffer[0:3, self.BufferSize - 1] = TimeStep + self.ErrorBuffer[0, self.BufferSize - 2], ErrorValue[0], ErrorValue[1] # Update rightmost values.
         self.BufferIteration += 1 # Update buffer iteration number.
+        print(self.ErrorBuffer)
 
     def conditional_integrator(self, ErrorValue, TimeStep):
         # Conditional integrator, clamps if ControlSignal is saturated and the error is the same sign as the integral.
@@ -95,15 +97,15 @@ class PID_Controller():
             ErrorDerivative = np.array([0.0, 0.0])
         return ErrorDerivative
 
-    def min_signal(self, ThetaSignal):
+    def min_theta(self, ThetaSignal):
         # Apply minimum signal if necessary.
-        if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinSignal[0]:
+        if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinTheta[0]:
             ThetaSignal[0] = self.MinSignal[0]
-        elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinSignal[0]:
+        elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinTheta[0]:
             ThetaSignal[0] = -self.MinSignal[0]
-        if ThetaSignal[1] > 0 and ThetaSignal[1] < self.MinSignal[1]:
+        if ThetaSignal[1] > 0 and ThetaSignal[1] < self.MinTheta[1]:
             ThetaSignal[1] = self.MinSignal[1]
-        elif ThetaSignal[1] < 0 and ThetaSignal[1] > -self.MinSignal[1]:
+        elif ThetaSignal[1] < 0 and ThetaSignal[1] > -self.MinTheta[1]:
             ThetaSignal[1] = -self.MinSignal[1]
         return ThetaSignal
 
@@ -144,7 +146,7 @@ class PID_Controller():
         IntegralTerm = self.Ki * ErrorIntegral
         DerivativeTerm = self.Kd * ErrorDerivative
         ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
-        ThetaSignal = self.min_signal(ThetaSignal) # Apply minimum signal if necessary.
+        ThetaSignal = self.min_theta(ThetaSignal) # Apply minimum theta if necessary.
         ControlSignal = self.gearing(ThetaSignal) # Convert theta to motor angle.
         ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
