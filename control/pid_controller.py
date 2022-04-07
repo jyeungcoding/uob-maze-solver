@@ -8,6 +8,7 @@ also resets the memory elements. update(ProcessVariable, TimeStep) outputs the c
 
 # Import modules.
 import numpy as np
+from math import pi
 
 class PID_Controller():
 
@@ -132,7 +133,7 @@ class PID_Controller():
 
     def gearing(self, ThetaSignal):
         # Convert theta to motor angle.
-        ControlSignal = ThetaSignal * np.array([11.25, 15])
+        ControlSignal = ThetaSignal * np.array([13, 15])
         return ControlSignal
 
     def saturation_clamp(self, ControlSignal):
@@ -174,6 +175,12 @@ class PID_Controller():
         ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
 
+        if self.SetPoint[0] == 5 and self.SetPoint[1] == 160:
+            ControlSignal[0] = pi / 4.5
+            ControlSignal[0] = pi / 4.5
+        if self.SetPoint[0] == 192 and self.SetPoint[1] == 168:
+            ControlSignal[0] = pi / 4.5
+            
         return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm
 
 if __name__ == "__main__":

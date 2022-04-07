@@ -41,7 +41,7 @@ GraphicsFrequency = 4 # [Hz]
 MaxFrequency = 50 # [Hz]
 
 # PID Coefficients
-Kp = 4e-4
+Kp = 3.4e-4
 Ki = 3e-4
 Kd = 3e-4
 
