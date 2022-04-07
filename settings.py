@@ -72,6 +72,8 @@ CalibrationTime = 3 # [s]
 # How close the ball has to be to each checkpoint.
 CheckpointRadius = 8 # [mm]
 
+SetPointTime = 1.5
+
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
 ThetaStep = 0.01 * pi
