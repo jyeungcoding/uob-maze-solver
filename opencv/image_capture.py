@@ -34,8 +34,10 @@ def main():
 
 	""" IMAGE PROCESSOR INITIALISATION START """
 	MazeSize = np.array([275, 230]) # [mm]
-	HSVLimitsBlue = np.array([[91, 78, 4], [130, 176, 63]])
-	HSVLimitsGreen = np.array([[29, 12, 15], [81, 171, 105]])
+	# Upper and lower HSV limits for the blue ball.
+	HSVLimitsBlue = np.array([[70, 58, 0], [120, 201, 75]])
+	# Upper and lower HSV limits for the green frame.
+	HSVLimitsGreen = np.array([[22, 95, 23], [86, 248, 148]])
 	ImageProcessor_ = ImageProcessor(perf_counter(), MazeSize, HSVLimitsBlue, HSVLimitsGreen)
 	""" IMAGE PROCESSOR INITIALISATION END """
 	while True:
@@ -55,9 +57,6 @@ def main():
 
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
-
-	Camera.close() # Don't forget to turn off the camera.
-	cv2.destroyAllWindows() # Don't forget to close all windows.
 
 if __name__ == '__main__':
 	main()

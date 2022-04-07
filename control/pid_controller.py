@@ -100,7 +100,7 @@ class PID_Controller():
 
     def static_boost(self, ThetaSignal, ErrorDerivative):
         if self.Calibrated == True: # Only apply static boost when the controller is calibrated.
-            ThetaSignal = self.Ks * np.sign(ThetaSignal) * np.exp(-3 * np.absolute(ErrorDerivative))
+            ThetaSignal = self.Ks * np.sign(ThetaSignal) * np.exp(-2 * np.absolute(ErrorDerivative))
         return ThetaSignal
 
     def min_theta(self, ThetaSignal):
