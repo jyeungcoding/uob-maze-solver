@@ -350,7 +350,7 @@ def full_system():
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
-                                        SystemRunning, Paused, Completed = 0, 0, 0
+                                        SystemRunning, Paused, Completed, CalibrationDone  = 0, 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, Paused, CalibrationDone = 0, 0, 0, 0
@@ -434,7 +434,7 @@ def full_system():
                                         change_maze(ActiveSprites, CurrentMaze) # Reset certain Sprites.
                                         ActiveSprites.remove_sprites_of_layer(4) # Erase display values.
                                         SpriteBall_.kill() # Erase ball.
-                                        SystemRunning, BallLost, Completed = 0, 0, 0
+                                        SystemRunning, BallLost, Completed, CalibrationDone  = 0, 0, 0, 0
                                     elif Button.CurrentState == "Quit": # Quit button quits the program.
                                         Button.click(perf_counter()) # Animate button click.
                                         ProgramOn, SystemRunning, BallLost, CalibrationDone = 0, 0, 0, 0
