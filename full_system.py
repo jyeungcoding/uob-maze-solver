@@ -5,8 +5,11 @@ motor control, and the graphics are all implemented from modular functions.
 '''
 
 # Import modules.
-from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
-from picamera import PiCamera
+try:
+    from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
+    from picamera import PiCamera
+except:
+    pass
 import cv2
 import pygame
 import numpy as np
@@ -24,7 +27,7 @@ from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, BufferSize, SaturationLimit, MinTheta, MinThetaStationary, MazeSize, CheckpointRadius, HSVLimitsBlue, HSVLimitsGreen
+from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, Ks, BufferSize, SaturationLimit, MinTheta, MazeSize, CheckpointRadius, HSVLimitsBlue, HSVLimitsGreen
 
 def full_system():
 
@@ -130,7 +133,7 @@ def full_system():
 
             ''' INITIALISE PID CONTROL '''
             # Initialise PID controller object, see control/pid_controller.py for more information.
-            PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta, MinThetaStationary)
+            PID_Controller_ = PID_Controller(Kp, Ki, Kd, Ks, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta)
             ''' INITIALISE PID CONTROL '''
 
             ''' INITIALISE CALIBRATOR '''
@@ -175,9 +178,9 @@ def full_system():
                 Image = Frame.array # Store the array from the frame object.
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
 
-            if ActiveMaze.Ball.Active == False:
-                ActiveMaze.Ball.S = np.array([0, 0])
-                BallLost = 1 # Ball is lost if not found for over 3 seconds.
+            if ActiveMaze.Ball.Active == False: # Ball is lost if not found for over 3 seconds.
+                ActiveMaze.Ball.S = np.array([0, 0]) # Set the ball position to a random value to avoid exceptions.
+                BallLost = 1
             """ IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
@@ -240,21 +243,19 @@ def full_system():
                     ''' PID CONTROL START '''
                     if CalibrationDone == 0:
                         ''' CALIBRATION START '''
-                        PID_Controller_.MinTheta, PID_Controller_.MinThetaStationary = np.array([0, 0]), np.array([0, 0]) # Ignore min theta while calibrating.
                         # Calibrate to record level theta.
                         CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, perf_counter())
                         if CalibrationDone == True:
-                            PID_Controller_.MinTheta, PID_Controller_.MinThetaStationary = MinTheta, MinThetaStationary # Reset min theta. 
                             PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
-                        ''' CALIBRATION START '''
+                        ''' CALIBRATION END '''
                     else:
-                        # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
+                        # If the ball is within CheckpointRadius of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
                         if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < CheckpointRadius:
                             if len(ActiveMaze.Checkpoints) > 1:
                                 ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
                                 PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
                             elif len(ActiveMaze.Checkpoints) == 1:
-                                Completed = 1
+                                Completed = 1 # If the last checkpoint has been reached, the program has been completed.
 
                     # Calculate control signal using the PID controller.
                     PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, ControlTimeStep)

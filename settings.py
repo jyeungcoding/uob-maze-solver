@@ -45,19 +45,14 @@ Kp = 4e-4
 Ki = 1e-4
 Kd = 2e-4
 
-# PID Coefficients
-#Kp = 2e-3
-#Ki = 1e-4
-#Kd = 4e-3
+# Static boost coefficient.
+Ks = 3
 
 # Number of error values to buffer for PID derivative calculation.
 BufferSize = 3
 
 # Minimum tilt angle allowed.
 MinTheta = np.array([pi/180, pi/180])
-
-# Minimum tilt angle allowed when ball is stationary.
-MinThetaStationary = np.array([pi/180, pi/180])
 
 # Maximum motor angle.
 SaturationLimit = np.array([pi / 6, pi / 6])
@@ -66,9 +61,9 @@ SaturationLimit = np.array([pi / 6, pi / 6])
 CalibrationTolerance = 2 # [mm]
 
 # Time before calibrated.
-CalibrationTime = 4 # [s]
+CalibrationTime = 3 # [s]
 
-# How close the ball has to be to each checkpoint. 
+# How close the ball has to be to each checkpoint.
 CheckpointRadius = 5 # [mm]
 
 ''' SIMULATION SETTINGS '''

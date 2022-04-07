@@ -20,7 +20,7 @@ from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Black, Kp, Ki, Kd, BufferSize, SaturationLimit, MinTheta, MinThetaStationary
+from settings import MaxFrequency, DisplayScale, White, Black, Kp, Ki, Kd, Ks, BufferSize, SaturationLimit, MinTheta
 
 def pid_sim():
 
@@ -125,7 +125,7 @@ def pid_sim():
 
             ''' INITIALISE PID CONTROL '''
             # Initialise PID controller object, see control/pid_controller.py for more information.
-            PID_Controller_ = PID_Controller(Kp, Ki, Kd, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta, MinThetaStationary)
+            PID_Controller_ = PID_Controller(Kp, Ki, Kd, Ks, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta)
             ''' INITIALISE PID CONTROL '''
 
             ''' INITIALISE CALIBRATOR '''
@@ -219,7 +219,7 @@ def pid_sim():
                             CalibrationDone, ControlSignalCalibrated = Calibrator_.update(ActiveMaze.Ball.S, ControlSignal, time.perf_counter())
                             if CalibrationDone == True:
                                 PID_Controller_.calibrate(ControlSignalCalibrated) # Enter calibrated angle when done.
-                            ''' CALIBRATION START '''
+                            ''' CALIBRATION END '''
                         else:
                             # If the ball is within 2mm of the set point, delete the current checkpoint and set the new first checkpoint as the set point.
                             if ((ActiveMaze.Checkpoints[0].S[0] - ActiveMaze.Ball.S[0]) ** 2 + (ActiveMaze.Checkpoints[0].S[1] - ActiveMaze.Ball.S[1]) ** 2) ** 0.5 < 2:
@@ -227,7 +227,7 @@ def pid_sim():
                                     ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
                                     PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point.
                                 elif len(ActiveMaze.Checkpoints) == 1:
-                                    Completed = 1
+                                    Completed = 1 # If the last checkpoint has been reached, the program has been completed.
 
                         # Calculate control signal using the PID controller.
                         PID_Output = PID_Controller_.update(ProcessVariable, ControlTimeStep)

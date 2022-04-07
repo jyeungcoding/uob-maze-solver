@@ -6,8 +6,11 @@ screen using the pygame module.
 '''
 
 # Import modules.
-from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
-from picamera import PiCamera
+try:
+    from picamera.array import PiRGBArray # Allows conversion of frames to cv2 array format.
+    from picamera import PiCamera
+except:
+    pass
 import cv2
 import pygame
 import numpy as np

@@ -11,7 +11,7 @@ import numpy as np
 
 class PID_Controller():
 
-    def __init__(self, Kp, Ki, Kd, SetPoint, BufferSize, SaturationLimit, MinTheta, MinThetaStationary):
+    def __init__(self, Kp, Ki, Kd, Ks, SetPoint, BufferSize, SaturationLimit, MinTheta):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
         if type(SetPoint) != np.ndarray:
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
@@ -21,16 +21,17 @@ class PID_Controller():
         self.Kp = Kp # Proportional coefficient.
         self.Ki = Ki # Integral coefficient.
         self.Kd = Kd # Derivative coefficient.
+        self.Ks = Ks # Static boost coefficient.
         self.SetPoint = SetPoint # Current set point.
         self.BufferSize = BufferSize # Number of error values to store in the buffer.
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Initialise error buffer (with additional rows for linear regression).
         self.BufferIteration = 0 # Record buffer iteration number.
         self.ErrorIntegral = np.array([0.0, 0.0]) # Initialise integrator.
+        self.Calibrated = False # Initialise as not calibrated.
         self.ControlSignalCalibrated = np.array([0,0]) # Theta for zero tilt. Change after calibration.
         self.Saturation = np.array([False, False]) # Initialise saturation check.
         self.SaturationLimit = SaturationLimit # Control signal maximum angle limit.
         self.MinTheta = MinTheta # Minimum output theta.
-        self.MinThetaStationary = MinThetaStationary # Minimum output theta when stationary.
 
     def __repr__(self):
         # Makes the class printable.
@@ -45,6 +46,7 @@ class PID_Controller():
     def calibrate(self, ControlSignalCalibrated):
         # Theta for zero tilt. Change after calibration.
         self.ControlSignalCalibrated = ControlSignalCalibrated
+        self.Calibrated = True
         self.reset()
 
     def reset(self):
@@ -96,21 +98,22 @@ class PID_Controller():
             ErrorDerivative = np.array([0.0, 0.0])
         return ErrorDerivative
 
+    def static_boost(self, ThetaSignal, ErrorDerivative):
+        if self.Calibrated == True: # Only apply static boost when the controller is calibrated.
+            ThetaSignal = self.Ks * np.sign(ThetaSignal) * np.exp(-3 * np.absolute(ErrorDerivative))
+        return ThetaSignal
+
     def min_theta(self, ThetaSignal):
-        # Apply minimum signal if necessary.
-        if self.ErrorBuffer[1, self.BufferSize - 1] == self.ErrorBuffer[1, self.BufferSize - 2] and \
-                self.ErrorBuffer[2, self.BufferSize - 1] == self.ErrorBuffer[2, self.BufferSize - 2]:
-            Minimum = self.MinThetaStationary
-        else:
-            Minimum = self.MinTheta
-        if ThetaSignal[0] > 0 and ThetaSignal[0] < Minimum[0]:
-            ThetaSignal[0] = Minimum[0]
-        elif ThetaSignal[0] < 0 and ThetaSignal[0] > -Minimum[0]:
-            ThetaSignal[0] = -Minimum[0]
-        if ThetaSignal[1] > 0 and ThetaSignal[1] < Minimum[1]:
-            ThetaSignal[1] = Minimum[1]
-        elif ThetaSignal[1] < 0 and ThetaSignal[1] > -Minimum[1]:
-            ThetaSignal[1] = -Minimum[1]
+        # Apply minimum theta if necessary.
+        if self.Calibrated == True: # Only apply minimum theta when the controller is calibrated.
+            if ThetaSignal[0] > 0 and ThetaSignal[0] < self.MinTheta[0]:
+                ThetaSignal[0] = self.MinTheta[0]
+            elif ThetaSignal[0] < 0 and ThetaSignal[0] > -self.MinTheta[0]:
+                ThetaSignal[0] = -self.MinTheta[0]
+            if ThetaSignal[1] > 0 and ThetaSignal[1] < self.MinTheta[1]:
+                ThetaSignal[1] = self.MinTheta[1]
+            elif ThetaSignal[1] < 0 and ThetaSignal[1] > -self.MinTheta[1]:
+                ThetaSignal[1] = -self.MinTheta[1]
         return ThetaSignal
 
     def gearing(self, ThetaSignal):
@@ -150,6 +153,7 @@ class PID_Controller():
         IntegralTerm = self.Ki * ErrorIntegral
         DerivativeTerm = self.Kd * ErrorDerivative
         ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
+        ThetaSignal = self.static_boost(ThetaSignal, ErrorDerivative) # Extra angle to help ball overcome static friction.
         ThetaSignal = self.min_theta(ThetaSignal) # Apply minimum theta if necessary.
         ControlSignal = self.gearing(ThetaSignal) # Convert theta to motor angle.
         ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
@@ -160,4 +164,3 @@ class PID_Controller():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
