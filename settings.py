@@ -41,12 +41,15 @@ GraphicsFrequency = 4 # [Hz]
 MaxFrequency = 50 # [Hz]
 
 # PID Coefficients
-Kp = 4e-4
+Kp = 5e-4
 Ki = 1e-4
-Kd = 2e-4
+Kd = 2.5e-4
 
 # Static boost coefficient.
 Ks = 3
+
+# Static boost length coefficient. Higher numbers produce a shorter static boost.
+Kst = 2
 
 # Number of error values to buffer for PID derivative calculation.
 BufferSize = 3

@@ -11,7 +11,7 @@ import numpy as np
 
 class PID_Controller():
 
-    def __init__(self, Kp, Ki, Kd, Ks, SetPoint, BufferSize, SaturationLimit, MinTheta):
+    def __init__(self, Kp, Ki, Kd, Ks, Kst, SetPoint, BufferSize, SaturationLimit, MinTheta):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
         if type(SetPoint) != np.ndarray:
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
@@ -22,6 +22,7 @@ class PID_Controller():
         self.Ki = Ki # Integral coefficient.
         self.Kd = Kd # Derivative coefficient.
         self.Ks = Ks # Static boost coefficient.
+        self.Kst = Kst # Static boost length coefficient. Higher numbers produce a shorter static boost.
         self.SetPoint = SetPoint # Current set point.
         self.BufferSize = BufferSize # Number of error values to store in the buffer.
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Initialise error buffer (with additional rows for linear regression).
@@ -100,7 +101,7 @@ class PID_Controller():
 
     def static_boost(self, ThetaSignal, ErrorDerivative):
         if self.Calibrated == True: # Only apply static boost when the controller is calibrated.
-            ThetaSignal = self.Ks * np.sign(ThetaSignal) * np.exp(-2 * np.absolute(ErrorDerivative))
+            ThetaSignal = self.Ks * np.sign(ThetaSignal) * np.exp(-self.Kst * np.absolute(ErrorDerivative))
         return ThetaSignal
 
     def min_theta(self, ThetaSignal):
