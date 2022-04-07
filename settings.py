@@ -41,27 +41,27 @@ GraphicsFrequency = 4 # [Hz]
 MaxFrequency = 50 # [Hz]
 
 # PID Coefficients
-Kp = 3e-4
+Kp = 5.5e-4
 Ki = 3e-4
-Kd = 3e-4
+Kd = 3.3e-4
 
 # Maximum proportional term allowed.
-PMax = 0.02778
+PMax = 0.032
 
 # Static boost coefficient.
-Ks = 0.0008
+Ks = 0.015
 
 # Static boost length coefficient. Higher numbers produce a shorter static boost.
-Kst = 0
+Kst = 3
 
 # Number of error values to buffer for PID derivative calculation.
 BufferSize = 3
 
 # Minimum tilt angle allowed.
-MinTheta = np.array([pi/180, pi/180])
+MinTheta = np.array([0, 0])
 
 # Maximum motor angle.
-SaturationLimit = np.array([pi / 4, pi / 4])
+SaturationLimit = np.array([pi / 3.5, pi / 3.5])
 
 # Tolerance distance for calibration.
 CalibrationTolerance = 2 # [mm]
@@ -72,7 +72,7 @@ CalibrationTime = 3 # [s]
 # How close the ball has to be to each checkpoint.
 CheckpointRadius = 8 # [mm]
 
-SetPointTime = 1.5
+SetPointTime = 0
 
 ''' SIMULATION SETTINGS '''
 # Tilt angle for manual maze tilt.
