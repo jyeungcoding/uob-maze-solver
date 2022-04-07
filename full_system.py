@@ -177,10 +177,6 @@ def full_system():
                 Frame = next(Frames) # If there is a new frame, grab it.
                 Image = Frame.array # Store the array from the frame object.
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
-
-            if ActiveMaze.Ball.Active == False: # Ball is lost if not found for over 3 seconds.
-                ActiveMaze.Ball.S = np.array([0, 0]) # Set the ball position to a random value to avoid exceptions.
-                BallLost = 1
             """ IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
@@ -237,6 +233,7 @@ def full_system():
                     ''' IMAGE DETECTION START '''
                     ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image) # Find ball position.
                     if ActiveMaze.Ball.Active == False:
+                        ActiveMaze.Ball.S = np.array([-20, -20]) # Set the ball position to a random value to avoid exceptions.
                         BallLost = 1 # If ball is lost.
                     ''' IMAGE DETECTION END '''
 

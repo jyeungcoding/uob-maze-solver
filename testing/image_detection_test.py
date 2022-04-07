@@ -164,9 +164,6 @@ def image_detection_test():
                 Frame = next(Frames) # If there is a new frame, grab it.
                 Image = Frame.array # Store the array from the frame object.
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
-
-            if ActiveMaze.Ball.Active == False:
-                BallLost = 1 # Ball is lost if not found for over 3 seconds.
             """ IMAGE PROCESSOR INITIALISATION END """
 
             while SystemRunning == 1:
