@@ -463,7 +463,10 @@ def full_system():
     pygame.quit()
     ''' QUIT PYGAME '''
 
-    PerformanceLog_.export("log.txt") # Export performance log.
+    try:
+        PerformanceLog_.export("log.txt") # Export performance log.
+    except:
+        pass
 
 if __name__ == "__main__":
     full_system()
