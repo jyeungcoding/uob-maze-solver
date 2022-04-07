@@ -266,7 +266,7 @@ def full_system():
                     ''' MOTOR CONTROL END '''
 
                     # Convert control signal into actual Theta (based on measurements).
-                    Theta = ControlSignal * np.array([3 / 20, 0.1]) # For display.
+                    Theta = ControlSignal * np.array([11.25, 15]) # For display.
 
                 if Completed == 0:
                     TimeElapsed = perf_counter() - StartTime

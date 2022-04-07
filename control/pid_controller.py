@@ -132,7 +132,7 @@ class PID_Controller():
 
     def gearing(self, ThetaSignal):
         # Convert theta to motor angle.
-        ControlSignal = ThetaSignal * np.array([20 / 3, 10])
+        ControlSignal = ThetaSignal * np.array([11.25, 15])
         return ControlSignal
 
     def saturation_clamp(self, ControlSignal):
