@@ -27,7 +27,7 @@ from control.calibrator import Calibrator
 from control.timing_controller import TimingController
 from control.performance_log import PerformanceLog
 from motor_control.motor_control import motor_reset, motor_angle
-from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, Ks, Kst, BufferSize, SaturationLimit, MinTheta, MazeSize, CheckpointRadius, HSVLimitsBlue, HSVLimitsGreen
+from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, PMax, Ks, Kst, BufferSize, SaturationLimit, MinTheta, MazeSize, CheckpointRadius, HSVLimitsBlue, HSVLimitsGreen
 
 def full_system():
 
@@ -133,7 +133,7 @@ def full_system():
 
             ''' INITIALISE PID CONTROL '''
             # Initialise PID controller object, see control/pid_controller.py for more information.
-            PID_Controller_ = PID_Controller(Kp, Ki, Kd, Ks, Kst, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta)
+            PID_Controller_ = PID_Controller(Kp, Ki, Kd, PMax, Ks, Kst, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta)
             ''' INITIALISE PID CONTROL '''
 
             ''' INITIALISE CALIBRATOR '''

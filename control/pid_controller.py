@@ -11,7 +11,7 @@ import numpy as np
 
 class PID_Controller():
 
-    def __init__(self, Kp, Ki, Kd, Ks, Kst, SetPoint, BufferSize, SaturationLimit, MinTheta):
+    def __init__(self, Kp, Ki, Kd, PMax, Ks, Kst, SetPoint, BufferSize, SaturationLimit, MinTheta):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
         if type(SetPoint) != np.ndarray:
             raise TypeError("SetPoint should be given in a size 2 numpy array.")
@@ -19,6 +19,7 @@ class PID_Controller():
             raise ValueError("SetPoint should be given in a size 2 numpy array.")
 
         self.Kp = Kp # Proportional coefficient.
+        self.PMax = PMax # Maximum proportional term allowed. 
         self.Ki = Ki # Integral coefficient.
         self.Kd = Kd # Derivative coefficient.
         self.Ks = Ks # Static boost coefficient.
@@ -61,6 +62,18 @@ class PID_Controller():
         self.ErrorBuffer[0:3] = np.roll(self.ErrorBuffer[0:3], -1, 1) # Shifts error buffer to the left.
         self.ErrorBuffer[0:3, self.BufferSize - 1] = TimeStep + self.ErrorBuffer[0, self.BufferSize - 2], ErrorValue[0], ErrorValue[1] # Update rightmost values.
         self.BufferIteration += 1 # Update buffer iteration number.
+
+    def proportional_cap(self, ProportionalTerm):
+        # Limit the proportional term to a maximum.
+        if ProportionalTerm[0] > self.PMax[0]:
+            ProportionalTerm[0] = self.PMax[0]
+        elif ProportionalTerm[0] < -self.PMax[0]:
+            ProportionalTerm[0] = -self.PMax[0]
+        if ProportionalTerm[1] > self.PMax[1]:
+            ProportionalTerm[1] = self.PMax[1]
+        elif ProportionalTerm[1] < -self.PMax[1]:
+            ProportionalTerm[1] = -self.PMax[1]
+        return ProportionalTerm
 
     def conditional_integrator(self, ErrorValue, TimeStep):
         # Conditional integrator, clamps if ControlSignal is saturated and the error is the same sign as the integral.
@@ -151,6 +164,7 @@ class PID_Controller():
 
         # Calculate PID terms and control signal.
         ProportionalTerm = self.Kp * ErrorValue
+        ProportionalTerm = self.proportional_cap(ProportionalTerm) # Limit the proportional term to a maximum.
         IntegralTerm = self.Ki * ErrorIntegral
         DerivativeTerm = self.Kd * ErrorDerivative
         ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.

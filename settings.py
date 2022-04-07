@@ -45,6 +45,9 @@ Kp = 1.2e-3
 Ki = 3e-4
 Kd = 6e-4
 
+# Maximum proportional term allowed.
+PMax = 2
+
 # Static boost coefficient.
 Ks = 2
 
