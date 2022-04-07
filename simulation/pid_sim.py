@@ -235,7 +235,7 @@ def pid_sim():
                         ControlSignal = PID_Output[0]
 
                         # Convert control signal into actual Theta (based on measurements).
-                        Theta = ControlSignal * np.array([11.25, 15])
+                        Theta = ControlSignal * np.array([0.088888888, 0.6])
                     ''' PID CONTROL END'''
 
                     ''' MOTOR CONTROL START'''
