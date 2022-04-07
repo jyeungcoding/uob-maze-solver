@@ -19,7 +19,7 @@ class PID_Controller():
             raise ValueError("SetPoint should be given in a size 2 numpy array.")
 
         self.Kp = Kp # Proportional coefficient.
-        self.PMax = PMax # Maximum proportional term allowed. 
+        self.PMax = PMax # Maximum proportional term allowed.
         self.Ki = Ki # Integral coefficient.
         self.Kd = Kd # Derivative coefficient.
         self.Ks = Ks # Static boost coefficient.
@@ -65,14 +65,14 @@ class PID_Controller():
 
     def proportional_cap(self, ProportionalTerm):
         # Limit the proportional term to a maximum.
-        if ProportionalTerm[0] > self.PMax[0]:
-            ProportionalTerm[0] = self.PMax[0]
-        elif ProportionalTerm[0] < -self.PMax[0]:
-            ProportionalTerm[0] = -self.PMax[0]
-        if ProportionalTerm[1] > self.PMax[1]:
-            ProportionalTerm[1] = self.PMax[1]
-        elif ProportionalTerm[1] < -self.PMax[1]:
-            ProportionalTerm[1] = -self.PMax[1]
+        if ProportionalTerm[0] > self.PMax:
+            ProportionalTerm[0] = self.PMax
+        elif ProportionalTerm[0] < -self.PMax:
+            ProportionalTerm[0] = -self.PMax
+        if ProportionalTerm[1] > self.PMax:
+            ProportionalTerm[1] = self.PMax
+        elif ProportionalTerm[1] < -self.PMax:
+            ProportionalTerm[1] = -self.PMax
         return ProportionalTerm
 
     def conditional_integrator(self, ErrorValue, TimeStep):
