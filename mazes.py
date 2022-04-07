@@ -55,8 +55,19 @@ for Point in Maze3Points:
 ''' MAZE 3 END '''
 """
 
+''' MAZE 3 START '''
+Ball3 = Ball(np.array([FrameSide[0] + 142, FrameSide[1] + 17]))
+
+Maze3 = Maze(Ball3, [], [], [])
+
 # Please replace these with the actual mazes.
-Maze3 = CircleMaze
+Maze3Points = ((135, 9), (4, 3), (4, 108), (30, 107), (108, 63), (109, 146), (58, 147), (50, 119), (3, 184), (4, 224), (68, 224), (98, 160), (132, 198), (178, 124), (122, 146), (123, 81), (219, 51), (163, 4), (271, 4), (271, 50), (232, 67), (271, 113), (233, 149), (271, 224), (222, 222), (192, 164), (194, 222), (84, 220))
+
+for Point in Maze3Points:
+    Coordinates = np.array([Point[0], Point[1]]) + FrameSide
+    Checkpoint_ = Checkpoint(Coordinates)
+    Maze3.Checkpoints.append(Checkpoint_)
+''' MAZE 3 END '''
 
 if __name__ == "__main__":
     if type(Maze1) != Maze:
