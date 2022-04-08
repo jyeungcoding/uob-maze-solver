@@ -8,8 +8,8 @@ import numpy as np
 from math import pi
 
 # Import objects and settings.
-from simulation.objects import CircleMaze
-from objects import Maze, Ball, Checkpoint
+from simulation.objects import CircleMaze, SandboxMaze
+from objects import Maze, Ball, Wall, Hole, Checkpoint
 from settings import FrameSize, MazeSize
 
 # Calculate width of frame side.
@@ -27,7 +27,8 @@ Wall(np.array([154,0]), np.array([6,47]))
 ]
 
 Holes1 = [
-Hole(np.array([20,20])),
+Hole(np.array([80, 200])),
+Hole(np.array([200, 200]))
 ]
 
 Maze1 = Maze(Ball1, Walls1, Holes1, [])
