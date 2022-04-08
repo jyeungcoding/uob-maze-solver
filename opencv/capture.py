@@ -6,7 +6,7 @@ import time
 import cv2
 import numpy as np
 
-camera = PiCamera(sensor_mode=4)
+camera = PiCamera(sensor_mode=4, resolution = (1024, 768))
 camera.framerate=20
 rawCapture = PiRGBArray(camera, size=(640, 480))
 time.sleep(0.2)
