@@ -105,8 +105,31 @@ Wall(np.array([124,134]), np.array([6,43])),
 Wall(np.array([40,140]), np.array([6,29])),
 Wall(np.array([25,150]), np.array([20,6])),
 Wall(np.array([0,196]), np.array([46,6])),
-Wall(np.array([43,185]), np.array([6,55]))
+Wall(np.array([43,185]), np.array([6,55])),
+Wall(np.array([177,14]), np.array([98,6])),
+Wall(np.array([112,46]), np.array([6,40])),
+Wall(np.array([115,59]), np.array([47,6])),
+Wall(np.array([157,64]), np.array([6,87])),
+Wall(np.array([160,142]), np.array([18,6])),
+Wall(np.array([135,87]), np.array([6,28])),
+Wall(np.array([91,160]), np.array([6,70])),
+Wall(np.array([66,183]), np.array([28,6])),
+Wall(np.array([94,195]), np.array([110,6])),
+Wall(np.array([181,166]), np.array([6,32])),
+Wall(np.array([224,176]), np.array([6,54])),
+Wall(np.array([239,71]), np.array([36,6])),
+Wall(np.array([222,34]), np.array([25,6])),
+Wall(np.array([222,34]), np.array([6,14])),
+Wall(np.array([180,65]), np.array([27,6])),
+Wall(np.array([180,65]), np.array([6,10])),
+Wall(np.array([201,55]), np.array([6,12])),
+Wall(np.array([209,102]), np.array([66,6])),
+Wall(np.array([209,102]), np.array([6,40])),
+Wall(np.array([185,116]), np.array([28,6])),
+Wall(np.array([213,136]), np.array([33,6])),
+Wall(np.array([239,140]), np.array([6,21]))
 ]
+
 
 Holes2 = [
 Hole(np.array([31,45])),
