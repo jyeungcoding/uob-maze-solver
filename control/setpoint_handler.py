@@ -5,6 +5,7 @@ This file contains the set point handler.
 
 # Import modules.
 import numpy as np
+from sympy import Point, Segment, Circle
 
 class SetPointHandler():
 
@@ -48,17 +49,17 @@ class SetPointHandler():
     def update(self, BallPosition, CurrentTime):
         if ((BallPosition[0] - self.SetPoint[0]) ** 2 + (BallPosition[1] - self.SetPoint[1]) ** 2) ** 0.5 < self.CheckpointRadius:
             if self.SetPointReached == False:
-                self.SetPointReached = True
                 self.StartTime = CurrentTime
-                self.NewSetPoint = False
-            else:
-                if CurrentTime - self.LastTime >= self.SetPointTime:
-                    self.new_setpoint()
-                    self.SetPointReached = False
-                    self.NewSetPoint = True
-        else:
-            self.SetPointReached = False
             self.NewSetPoint = False
+            self.SetPointReached = True
+        else:
+            self.NewSetPoint = False
+            self.SetPointReached = False
+
+        if self.SetPointReached == True and CurrentTime - self.LastTime >= self.SetPointTime:
+            self.new_setpoint()
+            self.NewSetPoint = True
+            self.SetPointReached = False
 
         return self.MazeCompleted, self.NewSetPoint, self.Checkpoints
 
