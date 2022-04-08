@@ -5,7 +5,6 @@ This file contains the set point handler.
 
 # Import modules.
 import numpy as np
-from sympy import Point, Segment, Circle
 
 class SetPointHandler():
 
