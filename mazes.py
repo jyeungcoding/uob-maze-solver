@@ -63,6 +63,30 @@ Hole(np.array([239, 86])),
 Hole(np.array([240, 170]))
 ]
 
+for Wall_ in Walls1:
+    Wall_.S = Wall_.S + FrameSide
+
+for Hole_ in Holes1:
+    Hole_.S = Hole_.S + FrameSide
+
+Maze1 = Maze(Ball1, Walls1, Holes1, [])
+
+Maze1Points = ((124, 8), (70, 8, (10, 1.2, np.array([None, None]))), (7, 107), (100, 68), (105, 110), (85, 146), (55, 122, (6, 1, np.array([None, None]))), (5, 180, (8, 0, np.array([-pi/4, pi/4]))), (64, 225), (68, 168), (90, 170), (95, 197), (120, 197), (118, 165), (171, 135, (8, 1, np.array([None, None]))), (130, 142), (125, 93, (8, 1, np.array([-pi/5, None]))), (218, 71), (163, 7), (270, 7), (270, 49), (233, 67), (269, 113), (233, 148), (268, 180), (231, 220), (192, 168, (8, 0, np.array([-pi/4, None]))), (92, 222))
+
+for Point in Maze1Points:
+    if len(Point) == 2:
+        Coordinates = np.array([Point[0], Point[1]]) + FrameSide
+        Checkpoint_ = Checkpoint(Coordinates)
+        Maze1.Checkpoints.append(Checkpoint_)
+    elif len(Point) == 3:
+        Coordinates = np.array([Point[0], Point[1]]) + FrameSide
+        Checkpoint_ = Checkpoint(Coordinates, True, Point[2][0], Point[2][1], Point[2][2]) # Order: radius, time, hard control signal.
+        Maze1.Checkpoints.append(Checkpoint_)
+''' MAZE 1 END '''
+
+''' MAZE 2 START '''
+Ball2 = Ball(np.array([FrameSide[0] + 158, FrameSide[1] + 12]))
+
 Walls2 = [
 Wall(np.array([41,0]), np.array([6,35])),
 Wall(np.array([0,30]), np.array([44,6])),
@@ -104,31 +128,13 @@ Hole(np.array([238,86])),
 Hole(np.array([238,170]))
 ]
 
-for Wall in Walls1:
-    Wall.S = Wall.S + FrameSide
+for Wall_ in Walls2:
+    Wall_.S = Wall_.S + FrameSide
 
-for Hole in Holes1:
-    Hole.S = Hole.S + FrameSide
+for Hole_ in Holes2:
+    Hole_.S = Hole_.S + FrameSide
 
-Maze1 = Maze(Ball1, Walls1, Holes1, [])
-
-Maze1Points = ((124, 8), (70, 8, (10, 1.2, np.array([None, None]))), (7, 107), (100, 68), (105, 110), (85, 146), (55, 122, (6, 1, np.array([None, None]))), (5, 180, (8, 0, np.array([-pi/4, pi/4]))), (64, 225), (68, 168), (90, 170), (95, 197), (120, 197), (118, 165), (171, 135, (8, 1, np.array([None, None]))), (130, 142), (125, 93, (8, 1, np.array([-pi/5, None]))), (218, 71), (163, 7), (270, 7), (270, 49), (233, 67), (269, 113), (233, 148), (268, 180), (231, 220), (192, 168, (8, 0, np.array([-pi/4, None]))), (92, 222))
-
-for Point in Maze1Points:
-    if len(Point) == 2:
-        Coordinates = np.array([Point[0], Point[1]]) + FrameSide
-        Checkpoint_ = Checkpoint(Coordinates)
-        Maze1.Checkpoints.append(Checkpoint_)
-    elif len(Point) == 3:
-        Coordinates = np.array([Point[0], Point[1]]) + FrameSide
-        Checkpoint_ = Checkpoint(Coordinates, True, Point[2][0], Point[2][1], Point[2][2]) # Order: radius, time, hard control signal.
-        Maze1.Checkpoints.append(Checkpoint_)
-''' MAZE 1 END '''
-
-''' MAZE 2 START '''
-Ball2 = Ball(np.array([FrameSide[0] + 158, FrameSide[1] + 12]))
-
-Maze2 = Maze(Ball2, [], [], [])
+Maze2 = Maze(Ball2, Walls2, Holes2, [])
 
 Maze2Points = ((160, 11), (52, 12), (43, 77), (76, 127), (5, 119), (4, 190), (39, 190), (87, 178), (75, 141), (120, 141), (119, 190), (130, 190), (142, 189), (143, 170), (142, 149), (140, 136), (128, 117), (113, 103), (90, 102), (107, 26), (123, 27), (121, 54), (196, 59), (184, 24), (266, 23), (267, 67), (205, 87), (166, 136), (205, 125), (220, 221), (101, 220))
 
