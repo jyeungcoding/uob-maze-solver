@@ -49,7 +49,7 @@ class SetPointHandler():
     def update(self, BallPosition, CurrentTime):
         if ((BallPosition[0] - self.SetPoint[0]) ** 2 + (BallPosition[1] - self.SetPoint[1]) ** 2) ** 0.5 < self.CheckpointRadius:
             if self.SetPointReached == False:
-                self.StartTime = CurrentTime
+                self.LastTime = CurrentTime
             self.NewSetPoint = False
             self.SetPointReached = True
         else:
