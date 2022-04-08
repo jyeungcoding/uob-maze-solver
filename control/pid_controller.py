@@ -14,10 +14,6 @@ class PID_Controller():
 
     def __init__(self, Kp, Ki, Kd, PMax, Ks, Kst, SetPoint, BufferSize, SaturationLimit, MinTheta):
         # SetPoint and SaturationLimit should be provided in a numpy vector, Size 2.
-        if type(SetPoint) != np.ndarray:
-            raise TypeError("SetPoint should be given in a size 2 numpy array.")
-        elif SetPoint.shape != (2,):
-            raise ValueError("SetPoint should be given in a size 2 numpy array.")
 
         self.Kp = Kp # Proportional coefficient.
         self.PMax = PMax # Maximum proportional term allowed.
@@ -25,7 +21,8 @@ class PID_Controller():
         self.Kd = Kd # Derivative coefficient.
         self.Ks = Ks # Static boost coefficient.
         self.Kst = Kst # Static boost length coefficient. Higher numbers produce a shorter static boost.
-        self.SetPoint = SetPoint # Current set point.
+        self.SetPoint = SetPoint.S # Current set point.
+        self.Special = False # Normal set point by default.
         self.BufferSize = BufferSize # Number of error values to store in the buffer.
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Initialise error buffer (with additional rows for linear regression).
         self.BufferIteration = 0 # Record buffer iteration number.
@@ -36,15 +33,24 @@ class PID_Controller():
         self.SaturationLimit = SaturationLimit # Control signal maximum angle limit.
         self.MinTheta = MinTheta # Minimum output theta.
 
+        if SetPoint.Special == True: # PID control is overridden if there is a HardControlSignal.
+            self.Special = True
+            self.HardControlSignal = SetPoint.HardControlSignal
+
     def __repr__(self):
         # Makes the class printable.
         return "PID Controller(Kp: %s, Ki: %s, Kd: %s, Set Point: %s)" % (self.Kp, self.Ki, self.Kd, self.SetPoint)
 
     def new_setpoint(self, SetPoint):
-        self.SetPoint = SetPoint # Set new set point.
+        self.SetPoint = SetPoint.S # Set new set point.
+        self.Special = False # Normal set point by default.
         self.ErrorIntegral = np.array([0.0, 0.0]) # Reset error integral.
         self.ErrorBuffer = np.zeros((9, self.BufferSize)) # Reset error buffer.
         self.BufferIteration = 0 # Reset buffer iteration number.
+
+        if SetPoint.Special == True: # PID control is overridden if there is a HardControlSignal.
+            self.Special = True
+            self.HardControlSignal = SetPoint.HardControlSignal
 
     def calibrate(self, ControlSignalCalibrated):
         # Theta for zero tilt. Change after calibration.
@@ -178,11 +184,8 @@ class PID_Controller():
         ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
 
-        if self.SetPoint[0] == 5 and self.SetPoint[1] == 160:
-            ControlSignal[0] = pi / 4.5
-            ControlSignal[0] = pi / 4.5
-        if self.SetPoint[0] == 192 and self.SetPoint[1] == 168:
-            ControlSignal[0] = pi / 4.5
+        if self.Special == True:
+            ControlSignal = self.HardControlSignal
 
         return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost
 

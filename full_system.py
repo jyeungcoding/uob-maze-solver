@@ -139,7 +139,7 @@ def full_system():
 
             ''' INITIALISE PID CONTROL '''
             # Initialise PID controller object, see control/pid_controller.py for more information.
-            PID_Controller_ = PID_Controller(Kp, Ki, Kd, PMax, Ks, Kst, ActiveMaze.Checkpoints[0].S, BufferSize, SaturationLimit, MinTheta)
+            PID_Controller_ = PID_Controller(Kp, Ki, Kd, PMax, Ks, Kst, ActiveMaze.Checkpoints[0], BufferSize, SaturationLimit, MinTheta)
             ''' INITIALISE PID CONTROL '''
 
             ''' INITIALISE CALIBRATOR '''
@@ -147,10 +147,6 @@ def full_system():
             ControlSignal = np.array([0, 0]) # Start at 0.
             ControlSignalCalibrated = np.array([0, 0]) # Record control signal angle for 'true' level after calibration.
             ''' INITIALISE CALIBRATOR '''
-
-            ''' INITIALISE SET POINT HANDLER '''
-            SetPointHandler_ = SetPointHandler(ActiveMaze.Checkpoints[0].S, CheckpointRadius, SetPointTime)
-            ''' INITIALISE SET POINT HANDLER '''
 
             ''' INITIALISE MOTOR CONTROL '''
             motor_reset()
@@ -188,6 +184,10 @@ def full_system():
                 Image = Frame.array # Store the array from the frame object.
                 ActiveMaze.Ball.Active, ActiveMaze.Ball.S = ImageProcessor_.update(perf_counter(), Image)
             """ IMAGE PROCESSOR INITIALISATION END """
+
+            ''' INITIALISE SET POINT HANDLER '''
+            SetPointHandler_ = SetPointHandler(ActiveMaze.Ball.S, perf_counter(), ActiveMaze.Checkpoints, CheckpointRadius, SetPointTime)
+            ''' INITIALISE SET POINT HANDLER '''
 
             while SystemRunning == 1:
 
@@ -257,14 +257,9 @@ def full_system():
                     else:
                         ''' SET POINT HANDLING '''
                         # Use the set point handler to determine if a set point has been completed.
-                        SetPointCompleted = SetPointHandler_.update(ActiveMaze.Ball.S, perf_counter())
-                        if SetPointCompleted == True:
-                            if len(ActiveMaze.Checkpoints) > 1:
-                                ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
-                                SetPointHandler_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point to set point handler.
-                                PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0].S) # Assign new set point to PID controller.
-                            elif len(ActiveMaze.Checkpoints) == 1:
-                                Completed = 1 # If the last checkpoint has been reached, the program has been completed.
+                        Completed, NewSetPoint, ActiveMaze.Checkpoints = SetPointHandler_.update(ActiveMaze.Ball.S, perf_counter())
+                        if NewSetPoint == True:
+                            PID_Controller_.new_setpoint(ActiveMaze.Checkpoints[0]) # Assign first checkpoint as the set point.
                         ''' SET POINT HANDLING '''
 
                     ''' PID CONTROL START '''

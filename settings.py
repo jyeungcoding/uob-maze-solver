@@ -67,11 +67,12 @@ SaturationLimit = np.array([pi / 3.5, pi / 3.5])
 CalibrationTolerance = 2 # [mm]
 
 # Time before calibrated.
-CalibrationTime = 3 # [s]
+CalibrationTime = 2.5 # [s]
 
 # How close the ball has to be to each checkpoint.
 CheckpointRadius = 8 # [mm]
 
+# Time the ball has to stay within the set point to "pass" it.
 SetPointTime = 0
 
 ''' SIMULATION SETTINGS '''

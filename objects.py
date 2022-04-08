@@ -211,7 +211,7 @@ class Hole():
 
 class Checkpoint():
     # Class for checkpoints.
-    def __init__(self, Position):
+    def __init__(self, Position, Special = False, Radius = None, Time = None, HardControlSignal = None):
         # Position and Size should be provided in numpy vectors, Size 2.
         if type(Position) != np.ndarray:
             raise TypeError("Position should be given in a size 2 numpy array.")
@@ -219,10 +219,14 @@ class Checkpoint():
             raise ValueError("Position should be given in a size 2 numpy array.")
 
         self.S = Position # [mm]
+        self.Special = Special # Set to true if there are optional args.
+        self.Radius = Radius # Custom radius.
+        self.Time = Time # Custom time to "pass".
+        self.HardControlSignal = HardControlSignal # Custom control signal output.
 
     def __repr__(self):
         # Printable.
-        return "Checkpoint(Position: %s)" % (np.round(self.S, 1))
+        return "Checkpoint(Position: %s, Special: %s)" % (np.round(self.S, 1), self.Special)
 
 class Maze():
     # Class for full model of maze.
