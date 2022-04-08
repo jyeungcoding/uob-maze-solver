@@ -18,7 +18,19 @@ FrameSide = (FrameSize - MazeSize) / 2
 ''' MAZE 1 START '''
 Ball1 = Ball(np.array([FrameSide[0] + 123, FrameSide[1] + 8]))
 
-Maze1 = Maze(Ball1, [], [], [])
+Walls1 = [
+Wall(np.array([154,0]), np.array([6,47])),
+Wall(np.array([154,0]), np.array([6,47])),
+Wall(np.array([154,0]), np.array([6,47])),
+Wall(np.array([154,0]), np.array([6,47])),
+Wall(np.array([154,0]), np.array([6,47]))
+]
+
+Holes1 = [
+Hole(np.array([20,20])),
+]
+
+Maze1 = Maze(Ball1, Walls1, Holes1, [])
 
 Maze1Points = ((124, 10), (70, 10), (7, 107), (100, 68), (105, 110), (68, 148), (48, 130), (5, 180, (8, 0, np.array([-pi/4, pi/4]))), (12, 225), (64, 225), (68, 168), (90, 170), (95, 197), (120, 197), (118, 165), (171, 148), (135, 145), (125, 93), (218, 71), (163, 7), (270, 7), (270, 49), (233, 67), (269, 113), (233, 148), (268, 180), (231, 210), (192, 168), (84, 222))
 
