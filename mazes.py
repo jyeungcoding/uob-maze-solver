@@ -46,7 +46,7 @@ Wall(np.array([255, 56]), np.array([20, 6])),
 Wall(np.array([250, 119]), np.array([25, 6])),
 Wall(np.array([228, 154]), np.array([18, 6])),
 Wall(np.array([182, 96]), np.array([40, 6])),
-Wall(np.array([102, 102]), np.array([6, 106])),
+Wall(np.array([182, 102]), np.array([6, 106])),
 Wall(np.array([188, 154]), np.array([34, 6])),
 Wall(np.array([210, 196]), np.array([6, 34]))
 ]
