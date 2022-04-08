@@ -15,6 +15,7 @@ class SetPointHandler():
         self.DefaultSetPointTime = SetPointTime
         self.DefaultCheckpointRadius = CheckpointRadius
 
+        self.SetPoint = self.Checkpoints[0].S
         if self.Checkpoints[0].Special == True:
             self.SetPointTime = self.Checkpoints[0].Time
             self.CheckpointRadius = self.Checkpoints[0].Radius
@@ -23,7 +24,6 @@ class SetPointHandler():
             self.CheckpointRadius = self.DefaultCheckpointRadius
 
         # Initialise values.
-        self.SetPoint = self.Checkpoints[0].S
         self.LastTime = CurrentTime
         self.SetPointReached = False
         self.MazeCompleted = 0
@@ -36,6 +36,7 @@ class SetPointHandler():
     def new_setpoint(self):
         if len(self.Checkpoints) > 1:
             self.Checkpoints.pop(0) # Delete current checkpoint.
+            self.SetPoint = self.Checkpoints[0].S
             if self.Checkpoints[0].Special == True:
                 self.SetPointTime = self.Checkpoints[0].Time
                 self.CheckpointRadius = self.Checkpoints[0].Radius
@@ -47,8 +48,6 @@ class SetPointHandler():
 
     def update(self, BallPosition, CurrentTime):
         if ((BallPosition[0] - self.SetPoint[0]) ** 2 + (BallPosition[1] - self.SetPoint[1]) ** 2) ** 0.5 < self.CheckpointRadius:
-            print(((BallPosition[0] - self.SetPoint[0]) ** 2 + (BallPosition[1] - self.SetPoint[1]) ** 2) ** 0.5)
-            print(self.CheckpointRadius)
             if self.SetPointReached == False:
                 self.StartTime = CurrentTime
             self.NewSetPoint = False
