@@ -120,7 +120,7 @@ CheckpointColours = {
 pygame.font.init()
 # Create fonts.
 HeaderFont = pygame.font.SysFont("Times New Roman", 30) # Scaling handled internally.
-TextFont = pygame.font.SysFont("Times New Roman", round(20 * DisplayScale))
+TextFont = pygame.font.SysFont("Times New Roman", round(19 * DisplayScale))
 ButtonFont = pygame.font.SysFont("Times New Roman", 22) # Scaling handled internally.
 
 if __name__ == "__main__":

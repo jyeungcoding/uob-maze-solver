@@ -130,6 +130,11 @@ def full_system():
             # Generate ball, add to ActiveSprites.
             SpriteBall_ = initialise_ball(ActiveMaze.Ball)
             ActiveSprites.add(SpriteBall_, layer = 7)
+
+            # Initialise starting display values.
+            ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost = \
+            np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0])
+            Saturation = np.array([False, False])
             ''' PYGAME GRAPHICS END '''
 
             ''' INITIALISE PID CONTROL '''
@@ -242,7 +247,6 @@ def full_system():
                         BallLost = 1 # If ball is lost.
                     ''' IMAGE DETECTION END '''
 
-                    ''' PID CONTROL START '''
                     if CalibrationDone == 0:
                         ''' CALIBRATION START '''
                         # Calibrate to record level theta.
@@ -263,10 +267,10 @@ def full_system():
                                 Completed = 1 # If the last checkpoint has been reached, the program has been completed.
                         ''' SET POINT HANDLING '''
 
+                    ''' PID CONTROL START '''
                     # Calculate control signal using the PID controller.
-                    PID_Output = PID_Controller_.update(ActiveMaze.Ball.S, ControlTimeStep)
+                    ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost = PID_Controller_.update(ActiveMaze.Ball.S, ControlTimeStep)
                     Saturation = PID_Controller_.Saturation # For display.
-                    ControlSignal = PID_Output[0]
                     ''' PID CONTROL END'''
                     # Make sure you deal with the cases where no control signal is generated when Active == False.
                     ''' MOTOR CONTROL START'''
@@ -284,12 +288,13 @@ def full_system():
                 DisplayValues = {
                 0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
-                2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
-                3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
-                4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[3][0]), degrees(PID_Output[3][1])), # D.
-                5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
-                6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
-                7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
+                2 : "( {0:.1f} , {1:.1f} )".format(degrees(ProportionalTerm[0]), degrees(ProportionalTerm[1])), # P.
+                3 : "( {0:.1f} , {1:.1f} )".format(degrees(IntegralTerm[0]), degrees(IntegralTerm[1])), # I.
+                4 : "( {0:.1f} , {1:.1f} )".format(degrees(DerivativeTerm[0]), degrees(DerivativeTerm[1])), # D.
+                5 : "( {0:.1f} , {1:.1f} )".format(degrees(StaticBoost[0]), degrees(StaticBoost[1])), # Static boost.
+                6 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
+                7 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
+                8 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
                 }
 
                 ''' PYGAME GRAPHICS START '''

@@ -68,29 +68,31 @@ def initialise_keys():
     # Generate ouput text keys.
     SpriteKeys = (
     SpriteText("Time Elapsed [s]: ", np.array([515, 65])),
-    SpriteText("Position [mm]: ", np.array([515, 100])),
-    SpriteText("P [°]: ", np.array([515, 135])),
-    SpriteText("I [°]: ", np.array([515, 170])),
-    SpriteText("D [°]: ", np.array([515, 205])),
-    SpriteText("Saturation: ", np.array([515, 240])),
-    SpriteText("Control Signal [°]: ", np.array([515, 275])),
-    SpriteText("Theta [°]: ", np.array([515, 310]))
+    SpriteText("Position [mm]: ", np.array([515, 96])),
+    SpriteText("P [°]: ", np.array([515, 127])),
+    SpriteText("I [°]: ", np.array([515, 158])),
+    SpriteText("D [°]: ", np.array([515, 189])),
+    SpriteText("Static Boost [°]: ", np.array([515, 220])),
+    SpriteText("Saturation: ", np.array([515, 251])),
+    SpriteText("Control Signal [°]: ", np.array([515, 282])),
+    SpriteText("Theta [°]: ", np.array([515, 313]))
     )
     return SpriteKeys
 
 def initialise_values():
     # Initialise ouput text values.
-    Sprites = (
-    SpriteText("0.0s", np.array([664, 65])),
-    SpriteText("( 0.0 , 0.0 )", np.array([644, 100])),
-    SpriteText("( 0.0 , 0.0 )", np.array([563, 135])),
-    SpriteText("( 0.0 , 0.0 )", np.array([560, 170])),
-    SpriteText("( 0.0 , 0.0 )", np.array([567, 205])),
-    SpriteText("( False , False )", np.array([610, 240])),
-    SpriteText("( 0.0 , 0.0 )", np.array([672, 275])),
-    SpriteText("( 0.0 , 0.0 )", np.array([599, 310]))
+    SpriteValues = (
+    SpriteText("0.0s", np.array([658, 65])),
+    SpriteText("( 0.0 , 0.0 )", np.array([640, 96])),
+    SpriteText("( 0.0 , 0.0 )", np.array([565, 127])),
+    SpriteText("( 0.0 , 0.0 )", np.array([561, 158])),
+    SpriteText("( 0.0 , 0.0 )", np.array([569, 189])),
+    SpriteText("( 0.0 , 0.0 )", np.array([647, 220])),
+    SpriteText("( False , False )", np.array([608, 251])),
+    SpriteText("( 0.0 , 0.0 )", np.array([668, 282])),
+    SpriteText("( 0.0 , 0.0 )", np.array([598, 313]))
     )
-    return Sprites
+    return SpriteValues
 
 def initialise_dirty_group(Maze):
     # Create dirty sprite group.

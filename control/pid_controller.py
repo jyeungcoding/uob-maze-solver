@@ -115,8 +115,11 @@ class PID_Controller():
 
     def static_boost(self, ThetaSignal, ErrorDerivative):
         if self.Calibrated == True: # Only apply static boost when the controller is calibrated.
-            ThetaSignal += self.Ks * np.sign(ThetaSignal) * np.exp(-self.Kst * np.absolute(ErrorDerivative))
-        return ThetaSignal
+            StaticBoost = self.Ks * np.sign(ThetaSignal) * np.exp(-self.Kst * np.absolute(ErrorDerivative))
+            ThetaSignal += StaticBoost
+        else:
+            StaticBoost = np.array([0, 0])
+        return ThetaSignal, StaticBoost
 
     def min_theta(self, ThetaSignal):
         # Apply minimum theta if necessary.
@@ -169,7 +172,7 @@ class PID_Controller():
         IntegralTerm = self.Ki * ErrorIntegral
         DerivativeTerm = self.Kd * ErrorDerivative
         ThetaSignal = ProportionalTerm + IntegralTerm + DerivativeTerm # Calculate control signal.
-        ThetaSignal = self.static_boost(ThetaSignal, ErrorDerivative) # Extra angle to help ball overcome static friction.
+        ThetaSignal, StaticBoost = self.static_boost(ThetaSignal, ErrorDerivative) # Extra angle to help ball overcome static friction.
         ThetaSignal = self.min_theta(ThetaSignal) # Apply minimum theta if necessary.
         ControlSignal = self.gearing(ThetaSignal) # Convert theta to motor angle.
         ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
@@ -180,8 +183,8 @@ class PID_Controller():
             ControlSignal[0] = pi / 4.5
         if self.SetPoint[0] == 192 and self.SetPoint[1] == 168:
             ControlSignal[0] = pi / 4.5
-            
-        return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm
+
+        return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost
 
 if __name__ == "__main__":
     import doctest

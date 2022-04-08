@@ -147,7 +147,8 @@ def pid_sim():
             ControlSignal = np.array([0.0, 0.0])
             Theta = np.array([0.0, 0.0]) # Theta (radians) should be a size 2 vector of floats.
             Saturation = np.array([False, False])
-            PID_Output = [np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0])]
+            ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost = \
+            np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, 0.0]) # Set starting values.
 
             # Start clock.
             TimeElapsed = 0
@@ -228,7 +229,7 @@ def pid_sim():
                         else:
                             ''' SET POINT HANDLING '''
                             # Use the set point handler to determine if a set point has been completed.
-                            SetPointCompleted = SetPointHandler_.update(ActiveMaze.Ball.S, perf_counter())
+                            SetPointCompleted = SetPointHandler_.update(ActiveMaze.Ball.S, time.perf_counter())
                             if SetPointCompleted == True:
                                 if len(ActiveMaze.Checkpoints) > 1:
                                     ActiveMaze.Checkpoints.pop(0) # Delete current checkpoint.
@@ -239,9 +240,8 @@ def pid_sim():
                             ''' SET POINT HANDLING '''
 
                         # Calculate control signal using the PID controller.
-                        PID_Output = PID_Controller_.update(ProcessVariable, ControlTimeStep)
+                        ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost = PID_Controller_.update(ActiveMaze.Ball.S, ControlTimeStep)
                         Saturation = PID_Controller_.Saturation # For display.
-                        ControlSignal = PID_Output[0]
 
                         # Convert control signal into actual Theta (based on measurements).
                         Theta = ControlSignal * np.array([0.088888888, 0.6])
@@ -259,12 +259,13 @@ def pid_sim():
                 DisplayValues = {
                 0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                 1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
-                2 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[1][0]), degrees(PID_Output[1][1])), # P.
-                3 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[2][0]), degrees(PID_Output[2][1])), # I.
-                4 : "( {0:.1f} , {1:.1f} )".format(degrees(PID_Output[3][0]), degrees(PID_Output[3][1])), # D.
-                5 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
-                6 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
-                7 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
+                2 : "( {0:.1f} , {1:.1f} )".format(degrees(ProportionalTerm[0]), degrees(ProportionalTerm[1])), # P.
+                3 : "( {0:.1f} , {1:.1f} )".format(degrees(IntegralTerm[0]), degrees(IntegralTerm[1])), # I.
+                4 : "( {0:.1f} , {1:.1f} )".format(degrees(DerivativeTerm[0]), degrees(DerivativeTerm[1])), # D.
+                5 : "( {0:.1f} , {1:.1f} )".format(degrees(StaticBoost[0]), degrees(StaticBoost[1])), # Static boost. 
+                6 : "( {!s:^5} , {!s:^5} )".format(Saturation[0], Saturation[1]), # Saturation.
+                7 : "( {0:.1f} , {1:.1f} )".format(degrees(ControlSignal[0]), degrees(ControlSignal[1])), # Control signal.
+                8 : "( {0:.1f} , {1:.1f} )".format(degrees(Theta[0]), degrees(Theta[1])) # Theta.
                 }
 
                 ''' PYGAME GRAPHICS START '''
