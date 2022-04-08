@@ -379,8 +379,11 @@ def full_system():
                             Paused = 0
                         ''' IMAGE DETECTION END '''
 
+                    if Completed == 0:
+                        TimeElapsed = perf_counter() - StartTime
+
                     DisplayValues = {
-                    0 : "{0:.1f}".format(perf_counter() - StartTime), # Time elapsed.
+                    0 : "{0:.1f}".format(TimeElapsed), # Time elapsed.
                     1 : "( {0:.1f} , {1:.1f} )".format(ActiveMaze.Ball.S[0], ActiveMaze.Ball.S[1]), # Ball position.
                     }
 
