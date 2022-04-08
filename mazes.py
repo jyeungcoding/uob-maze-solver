@@ -20,16 +20,53 @@ Ball1 = Ball(np.array([FrameSide[0] + 123, FrameSide[1] + 8]))
 
 Walls1 = [
 Wall(np.array([154,0]), np.array([6,47])),
-Wall(np.array([154,0]), np.array([6,47])),
-Wall(np.array([154,0]), np.array([6,47])),
-Wall(np.array([154,0]), np.array([6,47])),
-Wall(np.array([154,0]), np.array([6,47]))
+Wall(np.array([160,41]), np.array([15,6])),
+Wall(np.array([37,15]), np.array([117,6])),
+Wall(np.array([37,21]), np.array([6,9])),
+Wall(np.array([18,47]), np.array([6,24])),
+Wall(np.array([24,53]), np.array([93,6])),
+Wall(np.array([111,59]), np.array([6,91])),
+Wall(np.array([117,72]), np.array([53,6])),
+Wall(np.array([54,150]), np.array([103,6])),
+Wall(np.array([102,156]), np.array([6,25])),
+Wall(np.array([48,144]), np.array([6,39])),
+Wall(np.array([28,177]), np.array([26,6])),
+Wall(np.array([0,141]), np.array([20,6])),
+Wall(np.array([0,111]), np.array([91,6])),
+Wall(np.array([34,96]), np.array([6,15])),
+Wall(np.array([70,96]), np.array([6,15])),
+Wall(np.array([74,181]), np.array([6,49])),
+Wall(np.array([80,203]), np.array([109,6])),
+Wall(np.array([136,186]), np.array([6,17])),
+Wall(np.array([196, 21]), np.array([21, 6])),
+Wall(np.array([211, 27]), np.array([6, 20])),
+Wall(np.array([217, 41]), np.array([24, 6])),
+Wall(np.array([222, 47]), np.array([6, 133])),
+Wall(np.array([255, 56]), np.array([20, 6])),
+Wall(np.array([250, 119]), np.array([25, 6])),
+Wall(np.array([228, 154]), np.array([18, 6])),
+Wall(np.array([182, 96]), np.array([40, 6])),
+Wall(np.array([102, 102]), np.array([6, 106])),
+Wall(np.array([188, 154]), np.array([34, 6])),
+Wall(np.array([210, 196]), np.array([6, 34]))
 ]
 
 Holes1 = [
-Hole(np.array([80, 200])),
-Hole(np.array([200, 200]))
+Hole(np.array([33, 44])),
+Hole(np.array([58, 102])),
+Hole(np.array([34, 163])),
+Hole(np.array([174, 191])),
+Hole(np.array([150, 118])),
+Hole(np.array([172, 60])),
+Hole(np.array([239, 86])),
+Hole(np.array([240, 170]))
 ]
+
+for Wall in Walls1:
+    Wall.S = Wall.S + FrameSide
+
+for Hole in Holes1:
+    Hole.S = Hole.S + FrameSide
 
 Maze1 = Maze(Ball1, Walls1, Holes1, [])
 
