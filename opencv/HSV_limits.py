@@ -10,6 +10,10 @@ from tkinter import ttk
 import cv2
 import numpy as np
 
+''' HSV Starting Limits '''
+HSVLimits = np.array([[70, 58, 0], [120, 201, 75]])
+''' HSV Starting Limits '''
+
 def value_changed(a):
 	# This function updates the value labels.
 	HMinValueLabel.config(text = HMin.get())
@@ -45,12 +49,12 @@ Image = cv2.imread(Path) # Load image.
 ImageHSV = cv2.cvtColor(Image, cv2.COLOR_BGR2HSV) # Convert image to HSV format.
 
 # Initialise limit values.
-HMin = IntVar(Root, 110)
-HMax = IntVar(Root, 120)
-SMin = IntVar(Root, 137)
-SMax = IntVar(Root, 224)
-VMin = IntVar(Root, 52)
-VMax = IntVar(Root, 118)
+HMin = IntVar(Root, HSVLimits[0][0])
+HMax = IntVar(Root, HSVLimits[1][0])
+SMin = IntVar(Root, HSVLimits[0][1])
+SMax = IntVar(Root, HSVLimits[1][1])
+VMin = IntVar(Root, HSVLimits[0][2])
+VMax = IntVar(Root, HSVLimits[1][2])
 
 # Create Slider Labels
 HMinLabel = ttk.Label(Root, text = 'Hue Min:')
