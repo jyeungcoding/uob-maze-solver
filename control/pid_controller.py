@@ -185,8 +185,10 @@ class PID_Controller():
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
 
         if self.Special == True:
-            if np.any(np.equal(self.HardControlSignal, np.array([None, None]))) != True:
-                ControlSignal = self.HardControlSignal
+            if self.HardControlSignal[0] != None:
+                ControlSignal[0] = self.HardControlSignal[0]
+            if self.HardControlSignal[1] != None:
+                ControlSignal[1] = self.HardControlSignal[1]
 
         return ControlSignal, ProportionalTerm, IntegralTerm, DerivativeTerm, StaticBoost
 
