@@ -43,8 +43,8 @@ def full_system():
     # Initialise clock for limiting framerate during the menu screens.
     Clock = pygame.time.Clock()
     # Initialise display surface.
-    Screen = pygame.display.set_mode((800 * DisplayScale, 480 * DisplayScale))
-    #Screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) # Fullscreen mode: only use on pi touchscreen.
+    #Screen = pygame.display.set_mode((800 * DisplayScale, 480 * DisplayScale))
+    Screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) # Fullscreen mode: only use on pi touchscreen.
     pygame.display.set_caption("PID Simulation")
 
     # Generate background.
