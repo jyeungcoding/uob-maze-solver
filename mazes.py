@@ -63,6 +63,47 @@ Hole(np.array([239, 86])),
 Hole(np.array([240, 170]))
 ]
 
+Walls2 = [
+Wall(np.array([41,0]), np.array([6,35])),
+Wall(np.array([0,30]), np.array([44,6])),
+Wall(np.array([33,53]), np.array([6,32])),
+Wall(np.array([0,81]), np.array([59,6])),
+Wall(np.array([174,0]), np.array([6,41])),
+Wall(np.array([66,18]), np.array([110,6])),
+Wall(np.array([66,21]), np.array([6,38])),
+Wall(np.array([69,54]), np.array([12,6])),
+Wall(np.array([0,109]), np.array([59,6])),
+Wall(np.array([80,83]), np.array([6,50])),
+Wall(np.array([83,106]), np.array([18,6])),
+Wall(np.array([66,132]), np.array([62,6])),
+Wall(np.array([66,132]), np.array([6,26])),
+Wall(np.array([124,134]), np.array([6,43])),
+Wall(np.array([40,140]), np.array([6,29])),
+Wall(np.array([25,150]), np.array([20,6])),
+Wall(np.array([0,196]), np.array([46,6])),
+Wall(np.array([43,185]), np.array([6,55]))
+]
+
+Holes2 = [
+Hole(np.array([31,45])),
+Hole(np.array([79,70])),
+Hole(np.array([58,100])),
+Hole(np.array([57,141])),
+Hole(np.array([33,163])),
+Hole(np.array([59,192])),
+Hole(np.array([104,158])),
+Hole(np.array([80,71])),
+Hole(np.array([80,45])),
+Hole(np.array([126,82])),
+Hole(np.array([148,117])),
+Hole(np.array([149,37])),
+Hole(np.array([172,86])),
+Hole(np.array([171,158])),
+Hole(np.array([215,53])),
+Hole(np.array([238,86])),
+Hole(np.array([238,170]))
+]
+
 for Wall in Walls1:
     Wall.S = Wall.S + FrameSide
 
