@@ -22,17 +22,17 @@ def main():
         if int(argv[1]) == 0:
             image_detection_test()
         elif int(argv[1]) == 1:
-            manual_sim()
+            manual_sim() # Simulation of manual tilt.
         elif int(argv[1]) == 2:
-            pid_sim()
+            pid_sim() # PID control simulation. 
         elif int(argv[1]) == 3:
-            test1()
+            test1() # Motor test.
         elif int(argv[1]) == 4:
-            test2()
+            test2() # Motor test.
         elif int(argv[1]) == 5:
-            test3()
+            test3() # Motor test.
         elif int(argv[1]) == 6:
-            model_tuning()
+            model_tuning() # Simulated model tuning.
     else:
         full_system()
 

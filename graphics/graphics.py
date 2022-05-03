@@ -122,6 +122,7 @@ def initialise_header():
     return SpriteHeader_
 
 def initialise_ball(Ball):
+    # Initialise ball.
     SpriteBall_ = SpriteBall(
         Ball.S, # Initialise ball outside maze.
         Ball.R # [mm], numpy vector, size 2.
@@ -129,6 +130,7 @@ def initialise_ball(Ball):
     return SpriteBall_
 
 def change_maze(Group, Maze):
+    # Changes graphical holes, walls and checkpoints to the new settings.
     Group.remove_sprites_of_layer(0)
     Group.add(initialise_holes(Maze.Holes), layer = 0)
     Group.remove_sprites_of_layer(1)

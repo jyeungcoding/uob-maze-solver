@@ -32,10 +32,9 @@ from settings import MaxFrequency, DisplayScale, White, Kp, Ki, Kd, PMax, Ks, Ks
 
 def full_system():
 
-    ''' ------ MENU SCREEN START ------ '''
     # Set starting maze.
     CurrentMaze = Maze1
-    CurrentMaze.Ball.S = np.array([-20, -20])
+    CurrentMaze.Ball.S = np.array([-20, -20]) # Move ball outside frame.
 
     ''' PYGAME GRAPHICS START '''
     # Initialise PyGame.
@@ -65,6 +64,8 @@ def full_system():
     # Start program.
     ProgramOn, SystemRunning, CalibrationDone, Paused, BallLost, Completed = 1, 0, 0, 0, 0, 0
     while ProgramOn == 1:
+
+        ''' ------ MENU SCREEN START ------ '''
 
         ''' PYGAME GRAPHICS START '''
         # Update header to ready.
@@ -276,7 +277,7 @@ def full_system():
                     # Convert control signal into actual Theta (based on measurements).
                     Theta = ControlSignal * np.array([0.088888888, 0.6]) # For display.
 
-                if Completed == 0:
+                if Completed == 0: # Stop clock when completed. 
                     TimeElapsed = perf_counter() - StartTime
 
                 # Generate strings for output values to be displayed.
