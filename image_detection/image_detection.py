@@ -161,7 +161,7 @@ class ImageProcessor():
 		BallFound, Centre = self.ball_detection(ImageCorrected) # Try to detect the position of the ball.
 		Active, Position = self.position_buffer(CurrentTime, BallFound, Centre) # Outputs the last position of the ball for a short time if the ball cannot be found.
 		if BallFound == True:
-				Position += np.array([28.5, 28]) # Add frame width and height.
+			Position += np.array([28.5, 28]) # Add frame width and height.
 
 		return Active, Position
 
