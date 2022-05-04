@@ -156,8 +156,7 @@ def full_system():
             """ PICAMERA INITIALISATION START """
             # Initialise the camera.
             # Set sensor mode to 4. Refer to Raspicam documentation. Size: 1640x1232, framerate: 40fps.
-            Camera = PiCamera(sensor_mode = 4, resolution = (1024, 768)) # See if fixing the camera settings improves performance.
-            # Camera.framerate = 20 # Can set the camera's framerate.
+            Camera = PiCamera(sensor_mode = 4, resolution = (1024, 768))
             # Create an object containing an array in the correct openCV format to store each frame. The camera arg just saves a reference to the camera.
             Capture = PiRGBArray(Camera, size = (640, 480)) # Size should be the same as the size of the input frames.
             sleep(0.2) # Wait for the camera to warm up.
@@ -277,7 +276,7 @@ def full_system():
                     # Convert control signal into actual Theta (based on measurements).
                     Theta = ControlSignal * np.array([0.088888888, 0.6]) # For display.
 
-                if Completed == 0: # Stop clock when completed. 
+                if Completed == 0: # Stop clock when completed.
                     TimeElapsed = perf_counter() - StartTime
 
                 # Generate strings for output values to be displayed.

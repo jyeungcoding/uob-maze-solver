@@ -9,12 +9,13 @@ disable the display functions to save processing power!
 import cv2
 import numpy as np
 from time import perf_counter
+import matplotlib.pyplot as plt # For generating images.
 
 class ImageProcessor():
 
 	def __init__(self, StartTime, MazeSize, HSVLimitsBlue, HSVLimitsGreen):
 		# Initialise values.
-		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]]) # Points for perspective correction.
+		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]]) # Initial points for perspective correction.
 		self.LastPosition = np.array([False, False])
 		self.StartTime = StartTime
 		self.LastTime = StartTime
@@ -31,7 +32,7 @@ class ImageProcessor():
 
 	def __repr__(self):
 	    # Makes the class printable.
-	    return "Image Detector(Last Ball Position: %s, Time Detected: %s)" % (self.LastPosition, round((self.LastTime - self.StartTime), 2))
+	    return "Image Detector(Last Ball Position: %s, Time Detected: %s)" % (self.LastPosition, round(self.StartTime, 2))
 
 	def order_points(self, Points):
 		# Orders four points clockwise from the top left corner.
@@ -56,10 +57,10 @@ class ImageProcessor():
 			else:
 				MaxContour = max(Contours, key = lambda Contour: cv2.arcLength(Contour, True)) # Select the contour with the largest perimeter. (Assume the rect is the largest contour.)
 				MaxContourIndex = Contours.index(MaxContour) # Find index of MaxContour.
-				ContourRect = Contours[Hierarchy[0][MaxContourIndex][2]] # Use index and hierarchy to find the internal contour.
+				ContourRect = Contours[Hierarchy[0][MaxContourIndex][2]] # Use index and hierarchy to find the internal contour. (Refer to documentation.)
 
 			Perimeter = cv2.arcLength(ContourRect, True) # Find the perimeter of ContourRect.
-			print("Rect Perimeter: " + str(Perimeter)) # Print the perimeter.
+			#print("Rect Perimeter: " + str(Perimeter)) # Print the perimeter.
 			if Perimeter > 1500: # Sanity check: the contour has to be a minimum perimeter.
 				Corners = cv2.approxPolyDP(ContourRect, self.EpsilonMultiple * Perimeter, True) # Find the approximate corners of the contour.
 				if len(Corners) == 4:
@@ -78,10 +79,27 @@ class ImageProcessor():
 		ImageCorrected = cv2.warpPerspective(ImageHSV, TransformationMatrix, (self.MazeSize[0], self.MazeSize[1])) # Correct the perspective warp.
 
 		# Uncomment below to display the results.
-		ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
-		self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+		#ImageResult = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 1) # Draw the rect onto ImageResult in green.
+		#self.display("Rect Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+
+		''' Plot images '''
+		ImageColour = cv2.cvtColor(ImageHSV, cv2.COLOR_HSV2RGB) # Make a copy of the corrected image in RBG to draw the results on.
+		ImageResult = cv2.cvtColor(MaskDilated, cv2.COLOR_GRAY2RGB)
+		cv2.polylines(ImageResult, np.int32([InitialPoints]), True, (0, 255, 0), 2) # Draw the rect onto ImageResult in green.
+
+		plt.figure(1) # Plot second figure.
+
+		plt.subplot(221)
+		plt.imshow(ImageColour)
+		plt.tick_params(bottom = False, left = False, labelbottom = False, labelleft = False)
+		plt.xlabel("(a) Blurred image")
+
+		plt.subplot(222)
+		plt.imshow(ImageResult)
+		plt.tick_params(bottom = False, left = False, labelbottom = False, labelleft = False)
+		plt.xlabel("(b) Processed mask, polygon detected")
 
 		return ImageCorrected
 
@@ -95,7 +113,7 @@ class ImageProcessor():
 
 		if len(Contours) > 0: # Check if any contours were found.
 			MaxContour = max(Contours, key = lambda Contour: cv2.contourArea(Contour)) # Select the largest contour.
-			print("Ball Area: " + str(cv2.contourArea(MaxContour))) # Print the top down area of the largest contour.
+			#print("Ball Area: " + str(cv2.contourArea(MaxContour))) # Print the top down area of the largest contour.
 			if cv2.contourArea(MaxContour) > 15: # Sanity check: the contour has to be a minimum size.
 				EnclosingCircle = cv2.minEnclosingCircle(MaxContour) # Find the minumum enclosing circle arond the largest contour. Output: ((x, y), r).
 				Centre = np.array([EnclosingCircle[0][0], EnclosingCircle[0][1]]) # Save position as the centre of the circle.
@@ -108,11 +126,29 @@ class ImageProcessor():
 			Centre = None
 
 		# Uncomment below to display the results.
-		ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
-		cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
-		try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
+		#ImageResult = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2BGR) # Make a copy of the corrected image in RBG to draw the results on.
+		#cv2.drawContours(ImageResult, Contours, -1, (255, 0, 0), 1) # Draw contours onto ImageResult in blue.
+		#try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 1) # Draw enclosing circle in green.
+		#except: pass
+		#self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+
+		''' Plot images '''
+		ImageColour = cv2.cvtColor(ImageCorrected, cv2.COLOR_HSV2RGB) # Make a copy of the corrected image in RBG to draw the results on.
+		ImageResult = cv2.cvtColor(MaskDilated, cv2.COLOR_GRAY2RGB)
+		try: cv2.circle(ImageResult, (round(Centre[0]), round(Centre[1])), 7, (0, 255, 0), 2) # Draw enclosing circle in green.
 		except: pass
-		self.display("Ball Results", ImageResult, Mask, MaskEroded, MaskDilated) # Display results.
+
+		plt.subplot(223)
+		plt.imshow(ImageColour)
+		plt.tick_params(bottom = False, left = False, labelbottom = False, labelleft = False)
+		plt.xlabel("(c) Corrected image")
+
+		plt.subplot(224)
+		plt.imshow(ImageResult)
+		plt.tick_params(bottom = False, left = False, labelbottom = False, labelleft = False)
+		plt.xlabel("(d) Processed mask, enclosing circle")
+
+		plt.show()
 
 		return BallFound, Centre
 
@@ -123,8 +159,8 @@ class ImageProcessor():
 		Img3 = np.vstack((Img1, Img2)) # Stack all images together. Convert to BGR if necessary.
 
 		cv2.imshow(WindowName, Img3) # Draw all results.
-		#cv2.waitKey(0) # Wait until key is pressed.
-		#cv2.destroyWindow(WindowName)
+		cv2.waitKey(0) # Wait until key is pressed.
+		cv2.destroyWindow(WindowName)
 
 	def position_buffer(self, CurrentTime, BallFound, Centre):
 		# Outputs the last position of the ball for a short time if there is one, and if the ball cannot be found.
@@ -139,7 +175,7 @@ class ImageProcessor():
 				Position = self.LastPosition
 			else:
 				Active = False
-				Position = None
+				Position = self.LastPosition
 		return Active, Position
 
 	def update(self, CurrentTime, Image):
@@ -160,6 +196,8 @@ class ImageProcessor():
 		ImageCorrected = self.correct_perspective(ImageHSV) # Correct the maze's tilt perspective.
 		BallFound, Centre = self.ball_detection(ImageCorrected) # Try to detect the position of the ball.
 		Active, Position = self.position_buffer(CurrentTime, BallFound, Centre) # Outputs the last position of the ball for a short time if the ball cannot be found.
+		if BallFound == True:
+				Position += np.array([28.5, 28]) # Add frame width and height.
 
 		return Active, Position
 

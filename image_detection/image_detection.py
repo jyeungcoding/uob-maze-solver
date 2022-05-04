@@ -14,7 +14,7 @@ class ImageProcessor():
 
 	def __init__(self, StartTime, MazeSize, HSVLimitsBlue, HSVLimitsGreen):
 		# Initialise values.
-		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]]) # Points for perspective correction.
+		self.LastInitialPoints = np.float32([[82, 34], [574, 35], [562, 440], [88, 436]]) # Initial points for perspective correction.
 		self.LastPosition = np.array([False, False])
 		self.StartTime = StartTime
 		self.LastTime = StartTime
@@ -31,7 +31,7 @@ class ImageProcessor():
 
 	def __repr__(self):
 	    # Makes the class printable.
-	    return "Image Detector(Last Ball Position: %s, Time Detected: %s)" % (self.LastPosition, round((self.LastTime - self.StartTime), 2))
+	    return "Image Detector(Last Ball Position: %s, Time Detected: %s)" % (self.LastPosition, round(self.StartTime, 2))
 
 	def order_points(self, Points):
 		# Orders four points clockwise from the top left corner.
@@ -56,7 +56,7 @@ class ImageProcessor():
 			else:
 				MaxContour = max(Contours, key = lambda Contour: cv2.arcLength(Contour, True)) # Select the contour with the largest perimeter. (Assume the rect is the largest contour.)
 				MaxContourIndex = Contours.index(MaxContour) # Find index of MaxContour.
-				ContourRect = Contours[Hierarchy[0][MaxContourIndex][2]] # Use index and hierarchy to find the internal contour.
+				ContourRect = Contours[Hierarchy[0][MaxContourIndex][2]] # Use index and hierarchy to find the internal contour. (Refer to documentation.)
 
 			Perimeter = cv2.arcLength(ContourRect, True) # Find the perimeter of ContourRect.
 			#print("Rect Perimeter: " + str(Perimeter)) # Print the perimeter.
@@ -161,7 +161,7 @@ class ImageProcessor():
 		BallFound, Centre = self.ball_detection(ImageCorrected) # Try to detect the position of the ball.
 		Active, Position = self.position_buffer(CurrentTime, BallFound, Centre) # Outputs the last position of the ball for a short time if the ball cannot be found.
 		if BallFound == True:
-				Position += np.array([28.5, 28]) # Add frame width and height. 
+				Position += np.array([28.5, 28]) # Add frame width and height.
 
 		return Active, Position
 
