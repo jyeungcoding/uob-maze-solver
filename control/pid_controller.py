@@ -184,8 +184,9 @@ class PID_Controller():
         ControlSignal += self.ControlSignalCalibrated # Apply calibrated level angles.
         ControlSignal = self.saturation_clamp(ControlSignal) # Apply saturation clamp if necessary.
 
+        # If the checkpoint has a specified control signal, overide all calculations and use the one given.
         if self.Special == True:
-            if self.HardControlSignal[0] != None:
+            if self.HardControlSignal[0] != None: # Hard control signal can be specified for each axis.
                 ControlSignal[0] = self.HardControlSignal[0]
             if self.HardControlSignal[1] != None:
                 ControlSignal[1] = self.HardControlSignal[1]

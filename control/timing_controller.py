@@ -11,7 +11,7 @@ from settings import ControlFrequency, GraphicsFrequency
 class TimingController():
 
     def __init__(self, Time):
-        self.ControlPeriod = 1 / ControlFrequency # Calculate period from frequency.
+        self.ControlPeriod = 1 / ControlFrequency # Calculate time period from frequency.
         self.GraphicsPeriod = 1 / GraphicsFrequency
 
         self.ControlOn = True # Control signal for control loop.
@@ -25,13 +25,14 @@ class TimingController():
         return "Timing Controller(ControlOn: %s, LastControl: %s, GraphicsOn: %s, LastGraphics: %s)" % (self.ControlOn, round(self.LastControl, 2), self.GraphicsOn, round(self.LastGraphics, 2))
 
     def update(self, Time):
+        # Calculate control signal for the control functions.
         if Time - self.LastControl > self.ControlPeriod:
             self.ControlOn = True
             self.ControlTimeStep = Time - self.LastControl
             self.LastControl = Time
         else:
             self.ControlOn = False
-
+        # Calculate control signal for the graphics functions.
         if Time - self.LastGraphics > self.GraphicsPeriod:
             self.GraphicsOn = True
             self.LastGraphics = Time

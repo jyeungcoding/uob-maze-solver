@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 '''
-This file contains a class for the a performance logger that records the timesteps
-and control signals of each loop. A maximum of 50 entries are saved at a time.
+This file contains a class for a performance logger that records the control
+signals used in and the time taken for each loop. A maximum of 50 entries are
+saved at a time.
 '''
 
 class PerformanceLog():
@@ -27,7 +28,7 @@ class PerformanceLog():
         return LogEntry
 
     def export(self, Filename):
-        # Export the log as a text file.
+        # Export log to file.
         LogFile = open(Filename, "wt")
         LogFile.write("\n".join(self.Log))
         LogFile.close()

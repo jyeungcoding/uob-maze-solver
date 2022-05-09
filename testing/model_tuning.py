@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 '''
 This file contains the function that simulates manual tilting of the maze
-with the arrow keys to ThetaStep in each direction. Utilises pyagme to
-display graphics.
+in the x direction for a specified time. Use to tune maze simulation physics.
 '''
 
 # Import modules.
